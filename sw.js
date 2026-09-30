@@ -1,5 +1,5 @@
 // مبادئ التمييز — عامل الخدمة: يجعل المكتبة تعمل دون اتصال.
-const VERSION='202609302212';
+const VERSION='202609302228';
 const SHELL='mabadi-shell-'+VERSION, DATA='mabadi-data', FILES='mabadi-files', FONTS='mabadi-fonts';
 const SHELL_FILES=['./','index.html','app.js','sync-core.js','app.css','embed.html','embed.js','manifest.webmanifest','icons/icon.svg','icons/favicon.svg','icons/icon-192.png','data/meta.json'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(SHELL).then(c=>c.addAll(SHELL_FILES)).then(()=>self.skipWaiting()));});

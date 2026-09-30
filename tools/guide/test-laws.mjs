@@ -21,6 +21,10 @@ try{const c=await context(b,{viewport:{width:390,height:844},isMobile:true,hasTo
   ck('مادة من القانون الجديد تعرض مع حاشية العدد',t.includes('الكويت اليوم'));
   await go('#/m/LAW-159-2025');t=await p.locator('body').innerText();
   ck('المذكرة الإيضاحية للقانون الجديد',t.includes('المذكرة')&&t.includes('الفصل الثامن'));
+  await go('#/a/LAW-38-1980-A0128');await p.waitForTimeout(1500);
+  ck('المادة 128 مرافعات تعرض تعديل المرسوم 6/2025',await p.locator('#aev .amendbox').count()>0&&(await p.locator('#aev').innerText()).includes('6/2025'));
+  await go('#/law/LAW-11-2026');t=await p.locator('body').innerText();
+  ck('قانون العنف الأسري الجديد يذكر إلغاء 16/2020',t.includes('العنف')&&t.includes('يلغي')&&t.includes('رقم 16 لسنة 2020'));
   ck('لا أخطاء في الصفحة',errs.length===0,errs.join(' | '));
   const w=await p.evaluate(()=>document.documentElement.scrollWidth-innerWidth);ck('لا تمرير أفقي',w<=1,w);
 }finally{await b.close();server.close();}
