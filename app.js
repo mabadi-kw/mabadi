@@ -432,7 +432,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202609301920';
+const APP_BUILD='202609301936';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -913,10 +913,20 @@ document.addEventListener('click',e=>{const t=e.target;
   const cl=t.closest('[data-clr]');if(cl){F[cl.dataset.clr]=cl.dataset.clr==='rv'?false:'';syncInputs();runSearch();return;}
 });
 if('serviceWorker' in navigator){const hadSW=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').catch(()=>{});
-  // عند وصول إصدار جديد: شريط يعرض رقمه ويعيد التحميل بضغطة
-  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadSW||$('updbar'))return;const e=document.createElement('div');e.id='updbar';e.className='nudge';e.setAttribute('role','status');
-    e.innerHTML=`<b>صدر تحديث للتطبيق.</b> أعد التحميل لتعمل بالإصدار الجديد.<span><button class="btn primary" id="updgo">إعادة التحميل</button><button class="btn" id="updno">لاحقًا</button></span>`;
-    document.body.appendChild(e);$('updgo').onclick=()=>location.reload();$('updno').onclick=()=>e.remove();});}
+}
+// التحقق من وجود إصدار أحدث منشور (version.json) عند الفتح وعند العودة للتطبيق وكل نصف ساعة: رسالة صغيرة وزر «تحديث الآن»
+let updLater=false;
+async function checkUpdate(){if(updLater||!navigator.onLine||$('updbar'))return;try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();
+  if(j&&j.build&&String(j.build)>APP_BUILD)showUpdate(String(j.build));}catch(_){}}
+function showUpdate(b){if($('updbar'))return;const e=document.createElement('div');e.id='updbar';e.className='nudge upd';e.setAttribute('role','status');
+  e.innerHTML=`<b>يتوفر تحديث جديد للتطبيق</b> (الإصدار ${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}).<span><button class="btn primary" id="updgo">${svg('download')}تحديث الآن</button><button class="btn" id="updno">لاحقًا</button></span>`;
+  document.body.appendChild(e);
+  $('updgo').onclick=async()=>{$('updgo').disabled=true;$('updgo').textContent='جارٍ التحديث…';
+    try{const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg)await reg.update();
+      if('caches' in window){const ks=await caches.keys();await Promise.all(ks.filter(k=>k.startsWith('mabadi-shell-')).map(k=>caches.delete(k)));}}catch(_){}
+    location.reload();};
+  $('updno').onclick=()=>{updLater=true;e.remove();};}
+setTimeout(checkUpdate,4000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate();});setInterval(checkUpdate,30*60e3);
 buildSearch();route();setTimeout(loadAllLaws,1500);if(SYNC)SYNC.restore().then(()=>{if($('syncbox'))syncUI();}).catch(()=>{});setTimeout(syncNudge,2500);introShow();if(!location.hash||location.hash==='#/')playWeave();else wovenOnce=true;
 document.body.insertAdjacentHTML('beforeend',`<button class="totop" id="totop" hidden aria-label="العودة إلى الأعلى">${svg('back').replace('<svg','<svg style="transform:rotate(-90deg)"')}</button>`);
 $('totop').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});

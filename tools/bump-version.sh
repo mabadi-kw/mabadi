@@ -6,3 +6,4 @@ V=$(TZ=Asia/Kuwait date +%Y%m%d%H%M)
 sed -i "s/const APP_BUILD='[0-9]*'/const APP_BUILD='$V'/" app.js
 sed -i "s/const VERSION='[0-9]*'/const VERSION='$V'/" sw.js
 echo "الإصدار: $V"
+printf '{"build":"%s"}\n' "$V" > version.json

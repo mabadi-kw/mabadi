@@ -485,3 +485,8 @@ body::before{content:"";position:fixed;inset:0 0 auto 0;height:env(safe-area-ins
 .ibot .dots{display:flex;justify-content:center;gap:8px}.ibot .dots i{width:8px;height:8px;border-radius:50%;background:var(--rule)}.ibot .dots i.on{background:var(--gold);width:22px;border-radius:6px}
 .ibot .inav{display:flex;justify-content:space-between;gap:10px}.ibot .inav .btn{min-height:48px;min-width:120px;justify-content:center}
 @media (prefers-reduced-motion:reduce){.islide{animation:none}}
+.nudge.upd{border-inline-start-color:var(--blue);z-index:57}
+/* في الرئيسية: رابط «الدليل» داخل زاوية الترحيب بدل سطر فوقه */
+#v-home{position:relative}
+#v-home>.guidelnk{position:absolute;z-index:3;top:0;inset-inline-end:0;margin:0;background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.3)}
+@media (min-width:761px){#v-home>.guidelnk{top:12px;inset-inline-end:14px}}
