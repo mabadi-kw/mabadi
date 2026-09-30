@@ -357,12 +357,82 @@ const PRPRE={};function prPreload(html){(html.match(/data-src="([^"]+)"/g)||[]).
 function printHTML(title,html,sub=''){let r=$('printroot');if(!r){r=document.createElement('div');r.id='printroot';document.body.appendChild(r);}
   r.innerHTML=`<header class="prh"><span>مبادئ التمييز</span><span>${esc(prDate())}</span></header><h1>${esc(title)}</h1>${sub?`<div class="prsub">${esc(sub)}</div>`:''}${html}
    <footer class="prf">طُبع من «مبادئ التمييز» — النصوص منقولة حرفيًا من مصادرها. راجع المصدر الرسمي قبل الاعتماد.</footer>`;
-  r.querySelectorAll('details').forEach(d=>d.remove());prImgs(r);
+  r.querySelectorAll('details').forEach(d=>d.remove());
+  if(IOSAPP()){pdfPrint(title,r);return;}
+  prImgs(r);
   const t0=document.title;document.title=title;document.body.classList.add('printing');
   const done=()=>{document.body.classList.remove('printing');document.title=t0;r.innerHTML='';window.removeEventListener('afterprint',done);};
   window.addEventListener('afterprint',done);
   window.print();   // متزامن داخل الضغطة
   if(/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))setTimeout(done,1500);}
+// ---------- الطباعة في تطبيق iPhone/iPad المثبّت على الشاشة الرئيسية: iOS لا يدعم window.print() هناك،
+// فتُرسم الصفحات على لوحة رسم (A4) ويُصنع منها ملف PDF يُفتح له خيار «طباعة» من قائمة المشاركة.
+const IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const IOSAPP=()=>LS.get('pdfprint',false)||(IOS&&(navigator.standalone===true||matchMedia('(display-mode: standalone)').matches));
+const PPW=1240,PPH=1754,PPM=96,PPT=150/72;   // A4 بدقة 150 نقطة في البوصة
+function prModel(r){const out=[];const T=(s,o)=>{s=(s||'').replace(/\s+/g,' ').trim();if(s)out.push(Object.assign({t:'x',s},o));};
+  const walk=(el,ctx)=>{for(const n of el.children){const c=n.classList,tag=n.tagName;
+    if(c.contains('prh')){out.push({t:'head',a:n.children[0]?.textContent||'',b:n.children[1]?.textContent||''});continue;}
+    if(tag==='H1'){T(n.textContent,{f:'700 %px "Reem Kufi","Cairo",sans-serif',z:17,col:'#0b2545',g:4});continue;}
+    if(c.contains('prsub')){T(n.textContent,{f:'500 %px "Cairo",sans-serif',z:9.5,col:'#555',g:10});continue;}
+    if(tag==='H2'){if(c.contains('prsec'))out.push({t:'rule',gap:12});T(n.textContent,{f:'700 %px "Cairo",sans-serif',z:13,col:'#0b2545',g:4,b:8});continue;}
+    if(tag==='H3'){T(n.textContent,{f:'700 %px "Cairo",sans-serif',z:12,col:'#12325e',g:2,b:6});continue;}
+    if(c.contains('prmeta')){T(n.textContent,{f:'600 %px "Cairo",sans-serif',z:9,col:'#6b5a2e',g:3});continue;}
+    if(tag==='P'){const fn=ctx.fn||ctx.note;T(n.textContent,{f:'400 %px "Noto Naskh Arabic","Geeza Pro",serif',z:c.contains('prcit')?11:fn?10.5:13,col:c.contains('prcit')?'#333':fn?'#444':'#111',g:5,ind:ctx.fn?14:0,bg:ctx.note?'#f6f1e3':null});continue;}
+    if(c.contains('prnote')){T(n.textContent,{f:'400 %px "Noto Naskh Arabic","Geeza Pro",serif',z:10.5,col:'#444',g:5,bg:'#f6f1e3'});continue;}
+    if(c.contains('prfn')){if(n.querySelector('p'))walk(n,Object.assign({},ctx,{fn:1}));else T(n.textContent,{f:'400 %px "Noto Naskh Arabic",serif',z:10.5,col:'#444',g:5,ind:14});continue;}
+    if(tag==='FIGURE'){const d=n.querySelector('.pgimg'),h=d&&d.querySelector('.hlbox'),cap=n.querySelector('figcaption');
+      if(d){const ar=d.style.aspectRatio.split('/').map(Number);out.push({t:'img',src:d.dataset.src,gc:+d.dataset.gc,cx:+d.dataset.cx,ry:+d.dataset.ry,ar:ar[1]/ar[0],
+        hl:h?['left','top','width','height'].map(k=>parseFloat(h.style[k])/100):null});}
+      if(cap)T(cap.textContent,{f:'500 %px "Cairo",sans-serif',z:8.5,col:'#666',g:8,al:'center'});continue;}
+    if(c.contains('prf')){out.push({t:'rule',gap:14});T(n.textContent,{f:'500 %px "Cairo",sans-serif',z:8,col:'#777',g:0});continue;}
+    walk(n,ctx);
+    if(c.contains('prblock'))out.push({t:'rule',gap:10,dash:1});}};
+  walk(r,{});return out;}
+async function prRender(model,title){const imgs={};
+  await Promise.all([...new Set(model.filter(b=>b.t==='img').map(b=>b.src))].map(u=>new Promise(res=>{const i=new Image();i.onload=i.onerror=()=>res();i.src=u;imgs[u]=i;})));
+  try{await Promise.all(['400 20px "Noto Naskh Arabic"','500 20px "Cairo"','600 20px "Cairo"','700 20px "Cairo"','700 20px "Reem Kufi"'].map(f=>document.fonts.load(f,'ابت')));}catch(e){}
+  const pages=[];let cv,cx,y;const W=PPW-2*PPM,bottom=PPH-PPM-30;
+  const np=()=>{cv=document.createElement('canvas');cv.width=PPW;cv.height=PPH;cx=cv.getContext('2d');cx.fillStyle='#fff';cx.fillRect(0,0,PPW,PPH);cx.direction='rtl';pages.push(cv);y=PPM;};np();
+  for(const b of model){
+    if(b.t==='head'){cx.font=`600 ${9*PPT}px "Cairo",sans-serif`;cx.fillStyle='#6b5a2e';cx.textAlign='right';cx.fillText(b.a,PPW-PPM,y+9*PPT);cx.textAlign='left';cx.direction='ltr';cx.fillText(b.b,PPM,y+9*PPT);cx.direction='rtl';
+      y+=9*PPT*1.6;cx.fillStyle='#b8923a';cx.fillRect(PPM,y,W,3);y+=10*PPT;continue;}
+    if(b.t==='rule'){y+=b.gap*PPT/2;if(y>bottom)continue;cx.fillStyle=b.dash?'#bbb':'#ccc';if(b.dash){for(let x=PPM;x<PPW-PPM;x+=12)cx.fillRect(x,y,6,1.5);}else cx.fillRect(PPM,y,W,1.5);y+=b.gap*PPT/2;continue;}
+    if(b.t==='img'){const im=imgs[b.src];if(!im||!im.naturalWidth)continue;let w=Math.min(W,12.5/21*PPW),h=w*b.ar;const maxH=bottom-PPM;if(h>maxH){h=maxH;w=h/b.ar;}
+      if(y+h>bottom)np();const x=(PPW-w)/2,sw=im.naturalWidth/b.gc,sh=im.naturalHeight/10;
+      cx.drawImage(im,b.cx*sw,b.ry*sh,sw,sh,x,y,w,h);cx.strokeStyle='#999';cx.lineWidth=1.5;cx.strokeRect(x,y,w,h);
+      if(b.hl){cx.strokeStyle='#1d5aa6';cx.lineWidth=3;cx.strokeRect(x+b.hl[0]*w,y+b.hl[1]*h,b.hl[2]*w,b.hl[3]*h);}y+=h+6*PPT;continue;}
+    const z=b.z*PPT,lh=z*1.9,mw=W-(b.ind||0)*PPT;cx.font=b.f.replace('%',z);
+    const lines=[];let cur='';for(const w of b.s.split(' ')){const t=cur?cur+' '+w:w;if(cur&&cx.measureText(t).width>mw){lines.push(cur);cur=w;}else cur=t;}if(cur)lines.push(cur);
+    y+=(b.b||0)*PPT;
+    for(const ln of lines){if(y+lh>bottom)np();
+      if(b.bg){cx.fillStyle=b.bg;cx.fillRect(PPM,y,W,lh);}
+      cx.font=b.f.replace('%',z);cx.fillStyle=b.col;cx.textAlign=b.al==='center'?'center':'right';
+      cx.fillText(ln,b.al==='center'?PPW/2:PPW-PPM-(b.ind||0)*PPT,y+z*1.35);y+=lh;}
+    y+=(b.g||0)*PPT;}
+  pages.forEach((c,i)=>{const g=c.getContext('2d');g.direction='rtl';g.font=`500 ${8*PPT}px "Cairo",sans-serif`;g.fillStyle='#888';g.textAlign='center';g.fillText(`${title.slice(0,70)} — صفحة ${i+1} من ${pages.length}`,PPW/2,PPH-PPM/2);});
+  return pages;}
+function mkPDF(jpgs){const E=new TextEncoder(),parts=[],offs=[];let len=0;const push=x=>{const b=typeof x==='string'?E.encode(x):x;parts.push(b);len+=b.length;};
+  const obj=(id,f)=>{offs[id]=len;push(`${id} 0 obj\n`);f();push('\nendobj\n');};const pw=595.28,ph=841.89,n=jpgs.length,tot=2+3*n;
+  push('%PDF-1.4\n');obj(1,()=>push('<< /Type /Catalog /Pages 2 0 R >>'));
+  obj(2,()=>push(`<< /Type /Pages /Kids [${jpgs.map((_,i)=>`${3+3*i} 0 R`).join(' ')}] /Count ${n} >>`));
+  jpgs.forEach((j,i)=>{const p=3+3*i,cs=`q ${pw} 0 0 ${ph} 0 0 cm /Im${i} Do Q`;
+    obj(p,()=>push(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${pw} ${ph}] /Resources << /XObject << /Im${i} ${p+2} 0 R >> >> /Contents ${p+1} 0 R >>`));
+    obj(p+1,()=>push(`<< /Length ${cs.length} >>\nstream\n${cs}\nendstream`));
+    obj(p+2,()=>{push(`<< /Type /XObject /Subtype /Image /Width ${PPW} /Height ${PPH} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${j.length} >>\nstream\n`);push(j);push('\nendstream');});});
+  const xo=len;push(`xref\n0 ${tot+1}\n0000000000 65535 f \n`);for(let i=1;i<=tot;i++)push(String(offs[i]).padStart(10,'0')+' 00000 n \n');
+  push(`trailer\n<< /Size ${tot+1} /Root 1 0 R >>\nstartxref\n${xo}\n%%EOF\n`);return new Blob(parts,{type:'application/pdf'});}
+async function pdfPrint(title,r){const d=dlg(`${svg('print')} طباعة`,`<div class="set"><p class="hint" style="margin:0" id="pdfst">جارٍ تجهيز الصفحات للطباعة…</p><div class="prchoices" id="pdfgo"></div></div>`);
+  try{const pages=await prRender(prModel(r),title);r.innerHTML='';
+    const jpgs=await Promise.all(pages.map(c=>new Promise(res=>c.toBlob(b=>b.arrayBuffer().then(a=>res(new Uint8Array(a))),'image/jpeg',.88))));
+    const name=(title.replace(/[\\/:*?"<>|]+/g,' ').slice(0,60).trim()||'مبادئ التمييز')+'.pdf',file=new File([mkPDF(jpgs)],name,{type:'application/pdf'});
+    window.__pdf=file;if(!$('pdfst'))return;
+    $('pdfst').textContent=`الملف جاهز (${pages.length} ${pages.length>2&&pages.length<11?'صفحات':'صفحة'}). اضغط «طباعة»، ثم اختر «طباعة» من القائمة التي تظهر.`;
+    const can=navigator.canShare&&navigator.canShare({files:[file]});
+    $('pdfgo').innerHTML=`<button class="btn primary" id="pdfshare"><b>${svg('print')} طباعة</b><small>${can?'من قائمة المشاركة: «طباعة» أو «حفظ في الملفات»':'يفتح الملف، ثم اطبعه من زر المشاركة'}</small></button>`;
+    $('pdfshare').onclick=async()=>{if(can){try{await navigator.share({files:[file],title});closeDlg();}catch(e){if(e&&e.name!=='AbortError')toast('تعذّرت المشاركة');}}
+      else{const u=URL.createObjectURL(file);window.open(u,'_blank')||(location.href=u);closeDlg();}};}
+  catch(e){console.error(e);if($('pdfst'))$('pdfst').textContent='تعذّر تجهيز ملف الطباعة على هذا الجهاز.';r.innerHTML='';}}
 const prPara=t=>`<p>${esc(t)}</p>`;
 function prPrinciple(p,withPg){const C=COLS[p.col];
   return `<section class="prblock"><div class="prmeta">${esc(C.title)} — المبدأ ${p.n} — ص ${printed(p).join('–')}</div>${p.ttl?`<h2>${esc(p.ttl)}</h2>`:''}
@@ -468,7 +538,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202609302351';
+const APP_BUILD='202610010030';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
