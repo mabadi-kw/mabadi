@@ -108,7 +108,11 @@ const CHS=[...new Set(PR.flatMap(p=>p.c.map(c=>c.ch)).filter(Boolean))];
 const printed=p=>p.pg.map(g=>g+COLS[p.col].off);
 // ---------- views scaffold
 const main=$('main');
-main.innerHTML=['home','search','index','saved','more','item','report','about'].map(v=>`<section id="v-${v}" hidden></section>`).join('');
+const SNAV=[['home','home','الرئيسية','مبدأ اليوم وما فتحته مؤخرًا'],['search','search','البحث',`في ${nf(PR.length)} مبدأً`],['index','book','الفهرس','الموضوعات والقوانين والكتب'],['saved','star','المحفوظات','مجلداتك وملاحظاتك'],['report','report','التقارير','طريقة الاستخراج والتحقق'],['about','info','عن المكتبة','المصادر وقواعد النزاهة']];
+IC.home='M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z';
+main.innerHTML=`<div class="shell"><aside class="sidenav" aria-label="الأقسام">${SNAV.map(([k,i,t,d])=>`<button class="navcard" data-nav="${k}"><span class="ic">${svg(i)}</span><span><b>${t}</b><small>${d}</small></span></button>`).join('')}
+ <button class="navcard" data-a2="settings"><span class="ic">${svg('gear')}</span><span><b>الإعدادات</b><small>الخط والمظهر والقفل</small></span></button></aside>
+ <div class="views">${['home','search','index','saved','more','item','report','about'].map(v=>`<section id="v-${v}" hidden></section>`).join('')}</div></div>`;
 // ---------- search engine
 const F={q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:''};
 function terms(q){const o=[];west(q).replace(/"([^"]+)"|«([^»]+)»|(\S+)/g,(m,a,b,c)=>{const t=norm(a||b||c);if(t)o.push(t)});return o;}
@@ -227,19 +231,13 @@ function viewHome(){
   el.innerHTML=`<div class="hero"><h1>${greet}</h1><p>ابحث في ${nf(PR.length)} مبدأ من مبادئ محكمة التمييز، حرفيًا كما في مصادرها.</p>
    <form class="sbox" id="hsf">${svg('search')}<input id="hq" type="search" placeholder="كلمة، عبارة، رقم طعن أو مادة…" autocomplete="off" enterkeyhint="search">${micBtn('hq')}<button class="btn primary" type="submit">بحث</button></form>
    <div class="quick">${(QH.length?QH.slice(0,4).map(q=>`<button class="chip" data-q="${esc(q)}">${svg('clock')}${esc(q)}</button>`):[]).join('')}${tops.map(t=>`<button class="chip" data-f="tp" data-v="${t}">${esc(TL[t][1])}</button>`).join('')}</div></div>
-   <div class="homegrid"><nav class="homenav" aria-label="التنقل">
-    <button class="navcard primary" data-go="#/search"><span class="ic">${svg('search')}</span><span><b>البحث</b><small>في ${nf(PR.length)} مبدأً</small></span></button>
-    <button class="navcard" data-go="#/index/topics"><span class="ic">${svg('book')}</span><span><b>الفهرس</b><small>الموضوعات والقوانين والكتب</small></span></button>
-    <button class="navcard" data-go="#/saved"><span class="ic">${svg('star')}</span><span><b>المحفوظات</b><small>مجلداتك وملاحظاتك</small></span></button>
-    <button class="navcard" data-go="#/report"><span class="ic">${svg('report')}</span><span><b>التقارير</b><small>طريقة الاستخراج والتحقق</small></span></button>
-    <button class="navcard" data-a2="settings"><span class="ic">${svg('gear')}</span><span><b>الإعدادات</b><small>الخط والمظهر والقفل</small></span></button>
-   </nav><div>
+   <div>
    <h2>مبدأ اليوم</h2><div class="card daily"><div class="lbl">${svg('star')} ${esc(COLS[dp.col].title)} — ${dp.n}</div><div class="text">${esc(dp.p.join(' '))}</div><ul class="cits">${dp.c.map(c=>`<li>${esc(c.raw)}</li>`).join('')}</ul><button class="btn" data-go="#/p/${dp.id}">${svg('open')}فتح المبدأ</button></div>
    ${recent.length?`<h2>فتحتها مؤخرًا</h2><div class="hrow">${recent.map(mini).join('')}</div>`:''}
    <h2>تصفح حسب الموضوع</h2><div class="grid g3">${FAMS.map(famTile).join('')}</div>
    <h2>الكتب والمجموعات</h2><div class="grid g3">${ORDER.map(bookTile).join('')}</div>
    <h2>المكتبة بالأرقام</h2><div class="stats"><div class="stat card"><b>${nf(PR.length)}</b><span>مبدأ</span></div><div class="stat card"><b>${nf(Object.keys(RUL).length)}</b><span>حكمًا مفهرسًا</span></div><div class="stat card"><b>${ORDER.length}</b><span>مجموعة</span></div><div class="stat card"><b>${LORD.length}</b><span>قانونًا مُحالًا إليه</span></div></div>
-   </div></div>`;
+   </div>`;
   weave(el.querySelector('.hero'),8);
   $('hsf').onsubmit=e=>{e.preventDefault();doSearch($('hq').value);};
 }
@@ -434,7 +432,7 @@ let deferredInstall=null;window.addEventListener('beforeinstallprompt',e=>{e.pre
 function installDlg(){if(deferredInstall){deferredInstall.prompt();deferredInstall=null;return;}
   dlg('ثبّت التطبيق',`<div class="prose"><ul><li><b>آيفون وآيباد (Safari):</b> زر المشاركة ← «إضافة إلى الشاشة الرئيسية».</li><li><b>أندرويد (Chrome):</b> القائمة ⋮ ← «تثبيت التطبيق».</li><li><b>الحاسوب (Chrome أو Edge):</b> أيقونة التثبيت في شريط العنوان.</li></ul></div>`);}
 // ---------- router
-const NAVMAP={home:'#/',search:'#/search',index:'#/index/topics',saved:'#/saved',more:'#/more'};
+const NAVMAP={home:'#/',search:'#/search',index:'#/index/topics',saved:'#/saved',more:'#/more',report:'#/report',about:'#/about'};
 function show(v,nav){['home','search','index','saved','more','item','report','about'].forEach(x=>$('v-'+x).hidden=x!==v);
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',b.dataset.nav===nav));}
 function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));closeDlg();if(speakingId){speechSynthesis.cancel();speakingId=null;}
@@ -445,8 +443,8 @@ function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,
   else if(h.startsWith('index')){const [,sub,...rest]=h.split('/');viewIndex(sub||idxTab,rest.join('/'));show('index','index');}
   else if(h==='saved'){viewSaved();show('saved','saved');}
   else if(h==='more'){viewMore();show('more','more');}
-  else if(h==='report'){viewReport();show('report','more');}
-  else if(h==='about'){viewAbout();show('about','more');}
+  else if(h==='report'){viewReport();show('report',innerWidth>=1000?'report':'more');}
+  else if(h==='about'){viewAbout();show('about',innerWidth>=1000?'about':'more');}
   else{viewHome();show('home','home');}
   window.scrollTo({top:0});}
 let navs=0;window.addEventListener('hashchange',()=>{navs++;route();});
