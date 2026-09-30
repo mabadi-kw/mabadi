@@ -326,3 +326,12 @@ svg.weave{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .ltxt p{margin:0 0 .7em;line-height:var(--lh,2);font-family:var(--f-text);font-size:calc(1.05rem*var(--fs,1))}.artcard{padding:18px 20px}.artcard .ltxt p{font-size:calc(1.12rem*var(--fs,1))}
 .sig{text-align:center;padding:14px;margin-top:12px}.sig p{margin:0}
 .artcard .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.lnotes{margin-top:12px;padding:10px 14px;border-radius:12px;border:1px dashed var(--gold);background:var(--sheet);font-size:.88rem;line-height:1.9}
+.lnotes b{display:block;color:var(--gold);margin-bottom:4px}.lnotes p{margin:0 0 .4em}
+.linkbtn{border:0;background:none;color:var(--blue);cursor:pointer;font:inherit;padding:0;text-decoration:underline}
+.ltxt .tl{text-align:center;font-weight:700}
+.mref{padding:12px 14px;margin:12px 0}.mref summary{cursor:pointer}
+.memo p{position:relative}.memo p.hit{background:var(--gold-soft);border-radius:8px;padding:4px 8px}
+.mh{font-family:var(--f-ui);font-size:1.02rem;margin:1.2em 0 .5em;color:var(--navy2)}
+[data-theme=dark] .mh{color:var(--gold)}
+.pgref{border:1px solid var(--rule);background:var(--bg2);color:var(--muted);border-radius:8px;font:inherit;font-size:.7rem;padding:0 6px;cursor:pointer;vertical-align:middle}
