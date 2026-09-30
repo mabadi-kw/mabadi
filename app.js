@@ -35,7 +35,8 @@ const FONTS={
  naskh:{l:'نسخ',css:'"Noto Naskh Arabic"',u:''},
  amiri:{l:'أميري',css:'"Amiri"',u:'Amiri:wght@400;700'},
  scheh:{l:'شهرزاد',css:'"Scheherazade New"',u:'Scheherazade+New:wght@400;700'},
- plex:{l:'بلكس',css:'"IBM Plex Sans Arabic"',u:''},
+ cairo:{l:'القاهرة',css:'"Cairo"',u:''},
+ plex:{l:'بلكس',css:'"IBM Plex Sans Arabic"',u:'IBM+Plex+Sans+Arabic:wght@400;600'},
  kufi:{l:'كوفي',css:'"Noto Kufi Arabic"',u:'Noto+Kufi+Arabic:wght@400;600'},
  tajawal:{l:'تجوال',css:'"Tajawal"',u:'Tajawal:wght@400;700'}};
 function applyLook(){
@@ -50,6 +51,24 @@ function applyLook(){
   $('mename').textContent=S.name||'الإعدادات';
 }
 applyLook();
+
+// ---------- خيط الذهب (نقش السدو) ونقش الورق
+function sdUnit(){const dm=(cx,cy,r,ring)=>{const o=[];for(let x=cx-r;x<=cx+r;x++)for(let y=cy-r;y<=cy+r;y++){const d=Math.abs(x-cx)+Math.abs(y-cy);if(ring?d===r:d<=r)o.push([x,y]);}return o;};
+  let c=[];for(let x=0;x<24;x++)c.push(x%4<2?[x,0]:[x,15]);c=c.concat(dm(12,8,5,1),dm(12,8,3,1),[[12,8]]);
+  [3,21].forEach(cx=>c.push([cx,8],[cx-1,7],[cx-2,6],[cx-1,9],[cx-2,10],[cx+1,7],[cx+2,6],[cx+1,9],[cx+2,10]));return c.filter(p=>p[0]>=0&&p[0]<24);}
+let wid=0;
+function weave(host,cs){if(!host)return;const id='w'+(wid++),r=sdUnit().map(p=>`<rect x="${p[0]*cs+.6}" y="${p[1]*cs+.6}" width="${cs-1.2}" height="${cs-1.2}" fill="none" stroke="#C9A24B" stroke-width=".9"/>`).join('');
+  host.insertAdjacentHTML('afterbegin',`<svg class="weave" aria-hidden="true"><defs><pattern id="p${id}" width="${24*cs}" height="${16*cs}" patternUnits="userSpaceOnUse">${r}</pattern>
+   <linearGradient id="a${id}" x1="0" x2="1"><stop offset="0" stop-color="#fff"/><stop offset=".5" stop-color="#fff" stop-opacity=".7"/><stop offset="1" stop-color="#fff" stop-opacity=".32"/></linearGradient>
+   <linearGradient id="b${id}" x1="0" x2="1"><stop offset="0" stop-color="#fff" stop-opacity=".3"/><stop offset=".7" stop-color="#fff" stop-opacity=".16"/><stop offset="1" stop-color="#fff" stop-opacity=".45"/></linearGradient>
+   <linearGradient id="s${id}" x1="0" x2="1"><stop offset="0" stop-color="#FFE7A6" stop-opacity="0"/><stop offset=".5" stop-color="#FFE7A6" stop-opacity=".9"/><stop offset="1" stop-color="#FFE7A6" stop-opacity="0"/></linearGradient>
+   <mask id="m${id}" maskContentUnits="objectBoundingBox"><rect class="rev l" x="0" y="0" width=".5" height="1" fill="url(#a${id})"/><rect class="rev r" x=".5" y="0" width=".5" height="1" fill="url(#b${id})"/></mask></defs>
+   <g mask="url(#m${id})"><rect width="100%" height="100%" fill="url(#p${id})" opacity=".55"/></g><g mask="url(#m${id})"><rect class="shine" width="30%" height="100%" fill="url(#s${id})"/></g></svg>`);}
+function paper(){const cs=9,r=sdUnit().map(p=>`<rect class="t" x="${p[0]*cs}" y="${p[1]*cs}" width="${cs}" height="${cs}"/>`).join('');
+  document.body.insertAdjacentHTML('afterbegin',`<svg id="paper" aria-hidden="true"><defs><pattern id="pp" width="${24*cs}" height="${16*cs}" patternUnits="userSpaceOnUse">${r}</pattern></defs><g><rect width="100%" height="100%" fill="url(#pp)"/></g></svg>`);}
+paper();weave(document.querySelector('.appbar'),8);
+let wovenOnce=false;
+function playWeave(){if(wovenOnce)return;wovenOnce=true;document.querySelectorAll('.appbar,.hero').forEach(h=>{h.classList.remove('play');void h.offsetWidth;h.classList.add('play');});}
 // ---------- lock
 async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('mabadi:'+t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
 function lockScreen(){
@@ -72,8 +91,8 @@ let hiddenAt=0;document.addEventListener('visibilitychange',()=>{if(document.hid
 const META=await fetch('data/meta.json').then(r=>r.json());
 const ORDER=META.order,COLS=META.cols,TL=META.toplab,LL=META.lawlab;
 let done=0;
-const arrs=await Promise.all(ORDER.map(c=>fetch('data/'+c+'.json').then(r=>r.json()).then(a=>{done++;const l=$('loading');if(l)l.textContent=`جارٍ تحميل المكتبة… ${done} من ${ORDER.length}`;return a;})));
-const PR=arrs.flat(),BYID={},RUL={};PR.forEach(p=>BYID[p.id]=p);
+const arrs=await Promise.all(ORDER.map(c=>fetch('data/'+c+'.json').then(r=>r.json()).then(a=>{done++;const l=$('loading');if(l)l.textContent=`جارٍ تحميل المكتبة… ${done} من ${ORDER.length}`;const lb=$('loadbar');if(lb)lb.style.width=(done/ORDER.length*100)+'%';return a;})));
+const PR=arrs.flat(),BYID={},RUL={},POS={};PR.forEach((p,i)=>{BYID[p.id]=p;POS[p.id]=i;});
 PR.forEach(p=>{p.ns=norm(p.p.join(' ')+' '+(p.rule||'')+' '+(p.ttl||'')+' '+p.c.map(c=>c.raw).join(' ')+' '+p.fn.join(' '));p.sk=p.sec.join('›');
   new Set(p.c.map(c=>c.k).filter(Boolean)).forEach(k=>(RUL[k]=RUL[k]||[]).push(p.id));});
 $('sub').textContent=`${nf(PR.length)} مبدأً · ${ORDER.length} مجموعة`;
@@ -208,11 +227,20 @@ function viewHome(){
   el.innerHTML=`<div class="hero"><h1>${greet}</h1><p>ابحث في ${nf(PR.length)} مبدأ من مبادئ محكمة التمييز، حرفيًا كما في مصادرها.</p>
    <form class="sbox" id="hsf">${svg('search')}<input id="hq" type="search" placeholder="كلمة، عبارة، رقم طعن أو مادة…" autocomplete="off" enterkeyhint="search">${micBtn('hq')}<button class="btn primary" type="submit">بحث</button></form>
    <div class="quick">${(QH.length?QH.slice(0,4).map(q=>`<button class="chip" data-q="${esc(q)}">${svg('clock')}${esc(q)}</button>`):[]).join('')}${tops.map(t=>`<button class="chip" data-f="tp" data-v="${t}">${esc(TL[t][1])}</button>`).join('')}</div></div>
+   <div class="homegrid"><nav class="homenav" aria-label="التنقل">
+    <button class="navcard primary" data-go="#/search"><span class="ic">${svg('search')}</span><span><b>البحث</b><small>في ${nf(PR.length)} مبدأً</small></span></button>
+    <button class="navcard" data-go="#/index/topics"><span class="ic">${svg('book')}</span><span><b>الفهرس</b><small>الموضوعات والقوانين والكتب</small></span></button>
+    <button class="navcard" data-go="#/saved"><span class="ic">${svg('star')}</span><span><b>المحفوظات</b><small>مجلداتك وملاحظاتك</small></span></button>
+    <button class="navcard" data-go="#/report"><span class="ic">${svg('report')}</span><span><b>التقارير</b><small>طريقة الاستخراج والتحقق</small></span></button>
+    <button class="navcard" data-a2="settings"><span class="ic">${svg('gear')}</span><span><b>الإعدادات</b><small>الخط والمظهر والقفل</small></span></button>
+   </nav><div>
    <h2>مبدأ اليوم</h2><div class="card daily"><div class="lbl">${svg('star')} ${esc(COLS[dp.col].title)} — ${dp.n}</div><div class="text">${esc(dp.p.join(' '))}</div><ul class="cits">${dp.c.map(c=>`<li>${esc(c.raw)}</li>`).join('')}</ul><button class="btn" data-go="#/p/${dp.id}">${svg('open')}فتح المبدأ</button></div>
    ${recent.length?`<h2>فتحتها مؤخرًا</h2><div class="hrow">${recent.map(mini).join('')}</div>`:''}
    <h2>تصفح حسب الموضوع</h2><div class="grid g3">${FAMS.map(famTile).join('')}</div>
    <h2>الكتب والمجموعات</h2><div class="grid g3">${ORDER.map(bookTile).join('')}</div>
-   <h2>المكتبة بالأرقام</h2><div class="stats"><div class="stat card"><b>${nf(PR.length)}</b><span>مبدأ</span></div><div class="stat card"><b>${nf(Object.keys(RUL).length)}</b><span>حكمًا مفهرسًا</span></div><div class="stat card"><b>${ORDER.length}</b><span>مجموعة</span></div><div class="stat card"><b>${LORD.length}</b><span>قانونًا مُحالًا إليه</span></div></div>`;
+   <h2>المكتبة بالأرقام</h2><div class="stats"><div class="stat card"><b>${nf(PR.length)}</b><span>مبدأ</span></div><div class="stat card"><b>${nf(Object.keys(RUL).length)}</b><span>حكمًا مفهرسًا</span></div><div class="stat card"><b>${ORDER.length}</b><span>مجموعة</span></div><div class="stat card"><b>${LORD.length}</b><span>قانونًا مُحالًا إليه</span></div></div>
+   </div></div>`;
+  weave(el.querySelector('.hero'),8);
   $('hsf').onsubmit=e=>{e.preventDefault();doSearch($('hq').value);};
 }
 const maxFam=()=>Math.max(...Object.values(famcount));
@@ -292,6 +320,8 @@ function bookPage(el,c){const C=COLS[c];if(!C){el.innerHTML='<div class="empty">
   el.innerHTML=`<div class="crumbs"><button data-go="#/index/books">الكتب</button>›<span>${esc(C.name)}</span></div><div class="vh"><h2>${esc(C.title)}</h2><button class="btn primary" data-f="col" data-v="${c}">كل المبادئ (${nf(C.n)})</button></div><div class="card tree" style="padding:10px 12px">${tree(root,'',0)}</div>`;
   el.querySelector('.tree').onclick=e=>{const b=e.target.closest('[data-sec]');if(!b)return;Object.assign(F,{q:'',col:c,tp:'',ch:'',lw:'',art:'',rv:false,sec:b.dataset.sec});go('#/search');};}
 // ---------- ITEM & RULING
+function pnav(p){const i=POS[p.id],a=PR[i-1],b=PR[i+1];const ok=q=>q&&q.col===p.col;
+  return `<div class="pn no-print">${ok(a)?`<button class="btn" data-go="#/p/${a.id}">${svg('back')}<span>السابق: ${a.n}</span></button>`:'<span></span>'}${ok(b)?`<button class="btn" data-go="#/p/${b.id}"><span>التالي: ${b.n}</span><svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)"><path d="${IC.back}"/></svg></button>`:''}</div>`;}
 function viewItem(id){const el=$('v-item'),p=BYID[id];
   if(!p){el.innerHTML=`<div class="empty">لا يوجد مبدأ بالمعرّف ${esc(id)}.</div>`;return;}
   HIST=[id,...HIST.filter(x=>x!==id)].slice(0,30);LS.set('hist',HIST);
@@ -300,6 +330,7 @@ function viewItem(id){const el=$('v-item'),p=BYID[id];
   el.innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>${esc(COLS[p.col].title)} — ${p.n}</h2><button class="btn" data-print>${svg('print')}طباعة</button></div>
    <div class="list" data-main="1">${card(p,null,{page:1,open:1})}</div>
    <div class="card inline-src"><h3 style="margin-top:0">صفحة المصدر (${printed(p).join('–')})</h3>${pagesHTML(p)}</div>
+   ${pnav(p)}
    ${rel.length?`<h2>الحكم نفسه في مجموعات أخرى (${rel.length})</h2><div class="list">${rel.map(q=>card(q,null)).join('')}</div>`:''}`;
   wirePages(el);}
 function viewRuling(key){const el=$('v-item'),ids=RUL[key]||[],[ap,ses]=key.split('@');
@@ -441,5 +472,8 @@ document.addEventListener('click',e=>{const t=e.target;
   const cl=t.closest('[data-clr]');if(cl){F[cl.dataset.clr]=cl.dataset.clr==='rv'?false:'';syncInputs();runSearch();return;}
 });
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-buildSearch();route();
+buildSearch();route();if(!location.hash||location.hash==='#/')playWeave();else wovenOnce=true;
+document.body.insertAdjacentHTML('beforeend',`<button class="totop" id="totop" hidden aria-label="العودة إلى الأعلى">${svg('back').replace('<svg','<svg style="transform:rotate(-90deg)"')}</button>`);
+$('totop').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+addEventListener('scroll',()=>{$('totop').hidden=scrollY<900;},{passive:true});
 })().catch(e=>{const m=document.getElementById('main');if(m)m.innerHTML='<div class="empty">تعذّر تحميل المكتبة. أعد تحميل الصفحة.</div>';console.error(e);});
