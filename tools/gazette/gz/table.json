@@ -1,0 +1,4751 @@
+{
+"TraditionalArabic-Bold|174": {
+"t": "د",
+"files": 15,
+"nfiles": 15,
+"n": 23644,
+"alt": {}
+},
+"TraditionalArabic-Bold|446": {
+"t": "د",
+"files": 15,
+"nfiles": 15,
+"n": 43601,
+"alt": {}
+},
+"TraditionalArabic-Bold|480": {
+"t": "ع",
+"files": 15,
+"nfiles": 15,
+"n": 25354,
+"alt": {}
+},
+"TraditionalArabic-Bold|499": {
+"t": "ل",
+"files": 15,
+"nfiles": 15,
+"n": 101396,
+"alt": {}
+},
+"TraditionalArabic-Bold|166": {
+"t": "ا",
+"files": 15,
+"nfiles": 15,
+"n": 185201,
+"alt": {}
+},
+"TraditionalArabic-Bold|191": {
+"t": "م",
+"files": 15,
+"nfiles": 15,
+"n": 13331,
+"alt": {}
+},
+"TraditionalArabic-Bold|514": {
+"t": "و",
+"files": 15,
+"nfiles": 15,
+"n": 47095,
+"alt": {}
+},
+"TraditionalArabic-Bold|520": {
+"t": "ي",
+"files": 15,
+"nfiles": 15,
+"n": 51199,
+"alt": {}
+},
+"TraditionalArabic-Bold|426": {
+"t": "ت",
+"files": 15,
+"nfiles": 15,
+"n": 4277,
+"alt": {}
+},
+"TraditionalArabic-Bold|519": {
+"t": "ي",
+"files": 15,
+"nfiles": 15,
+"n": 33904,
+"alt": {}
+},
+"TraditionalArabic-Bold|496": {
+"t": "ك",
+"files": 15,
+"nfiles": 15,
+"n": 19692,
+"alt": {}
+},
+"TraditionalArabic-Bold|424": {
+"t": "ة",
+"files": 15,
+"nfiles": 15,
+"n": 61156,
+"alt": {}
+},
+"TraditionalArabic-Bold|508": {
+"t": "ن",
+"files": 15,
+"nfiles": 15,
+"n": 28301,
+"alt": {}
+},
+"TraditionalArabic-Bold|456": {
+"t": "س",
+"files": 15,
+"nfiles": 15,
+"n": 18831,
+"alt": {}
+},
+"TraditionalArabic-Bold|194": {
+"t": "و",
+"files": 15,
+"nfiles": 15,
+"n": 46226,
+"alt": {}
+},
+"TraditionalArabic-Bold|418": {
+"t": "ا",
+"files": 15,
+"nfiles": 15,
+"n": 108025,
+"alt": {}
+},
+"TraditionalArabic-Bold|363": {
+"t": "لح",
+"files": 15,
+"nfiles": 15,
+"n": 3387,
+"alt": {}
+},
+"TraditionalArabic-Bold|192": {
+"t": "ن",
+"files": 15,
+"nfiles": 15,
+"n": 18345,
+"alt": {}
+},
+"TraditionalArabic-Bold|422": {
+"t": "ب",
+"files": 15,
+"nfiles": 15,
+"n": 17196,
+"alt": {}
+},
+"TraditionalArabic-Bold|162": {
+"t": "أ",
+"files": 15,
+"nfiles": 16,
+"n": 17090,
+"alt": {
+"ين": [
+4122,
+1
+]
+}
+},
+"TraditionalArabic-Bold|439": {
+"t": "ح",
+"files": 15,
+"nfiles": 15,
+"n": 9912,
+"alt": {}
+},
+"TraditionalArabic-Bold|523": {
+"t": "لأ",
+"files": 15,
+"nfiles": 15,
+"n": 7432,
+"alt": {}
+},
+"TraditionalArabic-Bold|468": {
+"t": "ض",
+"files": 12,
+"nfiles": 14,
+"n": 6767,
+"alt": {
+"في": [
+1469,
+1
+],
+"ن": [
+23,
+1
+]
+}
+},
+"TraditionalArabic-Bold|503": {
+"t": "م",
+"files": 13,
+"nfiles": 13,
+"n": 39291,
+"alt": {}
+},
+"TraditionalArabic-Bold|176": {
+"t": "ر",
+"files": 13,
+"nfiles": 13,
+"n": 41931,
+"alt": {}
+},
+"TraditionalArabic-Bold|186": {
+"t": "ـ",
+"files": 15,
+"nfiles": 15,
+"n": 329201,
+"alt": {}
+},
+"TraditionalArabic-Bold|511": {
+"t": "ه",
+"files": 15,
+"nfiles": 15,
+"n": 5961,
+"alt": {}
+},
+"TraditionalArabic-Bold|455": {
+"t": "س",
+"files": 13,
+"nfiles": 13,
+"n": 16612,
+"alt": {}
+},
+"TraditionalArabic-Bold|450": {
+"t": "ر",
+"files": 15,
+"nfiles": 15,
+"n": 45057,
+"alt": {}
+},
+"TraditionalArabic-Bold|507": {
+"t": "ن",
+"files": 13,
+"nfiles": 13,
+"n": 14605,
+"alt": {}
+},
+"TraditionalArabic-Bold|492": {
+"t": "ق",
+"files": 13,
+"nfiles": 13,
+"n": 23833,
+"alt": {}
+},
+"TraditionalArabic-Bold|421": {
+"t": "ب",
+"files": 13,
+"nfiles": 13,
+"n": 17741,
+"alt": {}
+},
+"TraditionalArabic-Bold|502": {
+"t": "م",
+"files": 13,
+"nfiles": 13,
+"n": 17517,
+"alt": {}
+},
+"TraditionalArabic-Bold|491": {
+"t": "ق",
+"files": 13,
+"nfiles": 13,
+"n": 22388,
+"alt": {}
+},
+"TraditionalArabic-Bold|498": {
+"t": "ل",
+"files": 10,
+"nfiles": 14,
+"n": 10069,
+"alt": {
+"ا": [
+1271,
+2
+],
+" ": [
+333,
+2
+]
+}
+},
+"TraditionalArabic-Bold|428": {
+"t": "ت",
+"files": 13,
+"nfiles": 13,
+"n": 36979,
+"alt": {}
+},
+"TraditionalArabic-Bold|462": {
+"t": "ص",
+"files": 8,
+"nfiles": 14,
+"n": 3221,
+"alt": {
+" ": [
+221,
+4
+],
+"ش": [
+232,
+2
+]
+}
+},
+"TraditionalArabic-Bold|168": {
+"t": "ة",
+"files": 14,
+"nfiles": 16,
+"n": 19622,
+"alt": {
+" ": [
+2444,
+2
+]
+}
+},
+"TraditionalArabic-Bold|365": {
+"t": "لم",
+"files": 13,
+"nfiles": 13,
+"n": 30233,
+"alt": {}
+},
+"TraditionalArabic-Bold|506": {
+"t": "ن",
+"files": 12,
+"nfiles": 13,
+"n": 17913,
+"alt": {
+"ل": [
+574,
+1
+]
+}
+},
+"TraditionalArabic-Bold|319": {
+"t": "في",
+"files": 12,
+"nfiles": 13,
+"n": 9111,
+"alt": {
+"ف": [
+31,
+1
+]
+}
+},
+"TraditionalArabic-Bold|408": {
+"t": "أ",
+"files": 11,
+"nfiles": 13,
+"n": 2277,
+"alt": {
+"ل": [
+27,
+1
+],
+"ي": [
+82,
+1
+]
+}
+},
+"TraditionalArabic-Bold|459": {
+"t": "ش",
+"files": 13,
+"nfiles": 13,
+"n": 9079,
+"alt": {}
+},
+"TraditionalArabic-Bold|190": {
+"t": "ل",
+"files": 12,
+"nfiles": 13,
+"n": 7374,
+"alt": {
+"نا": [
+26,
+1
+]
+}
+},
+"TraditionalArabic-Bold|464": {
+"t": "ص",
+"files": 12,
+"nfiles": 13,
+"n": 14349,
+"alt": {
+" ": [
+429,
+1
+]
+}
+},
+"TraditionalArabic-Bold|444": {
+"t": "خ",
+"files": 12,
+"nfiles": 14,
+"n": 3787,
+"alt": {
+"ن": [
+326,
+2
+]
+}
+},
+"TraditionalArabic-Bold|460": {
+"t": "ش",
+"files": 13,
+"nfiles": 13,
+"n": 13313,
+"alt": {}
+},
+"TraditionalArabic-Bold|184": {
+"t": "ع",
+"files": 13,
+"nfiles": 13,
+"n": 3966,
+"alt": {}
+},
+"TraditionalArabic-Bold|528": {
+"t": "لا",
+"files": 13,
+"nfiles": 13,
+"n": 10330,
+"alt": {}
+},
+"TraditionalArabic-Bold|471": {
+"t": "ط",
+"files": 13,
+"nfiles": 13,
+"n": 3995,
+"alt": {}
+},
+"TraditionalArabic-Bold|527": {
+"t": "لا",
+"files": 13,
+"nfiles": 13,
+"n": 9008,
+"alt": {}
+},
+"TraditionalArabic-Bold|516": {
+"t": "ى",
+"files": 13,
+"nfiles": 14,
+"n": 7852,
+"alt": {
+"ا": [
+2227,
+1
+]
+}
+},
+"TraditionalArabic-Bold|500": {
+"t": "ل",
+"files": 13,
+"nfiles": 13,
+"n": 33498,
+"alt": {}
+},
+"TraditionalArabic-Bold|479": {
+"t": "ع",
+"files": 13,
+"nfiles": 13,
+"n": 31808,
+"alt": {}
+},
+"TraditionalArabic-Bold|157": {
+"t": "،",
+"files": 13,
+"nfiles": 13,
+"n": 7428,
+"alt": {}
+},
+"TraditionalArabic-Bold|196": {
+"t": "ي",
+"files": 11,
+"nfiles": 14,
+"n": 5421,
+"alt": {
+"ر": [
+926,
+3
+]
+}
+},
+"TraditionalArabic-Bold|346": {
+"t": "ير",
+"files": 11,
+"nfiles": 15,
+"n": 3988,
+"alt": {
+" ": [
+864,
+1
+],
+"ا": [
+442,
+3
+]
+}
+},
+"TraditionalArabic-Bold|442": {
+"t": "خ",
+"files": 10,
+"nfiles": 14,
+"n": 3317,
+"alt": {
+" ": [
+556,
+4
+]
+}
+},
+"TraditionalArabic-Bold|175": {
+"t": "ذ",
+"files": 13,
+"nfiles": 13,
+"n": 4657,
+"alt": {}
+},
+"TraditionalArabic-Bold|490": {
+"t": "ق",
+"files": 13,
+"nfiles": 13,
+"n": 3537,
+"alt": {}
+},
+"TraditionalArabic-Bold|487": {
+"t": "ف",
+"files": 13,
+"nfiles": 13,
+"n": 11224,
+"alt": {}
+},
+"TraditionalArabic-Bold|188": {
+"t": "ق",
+"files": 10,
+"nfiles": 13,
+"n": 1790,
+"alt": {
+" ": [
+216,
+3
+]
+}
+},
+"TraditionalArabic-Bold|488": {
+"t": "ف",
+"files": 12,
+"nfiles": 13,
+"n": 11360,
+"alt": {
+"ق": [
+277,
+1
+]
+}
+},
+"TraditionalArabic-Bold|472": {
+"t": "ط",
+"files": 13,
+"nfiles": 13,
+"n": 10830,
+"alt": {}
+},
+"TraditionalArabic-Bold|169": {
+"t": "ت",
+"files": 13,
+"nfiles": 13,
+"n": 16992,
+"alt": {}
+},
+"TraditionalArabic-Bold|682": {
+"t": "با",
+"files": 10,
+"nfiles": 14,
+"n": 5741,
+"alt": {
+"و": [
+757,
+2
+],
+" ": [
+283,
+2
+]
+}
+},
+"TraditionalArabic-Bold|685": {
+"t": "نا",
+"files": 9,
+"nfiles": 14,
+"n": 1693,
+"alt": {
+" ": [
+190,
+4
+],
+"ن": [
+9,
+1
+]
+}
+},
+"TraditionalArabic-Bold|525": {
+"t": "لإ",
+"files": 13,
+"nfiles": 13,
+"n": 5956,
+"alt": {}
+},
+"TraditionalArabic-Bold|177": {
+"t": "ز",
+"files": 13,
+"nfiles": 13,
+"n": 7302,
+"alt": {}
+},
+"TraditionalArabic-Bold|510": {
+"t": "ه",
+"files": 13,
+"nfiles": 14,
+"n": 10316,
+"alt": {
+" ": [
+2794,
+1
+]
+}
+},
+"TraditionalArabic-Bold|197": {
+"t": "ً",
+"files": 6,
+"nfiles": 14,
+"n": 4817,
+"alt": {
+" ": [
+354,
+5
+],
+"م": [
+23,
+1
+],
+"ا": [
+19,
+1
+],
+"ي": [
+20,
+1
+]
+}
+},
+"TraditionalArabic-Bold|160": {
+"t": "ء",
+"files": 13,
+"nfiles": 14,
+"n": 8982,
+"alt": {
+"ز": [
+2645,
+1
+]
+}
+},
+"TraditionalArabic-Bold|181": {
+"t": "ض",
+"files": 13,
+"nfiles": 13,
+"n": 2276,
+"alt": {}
+},
+"TraditionalArabic-Bold|454": {
+"t": "س",
+"files": 13,
+"nfiles": 14,
+"n": 2968,
+"alt": {
+" ": [
+540,
+1
+]
+}
+},
+"TraditionalArabic-Bold|367": {
+"t": "مج",
+"files": 13,
+"nfiles": 13,
+"n": 1476,
+"alt": {}
+},
+"TraditionalArabic-Bold|463": {
+"t": "ص",
+"files": 13,
+"nfiles": 14,
+"n": 7117,
+"alt": {
+" ": [
+2245,
+1
+]
+}
+},
+"TraditionalArabic-Bold|316": {
+"t": "تي",
+"files": 12,
+"nfiles": 13,
+"n": 193,
+"alt": {
+"ت": [
+2,
+1
+]
+}
+},
+"TraditionalArabic-Bold|521": {
+"t": "لآ",
+"files": 15,
+"nfiles": 15,
+"n": 1141,
+"alt": {}
+},
+"TraditionalArabic-Bold|324": {
+"t": "ل",
+"files": 8,
+"nfiles": 14,
+"n": 3746,
+"alt": {
+"لى": [
+1841,
+5
+],
+"و": [
+1368,
+1
+]
+}
+},
+"TraditionalArabic-Bold|164": {
+"t": "إ",
+"files": 10,
+"nfiles": 14,
+"n": 11928,
+"alt": {
+"ش": [
+1315,
+2
+],
+" ": [
+270,
+1
+],
+"ا": [
+303,
+1
+]
+}
+},
+"TraditionalArabic-Bold|478": {
+"t": "ع",
+"files": 13,
+"nfiles": 13,
+"n": 6676,
+"alt": {}
+},
+"TraditionalArabic-Bold|379": {
+"t": "يم",
+"files": 11,
+"nfiles": 14,
+"n": 539,
+"alt": {
+"يُ": [
+40,
+1
+],
+" ": [
+227,
+2
+]
+}
+},
+"TraditionalArabic-Bold|431": {
+"t": "ث",
+"files": 10,
+"nfiles": 15,
+"n": 3803,
+"alt": {
+"لم": [
+7,
+1
+],
+" ": [
+1409,
+4
+]
+}
+},
+"TraditionalArabic-Bold|427": {
+"t": "ت",
+"files": 12,
+"nfiles": 13,
+"n": 14836,
+"alt": {
+"ر": [
+89,
+1
+]
+}
+},
+"TraditionalArabic-Bold|171": {
+"t": "ج",
+"files": 9,
+"nfiles": 10,
+"n": 720,
+"alt": {
+" ": [
+6,
+1
+]
+}
+},
+"TraditionalArabic-Bold|452": {
+"t": "ز",
+"files": 12,
+"nfiles": 13,
+"n": 7058,
+"alt": {
+"ل": [
+157,
+1
+]
+}
+},
+"TraditionalArabic-Bold|323": {
+"t": "لم",
+"files": 11,
+"nfiles": 12,
+"n": 653,
+"alt": {
+"ا": [
+10,
+1
+]
+}
+},
+"TraditionalArabic-Bold|482": {
+"t": "غ",
+"files": 9,
+"nfiles": 10,
+"n": 474,
+"alt": {
+"و": [
+87,
+1
+]
+}
+},
+"TraditionalArabic-Bold|504": {
+"t": "م",
+"files": 13,
+"nfiles": 13,
+"n": 21577,
+"alt": {}
+},
+"TraditionalArabic-Bold|357": {
+"t": "ثم",
+"files": 5,
+"nfiles": 6,
+"n": 206,
+"alt": {
+"ين": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|684": {
+"t": "ثا",
+"files": 12,
+"nfiles": 14,
+"n": 1771,
+"alt": {
+"ق": [
+481,
+1
+],
+"،": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|495": {
+"t": "ك",
+"files": 12,
+"nfiles": 13,
+"n": 15486,
+"alt": {
+" ": [
+265,
+1
+]
+}
+},
+"TraditionalArabic-Bold|378": {
+"t": "يخ",
+"files": 12,
+"nfiles": 13,
+"n": 209,
+"alt": {
+"ت": [
+8,
+1
+]
+}
+},
+"TraditionalArabic-Bold|448": {
+"t": "ذ",
+"files": 10,
+"nfiles": 14,
+"n": 7691,
+"alt": {
+"و": [
+797,
+2
+],
+" ": [
+280,
+1
+],
+"ا": [
+47,
+1
+]
+}
+},
+"TraditionalArabic-Bold|361": {
+"t": "سم",
+"files": 11,
+"nfiles": 13,
+"n": 1271,
+"alt": {
+" ": [
+2,
+1
+],
+"و": [
+13,
+1
+]
+}
+},
+"TraditionalArabic-Bold|362": {
+"t": "لج",
+"files": 12,
+"nfiles": 14,
+"n": 6464,
+"alt": {
+"ق": [
+1318,
+1
+],
+"ا": [
+178,
+1
+]
+}
+},
+"TraditionalArabic-Bold|683": {
+"t": "تا",
+"files": 10,
+"nfiles": 14,
+"n": 2307,
+"alt": {
+"س": [
+386,
+2
+],
+"لم": [
+45,
+1
+],
+"ر": [
+4,
+1
+]
+}
+},
+"TraditionalArabic-Bold|509": {
+"t": "ه",
+"files": 12,
+"nfiles": 14,
+"n": 4108,
+"alt": {
+" ": [
+1026,
+2
+]
+}
+},
+"TraditionalArabic-Bold|359": {
+"t": "حم",
+"files": 12,
+"nfiles": 14,
+"n": 1299,
+"alt": {
+"ي": [
+116,
+2
+]
+}
+},
+"TraditionalArabic-Bold|172": {
+"t": "ح",
+"files": 10,
+"nfiles": 14,
+"n": 1282,
+"alt": {
+"ع": [
+3,
+1
+],
+" ": [
+226,
+2
+],
+"ل": [
+14,
+1
+]
+}
+},
+"TraditionalArabic-Bold|415": {
+"t": "ئ",
+"files": 11,
+"nfiles": 14,
+"n": 8092,
+"alt": {
+"في": [
+670,
+2
+],
+"ص": [
+161,
+1
+]
+}
+},
+"TraditionalArabic-Bold|512": {
+"t": "ه",
+"files": 12,
+"nfiles": 13,
+"n": 12984,
+"alt": {
+" ": [
+28,
+1
+]
+}
+},
+"TraditionalArabic-Bold|486": {
+"t": "ف",
+"files": 11,
+"nfiles": 13,
+"n": 2538,
+"alt": {
+"ل": [
+63,
+1
+],
+"م": [
+82,
+1
+]
+}
+},
+"TraditionalArabic-Bold|368": {
+"t": "مح",
+"files": 9,
+"nfiles": 14,
+"n": 2668,
+"alt": {
+"م": [
+3,
+2
+],
+" ": [
+291,
+3
+]
+}
+},
+"TraditionalArabic-Bold|470": {
+"t": "ط",
+"files": 11,
+"nfiles": 13,
+"n": 1923,
+"alt": {
+"و": [
+2,
+1
+],
+"ل": [
+20,
+1
+]
+}
+},
+"TraditionalArabic-Bold|193": {
+"t": "ه",
+"files": 10,
+"nfiles": 10,
+"n": 78,
+"alt": {}
+},
+"TraditionalArabic-Bold|178": {
+"t": "س",
+"files": 9,
+"nfiles": 13,
+"n": 1158,
+"alt": {
+"ل": [
+284,
+1
+],
+"م": [
+257,
+2
+],
+" ": [
+4,
+1
+]
+}
+},
+"TraditionalArabic-Bold|410": {
+"t": "ؤ",
+"files": 8,
+"nfiles": 9,
+"n": 1414,
+"alt": {
+" ": [
+23,
+1
+]
+}
+},
+"TraditionalArabic-Bold|352": {
+"t": "بم",
+"files": 9,
+"nfiles": 14,
+"n": 1647,
+"alt": {
+"ت": [
+11,
+1
+],
+" ": [
+244,
+2
+],
+"غ": [
+52,
+1
+],
+"ي": [
+14,
+1
+]
+}
+},
+"TraditionalArabic-Bold|518": {
+"t": "ي",
+"files": 11,
+"nfiles": 13,
+"n": 6332,
+"alt": {
+"في": [
+6,
+1
+],
+" ": [
+94,
+1
+]
+}
+},
+"TraditionalArabic-Bold|342": {
+"t": "تي",
+"files": 8,
+"nfiles": 15,
+"n": 1581,
+"alt": {
+" ": [
+13,
+1
+],
+"ت": [
+173,
+3
+],
+"ل": [
+161,
+2
+],
+"لا": [
+69,
+1
+]
+}
+},
+"TraditionalArabic-Bold|187": {
+"t": "ف",
+"files": 11,
+"nfiles": 13,
+"n": 1768,
+"alt": {
+" ": [
+70,
+1
+],
+"أ": [
+76,
+1
+]
+}
+},
+"TraditionalArabic-Bold|436": {
+"t": "ج",
+"files": 11,
+"nfiles": 14,
+"n": 4889,
+"alt": {
+"ع": [
+620,
+2
+],
+"ه": [
+59,
+1
+]
+}
+},
+"TraditionalArabic-Bold|432": {
+"t": "ث",
+"files": 13,
+"nfiles": 13,
+"n": 3505,
+"alt": {}
+},
+"TraditionalArabic-Bold|350": {
+"t": "بح",
+"files": 10,
+"nfiles": 11,
+"n": 1215,
+"alt": {
+"س": [
+20,
+1
+]
+}
+},
+"TraditionalArabic-Bold|358": {
+"t": "جم",
+"files": 13,
+"nfiles": 14,
+"n": 1806,
+"alt": {
+" ": [
+130,
+1
+]
+}
+},
+"TraditionalArabic-Bold|467": {
+"t": "ض",
+"files": 13,
+"nfiles": 13,
+"n": 4783,
+"alt": {}
+},
+"TraditionalArabic-Bold|347": {
+"t": "ين",
+"files": 11,
+"nfiles": 14,
+"n": 5423,
+"alt": {
+"ي": [
+31,
+2
+],
+" ": [
+1465,
+1
+]
+}
+},
+"TraditionalArabic-Bold|435": {
+"t": "ج",
+"files": 11,
+"nfiles": 14,
+"n": 11811,
+"alt": {
+"ك": [
+1193,
+2
+],
+"ء": [
+217,
+1
+]
+}
+},
+"TraditionalArabic-Bold|354": {
+"t": "تح",
+"files": 11,
+"nfiles": 13,
+"n": 1574,
+"alt": {
+"ي": [
+1,
+1
+],
+"م": [
+24,
+1
+]
+}
+},
+"TraditionalArabic-Bold|327": {
+"t": "نى",
+"files": 4,
+"nfiles": 5,
+"n": 32,
+"alt": {
+"ا": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|163": {
+"t": "ؤ",
+"files": 8,
+"nfiles": 11,
+"n": 175,
+"alt": {
+"ء": [
+18,
+2
+],
+"ل": [
+79,
+1
+]
+}
+},
+"TraditionalArabic-Bold|372": {
+"t": "نح",
+"files": 10,
+"nfiles": 10,
+"n": 481,
+"alt": {}
+},
+"TraditionalArabic-Bold|443": {
+"t": "خ",
+"files": 13,
+"nfiles": 14,
+"n": 6854,
+"alt": {
+" ": [
+157,
+1
+]
+}
+},
+"TraditionalArabic-Bold|328": {
+"t": "ني",
+"files": 6,
+"nfiles": 13,
+"n": 3812,
+"alt": {
+"ق": [
+4,
+1
+],
+"با": [
+210,
+2
+],
+"و": [
+2019,
+2
+],
+"لم": [
+18,
+1
+],
+"ن": [
+2,
+1
+]
+}
+},
+"TraditionalArabic-Bold|364": {
+"t": "لخ",
+"files": 12,
+"nfiles": 12,
+"n": 2248,
+"alt": {}
+},
+"TraditionalArabic-Bold|476": {
+"t": "ظ",
+"files": 11,
+"nfiles": 12,
+"n": 2108,
+"alt": {
+"م": [
+27,
+1
+]
+}
+},
+"TraditionalArabic-Bold|1013": {
+"t": "بإ",
+"files": 11,
+"nfiles": 14,
+"n": 587,
+"alt": {
+"ت": [
+2,
+1
+],
+"ش": [
+328,
+2
+]
+}
+},
+"TraditionalArabic-Bold|483": {
+"t": "غ",
+"files": 11,
+"nfiles": 14,
+"n": 3316,
+"alt": {
+"ر": [
+1085,
+3
+]
+}
+},
+"TraditionalArabic-Bold|524": {
+"t": "لأ",
+"files": 8,
+"nfiles": 10,
+"n": 240,
+"alt": {
+"ا": [
+36,
+1
+],
+"لا": [
+6,
+1
+]
+}
+},
+"TraditionalArabic-Bold|349": {
+"t": "بج",
+"files": 5,
+"nfiles": 8,
+"n": 580,
+"alt": {
+"،": [
+22,
+2
+],
+"و": [
+4,
+1
+]
+}
+},
+"TraditionalArabic-Bold|343": {
+"t": "تر",
+"files": 11,
+"nfiles": 14,
+"n": 5780,
+"alt": {
+"ل": [
+2637,
+1
+],
+"و": [
+271,
+2
+]
+}
+},
+"TraditionalArabic-Bold|195": {
+"t": "ى",
+"files": 11,
+"nfiles": 15,
+"n": 2611,
+"alt": {
+" ": [
+236,
+3
+],
+"ص": [
+740,
+1
+]
+}
+},
+"TraditionalArabic-Bold|388": {
+"t": "لمح",
+"files": 9,
+"nfiles": 13,
+"n": 3397,
+"alt": {
+" ": [
+916,
+3
+],
+"ا": [
+30,
+1
+]
+}
+},
+"TraditionalArabic-Bold|494": {
+"t": "ك",
+"files": 10,
+"nfiles": 12,
+"n": 2897,
+"alt": {
+"ي": [
+87,
+1
+],
+" ": [
+116,
+1
+]
+}
+},
+"TraditionalArabic-Bold|167": {
+"t": "ب",
+"files": 10,
+"nfiles": 14,
+"n": 3886,
+"alt": {
+" ": [
+2061,
+4
+]
+}
+},
+"TraditionalArabic-Bold|466": {
+"t": "ض",
+"files": 11,
+"nfiles": 12,
+"n": 749,
+"alt": {
+"ص": [
+30,
+1
+]
+}
+},
+"TraditionalArabic-Bold|440": {
+"t": "ح",
+"files": 12,
+"nfiles": 13,
+"n": 5080,
+"alt": {
+"ا": [
+1507,
+1
+]
+}
+},
+"TraditionalArabic-Bold|356": {
+"t": "تم",
+"files": 7,
+"nfiles": 10,
+"n": 801,
+"alt": {
+"با": [
+3,
+1
+],
+" ": [
+156,
+1
+],
+"ت": [
+4,
+1
+]
+}
+},
+"TraditionalArabic-Bold|416": {
+"t": "ئ",
+"files": 9,
+"nfiles": 13,
+"n": 2048,
+"alt": {
+"ا": [
+250,
+3
+],
+" ": [
+64,
+1
+]
+}
+},
+"TraditionalArabic-Bold|366": {
+"t": "له",
+"files": 9,
+"nfiles": 12,
+"n": 1809,
+"alt": {
+"ل": [
+328,
+2
+],
+" ": [
+48,
+1
+]
+}
+},
+"TraditionalArabic-Bold|997": {
+"t": "بأ",
+"files": 10,
+"nfiles": 12,
+"n": 1325,
+"alt": {
+" ": [
+152,
+2
+]
+}
+},
+"TraditionalArabic-Bold|336": {
+"t": "بر",
+"files": 9,
+"nfiles": 12,
+"n": 1023,
+"alt": {
+" ": [
+125,
+2
+],
+"ا": [
+26,
+1
+]
+}
+},
+"TraditionalArabic-Bold|275": {
+"t": "ته",
+"files": 9,
+"nfiles": 14,
+"n": 531,
+"alt": {
+"لأ": [
+110,
+1
+],
+"و": [
+56,
+2
+],
+" ": [
+34,
+2
+]
+}
+},
+"TraditionalArabic-Bold|345": {
+"t": "ني",
+"files": 9,
+"nfiles": 14,
+"n": 567,
+"alt": {
+"ن": [
+65,
+2
+],
+" ": [
+184,
+1
+],
+"ي": [
+19,
+1
+],
+"ا": [
+10,
+1
+]
+}
+},
+"TraditionalArabic-Bold|484": {
+"t": "غ",
+"files": 8,
+"nfiles": 13,
+"n": 2356,
+"alt": {
+"ف": [
+12,
+1
+],
+" ": [
+540,
+4
+]
+}
+},
+"TraditionalArabic-Bold|201": {
+"t": "ُ",
+"files": 5,
+"nfiles": 11,
+"n": 485,
+"alt": {
+" ": [
+117,
+4
+],
+"،": [
+94,
+1
+],
+"ي": [
+9,
+1
+]
+}
+},
+"TraditionalArabic-Bold|344": {
+"t": "نى",
+"files": 6,
+"nfiles": 9,
+"n": 286,
+"alt": {
+"ا": [
+66,
+1
+],
+"ن": [
+6,
+1
+],
+" ": [
+4,
+1
+]
+}
+},
+"TraditionalArabic-Bold|180": {
+"t": "ص",
+"files": 11,
+"nfiles": 13,
+"n": 1759,
+"alt": {
+" ": [
+158,
+2
+]
+}
+},
+"TraditionalArabic-Bold|370": {
+"t": "مم",
+"files": 10,
+"nfiles": 13,
+"n": 1469,
+"alt": {
+"ة": [
+215,
+2
+],
+"س": [
+16,
+1
+]
+}
+},
+"TraditionalArabic-Bold|1001": {
+"t": "يأ",
+"files": 9,
+"nfiles": 9,
+"n": 34,
+"alt": {}
+},
+"TraditionalArabic-Bold|438": {
+"t": "ح",
+"files": 10,
+"nfiles": 13,
+"n": 2065,
+"alt": {
+"ي": [
+8,
+1
+],
+" ": [
+452,
+2
+]
+}
+},
+"TraditionalArabic-Bold|329": {
+"t": "يم",
+"files": 7,
+"nfiles": 9,
+"n": 2030,
+"alt": {
+" ": [
+2,
+1
+],
+"ف": [
+6,
+1
+]
+}
+},
+"TraditionalArabic-Bold|272": {
+"t": "لمج",
+"files": 8,
+"nfiles": 11,
+"n": 535,
+"alt": {
+" ": [
+85,
+1
+],
+"ل": [
+163,
+1
+],
+"ت": [
+47,
+1
+]
+}
+},
+"TraditionalArabic-Bold|420": {
+"t": "ب",
+"files": 10,
+"nfiles": 14,
+"n": 6742,
+"alt": {
+" ": [
+2960,
+4
+]
+}
+},
+"TraditionalArabic-Bold|686": {
+"t": "يا",
+"files": 11,
+"nfiles": 11,
+"n": 1321,
+"alt": {}
+},
+"TraditionalArabic-Bold|376": {
+"t": "يج",
+"files": 8,
+"nfiles": 11,
+"n": 1119,
+"alt": {
+"ه": [
+126,
+2
+],
+" ": [
+6,
+1
+]
+}
+},
+"TraditionalArabic-Bold|161": {
+"t": "آ",
+"files": 10,
+"nfiles": 12,
+"n": 294,
+"alt": {
+" ": [
+136,
+2
+]
+}
+},
+"TraditionalArabic-Bold|353": {
+"t": "تج",
+"files": 8,
+"nfiles": 10,
+"n": 524,
+"alt": {
+" ": [
+134,
+2
+]
+}
+},
+"TraditionalArabic-Bold|273": {
+"t": "به",
+"files": 9,
+"nfiles": 13,
+"n": 1088,
+"alt": {
+"ا": [
+5,
+2
+],
+" ": [
+208,
+2
+]
+}
+},
+"TraditionalArabic-Bold|375": {
+"t": "هم",
+"files": 5,
+"nfiles": 8,
+"n": 205,
+"alt": {
+" ": [
+42,
+2
+],
+"ع": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|165": {
+"t": "ئ",
+"files": 6,
+"nfiles": 9,
+"n": 88,
+"alt": {
+"ا": [
+6,
+1
+],
+" ": [
+4,
+1
+],
+"ع": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|321": {
+"t": "لح",
+"files": 5,
+"nfiles": 9,
+"n": 420,
+"alt": {
+" ": [
+332,
+2
+],
+"ق": [
+1,
+1
+],
+"في": [
+9,
+1
+]
+}
+},
+"TraditionalArabic-Bold|377": {
+"t": "يح",
+"files": 9,
+"nfiles": 13,
+"n": 636,
+"alt": {
+"ا": [
+40,
+2
+],
+"و": [
+44,
+1
+],
+"ل": [
+8,
+1
+]
+}
+},
+"TraditionalArabic-Bold|369": {
+"t": "مخ",
+"files": 10,
+"nfiles": 12,
+"n": 1023,
+"alt": {
+"ص": [
+46,
+2
+]
+}
+},
+"TraditionalArabic-Bold|325": {
+"t": "لي",
+"files": 9,
+"nfiles": 12,
+"n": 1817,
+"alt": {
+" ": [
+438,
+2
+],
+"(": [
+763,
+1
+]
+}
+},
+"TraditionalArabic-Bold|430": {
+"t": "ث",
+"files": 7,
+"nfiles": 11,
+"n": 731,
+"alt": {
+" ": [
+184,
+3
+],
+"م": [
+13,
+1
+]
+}
+},
+"TraditionalArabic-Bold|412": {
+"t": "إ",
+"files": 5,
+"nfiles": 7,
+"n": 152,
+"alt": {
+" ": [
+18,
+2
+]
+}
+},
+"TraditionalArabic-Bold|170": {
+"t": "ث",
+"files": 7,
+"nfiles": 11,
+"n": 199,
+"alt": {
+" ": [
+5,
+2
+],
+"خ": [
+50,
+1
+],
+"ن": [
+19,
+1
+]
+}
+},
+"TraditionalArabic-Bold|355": {
+"t": "تخ",
+"files": 8,
+"nfiles": 10,
+"n": 272,
+"alt": {
+"ص": [
+1,
+1
+],
+" ": [
+11,
+1
+]
+}
+},
+"TraditionalArabic-Bold|182": {
+"t": "ط",
+"files": 9,
+"nfiles": 12,
+"n": 1452,
+"alt": {
+"ا": [
+1,
+1
+],
+"ق": [
+31,
+1
+],
+"ت": [
+19,
+1
+]
+}
+},
+"TraditionalArabic-Bold|276": {
+"t": "نه",
+"files": 8,
+"nfiles": 12,
+"n": 1299,
+"alt": {
+"ا": [
+2,
+1
+],
+" ": [
+414,
+1
+],
+"ق": [
+52,
+1
+],
+"م": [
+17,
+1
+]
+}
+},
+"TraditionalArabic-Bold|681": {
+"t": "ئا",
+"files": 4,
+"nfiles": 5,
+"n": 30,
+"alt": {
+"ة": [
+7,
+1
+]
+}
+},
+"TraditionalArabic-Bold|474": {
+"t": "ظ",
+"files": 6,
+"nfiles": 9,
+"n": 89,
+"alt": {
+" ": [
+22,
+2
+],
+"ا": [
+8,
+1
+]
+}
+},
+"TraditionalArabic-Bold|185": {
+"t": "غ",
+"files": 7,
+"nfiles": 8,
+"n": 43,
+"alt": {
+"د": [
+4,
+1
+]
+}
+},
+"TraditionalArabic-Bold|434": {
+"t": "ج",
+"files": 8,
+"nfiles": 10,
+"n": 329,
+"alt": {
+"في": [
+2,
+1
+],
+" ": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|475": {
+"t": "ظ",
+"files": 8,
+"nfiles": 11,
+"n": 662,
+"alt": {
+" ": [
+202,
+2
+],
+"ة": [
+104,
+1
+]
+}
+},
+"TraditionalArabic-Bold|414": {
+"t": "ئ",
+"files": 4,
+"nfiles": 6,
+"n": 33,
+"alt": {
+" ": [
+1,
+1
+],
+"ا": [
+2,
+1
+]
+}
+},
+"TraditionalArabic-Bold|189": {
+"t": "ك",
+"files": 6,
+"nfiles": 9,
+"n": 1610,
+"alt": {
+"،": [
+403,
+1
+],
+" ": [
+23,
+2
+]
+}
+},
+"TraditionalArabic-Bold|371": {
+"t": "نج",
+"files": 2,
+"nfiles": 4,
+"n": 107,
+"alt": {
+" ": [
+14,
+1
+],
+"ي": [
+15,
+1
+]
+}
+},
+"TraditionalArabic-Bold|998": {
+"t": "تأ",
+"files": 9,
+"nfiles": 11,
+"n": 309,
+"alt": {
+" ": [
+40,
+2
+]
+}
+},
+"TraditionalArabic-Bold|315": {
+"t": "تم",
+"files": 8,
+"nfiles": 10,
+"n": 266,
+"alt": {
+" ": [
+9,
+2
+]
+}
+},
+"TraditionalArabic-Bold|360": {
+"t": "خم",
+"files": 9,
+"nfiles": 12,
+"n": 683,
+"alt": {
+"ن": [
+218,
+2
+],
+" ": [
+24,
+1
+]
+}
+},
+"TraditionalArabic-Bold|183": {
+"t": "ظ",
+"files": 4,
+"nfiles": 6,
+"n": 26,
+"alt": {
+" ": [
+6,
+2
+]
+}
+},
+"TraditionalArabic-Bold|339": {
+"t": "بي",
+"files": 4,
+"nfiles": 7,
+"n": 221,
+"alt": {
+"أ": [
+3,
+1
+],
+" ": [
+15,
+1
+],
+"ا": [
+2,
+1
+]
+}
+},
+"TraditionalArabic-Bold|314": {
+"t": "بي",
+"files": 5,
+"nfiles": 7,
+"n": 96,
+"alt": {
+" ": [
+31,
+1
+],
+"ب": [
+11,
+1
+]
+}
+},
+"TraditionalArabic-Bold|351": {
+"t": "بخ",
+"files": 3,
+"nfiles": 6,
+"n": 53,
+"alt": {
+"د": [
+4,
+1
+],
+"ض": [
+1,
+1
+],
+"ة": [
+2,
+1
+]
+}
+},
+"TraditionalArabic-Bold|203": {
+"t": "ّ",
+"files": 5,
+"nfiles": 9,
+"n": 66,
+"alt": {
+" ": [
+10,
+3
+],
+"ن": [
+29,
+1
+]
+}
+},
+"TraditionalArabic-Bold|341": {
+"t": "تى",
+"files": 9,
+"nfiles": 13,
+"n": 214,
+"alt": {
+"ذ": [
+32,
+2
+],
+"ى": [
+5,
+1
+],
+"ن": [
+3,
+1
+]
+}
+},
+"TraditionalArabic-Bold|158": {
+"t": "؛",
+"files": 4,
+"nfiles": 5,
+"n": 67,
+"alt": {
+"نا": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|526": {
+"t": "لإ",
+"files": 4,
+"nfiles": 5,
+"n": 781,
+"alt": {
+"د": [
+31,
+1
+]
+}
+},
+"TraditionalArabic-Bold|383": {
+"t": "شم",
+"files": 6,
+"nfiles": 7,
+"n": 46,
+"alt": {
+"ه": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|317": {
+"t": "ثم",
+"files": 4,
+"nfiles": 8,
+"n": 32,
+"alt": {
+" ": [
+4,
+1
+],
+"ء": [
+12,
+1
+],
+"ي": [
+1,
+1
+],
+"م": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|374": {
+"t": "نم",
+"files": 6,
+"nfiles": 6,
+"n": 48,
+"alt": {}
+},
+"TraditionalArabic-Bold|981": {
+"t": "بآ",
+"files": 2,
+"nfiles": 2,
+"n": 2,
+"alt": {}
+},
+"TraditionalArabic-Bold|406": {
+"t": "آ",
+"files": 6,
+"nfiles": 7,
+"n": 49,
+"alt": {
+"ت": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|458": {
+"t": "ش",
+"files": 5,
+"nfiles": 9,
+"n": 184,
+"alt": {
+"و": [
+50,
+2
+],
+"ا": [
+6,
+2
+]
+}
+},
+"TraditionalArabic-Bold|199": {
+"t": "ٍ",
+"files": 2,
+"nfiles": 3,
+"n": 13,
+"alt": {
+" ": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|614": {
+"t": "الله",
+"files": 9,
+"nfiles": 10,
+"n": 867,
+"alt": {
+"الل": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|198": {
+"t": "ٌ",
+"files": 2,
+"nfiles": 5,
+"n": 13,
+"alt": {
+" ": [
+3,
+2
+],
+"ي": [
+4,
+1
+]
+}
+},
+"TraditionalArabic-Bold|320": {
+"t": "لج",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic-Bold|318": {
+"t": "فى",
+"files": 6,
+"nfiles": 9,
+"n": 104,
+"alt": {
+"ف": [
+1,
+1
+],
+"ى": [
+46,
+1
+],
+" ": [
+3,
+1
+]
+}
+},
+"TraditionalArabic-Bold|313": {
+"t": "بى",
+"files": 2,
+"nfiles": 3,
+"n": 17,
+"alt": {
+"ب": [
+10,
+1
+]
+}
+},
+"TraditionalArabic-Bold|215": {
+"t": "٪",
+"files": 2,
+"nfiles": 2,
+"n": 2,
+"alt": {}
+},
+"TraditionalArabic|174": {
+"t": "د",
+"files": 4,
+"nfiles": 4,
+"n": 13,
+"alt": {}
+},
+"TraditionalArabic|446": {
+"t": "د",
+"files": 4,
+"nfiles": 4,
+"n": 4,
+"alt": {}
+},
+"TraditionalArabic|186": {
+"t": "ـ",
+"files": 4,
+"nfiles": 4,
+"n": 88,
+"alt": {}
+},
+"TraditionalArabic|480": {
+"t": "ع",
+"files": 4,
+"nfiles": 4,
+"n": 18,
+"alt": {}
+},
+"TraditionalArabic|499": {
+"t": "ل",
+"files": 4,
+"nfiles": 4,
+"n": 20,
+"alt": {}
+},
+"TraditionalArabic|166": {
+"t": "ا",
+"files": 4,
+"nfiles": 4,
+"n": 25,
+"alt": {}
+},
+"TraditionalArabic|169": {
+"t": "ت",
+"files": 4,
+"nfiles": 4,
+"n": 4,
+"alt": {}
+},
+"TraditionalArabic|686": {
+"t": "يا",
+"files": 4,
+"nfiles": 4,
+"n": 4,
+"alt": {}
+},
+"TraditionalArabic|514": {
+"t": "و",
+"files": 4,
+"nfiles": 4,
+"n": 7,
+"alt": {}
+},
+"TraditionalArabic|428": {
+"t": "ت",
+"files": 4,
+"nfiles": 4,
+"n": 6,
+"alt": {}
+},
+"TraditionalArabic|368": {
+"t": "مح",
+"files": 4,
+"nfiles": 4,
+"n": 4,
+"alt": {}
+},
+"TraditionalArabic-Bold|243": {
+"t": "–",
+"files": 7,
+"nfiles": 7,
+"n": 1531,
+"alt": {}
+},
+"TraditionalArabic-Bold|173": {
+"t": "خ",
+"files": 3,
+"nfiles": 4,
+"n": 269,
+"alt": {
+" ": [
+115,
+1
+]
+}
+},
+"TraditionalArabic-Bold|326": {
+"t": "نم",
+"files": 2,
+"nfiles": 3,
+"n": 38,
+"alt": {
+" ": [
+3,
+1
+]
+}
+},
+"TraditionalArabic-Bold|982": {
+"t": "تآ",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic-Bold|202": {
+"t": "ِ",
+"files": 1,
+"nfiles": 3,
+"n": 16,
+"alt": {
+"ق": [
+1,
+1
+],
+"ن": [
+12,
+1
+]
+}
+},
+"TraditionalArabic-Bold|267": {
+"t": "ع",
+"files": 1,
+"nfiles": 3,
+"n": 3,
+"alt": {
+"َّ": [
+1,
+1
+],
+" ": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|200": {
+"t": "َ",
+"files": 2,
+"nfiles": 5,
+"n": 15,
+"alt": {
+"لم": [
+1,
+1
+],
+"ل": [
+2,
+1
+],
+" ": [
+5,
+1
+]
+}
+},
+"TraditionalArabic-Bold|340": {
+"t": "تن",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic-Bold|311": {
+"t": "ی",
+"files": 2,
+"nfiles": 2,
+"n": 2,
+"alt": {}
+},
+"TraditionalArabic-Bold|179": {
+"t": "ش",
+"files": 3,
+"nfiles": 3,
+"n": 189,
+"alt": {}
+},
+"TraditionalArabic-Bold|253": {
+"t": "•",
+"files": 2,
+"nfiles": 2,
+"n": 53,
+"alt": {}
+},
+"TraditionalArabic-Bold|437": {
+"t": "ﺡ",
+"files": 2,
+"nfiles": 2,
+"n": 17,
+"alt": {}
+},
+"TraditionalArabic-Bold|417": {
+"t": "ﺍ",
+"files": 2,
+"nfiles": 2,
+"n": 292,
+"alt": {}
+},
+"TraditionalArabic-Bold|477": {
+"t": "ﻉ",
+"files": 2,
+"nfiles": 2,
+"n": 33,
+"alt": {}
+},
+"TraditionalArabic-Bold|449": {
+"t": "ﺭ",
+"files": 2,
+"nfiles": 2,
+"n": 66,
+"alt": {}
+},
+"TraditionalArabic-Bold|425": {
+"t": "ﺕ",
+"files": 2,
+"nfiles": 2,
+"n": 57,
+"alt": {}
+},
+"TraditionalArabic-Bold|404": {
+"t": "ﺀ",
+"files": 2,
+"nfiles": 2,
+"n": 25,
+"alt": {}
+},
+"TraditionalArabic-Bold|497": {
+"t": "ﻝ",
+"files": 2,
+"nfiles": 2,
+"n": 13,
+"alt": {}
+},
+"TraditionalArabic-Bold|517": {
+"t": "ﻱ",
+"files": 2,
+"nfiles": 2,
+"n": 29,
+"alt": {}
+},
+"TraditionalArabic-Bold|513": {
+"t": "ﻭ",
+"files": 2,
+"nfiles": 2,
+"n": 44,
+"alt": {}
+},
+"TraditionalArabic-Bold|583": {
+"t": "ى",
+"files": 1,
+"nfiles": 2,
+"n": 13,
+"alt": {
+" ": [
+12,
+1
+]
+}
+},
+"TraditionalArabic-Bold|245": {
+"t": "‘",
+"files": 2,
+"nfiles": 2,
+"n": 3,
+"alt": {}
+},
+"TraditionalArabic-Bold|246": {
+"t": "’",
+"files": 2,
+"nfiles": 2,
+"n": 6,
+"alt": {}
+},
+"TraditionalArabic-Bold|248": {
+"t": "“",
+"files": 2,
+"nfiles": 2,
+"n": 7,
+"alt": {}
+},
+"TraditionalArabic-Bold|322": {
+"t": "لخ",
+"files": 2,
+"nfiles": 2,
+"n": 2,
+"alt": {}
+},
+"TraditionalArabic|162": {
+"t": "أ",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic-Bold|337": {
+"t": "بن",
+"files": 2,
+"nfiles": 2,
+"n": 3,
+"alt": {}
+},
+"TraditionalArabic-Bold|515": {
+"t": "ﻯ",
+"files": 1,
+"nfiles": 1,
+"n": 12,
+"alt": {}
+},
+"TraditionalArabic-Bold|445": {
+"t": "ﺩ",
+"files": 2,
+"nfiles": 2,
+"n": 10,
+"alt": {}
+},
+"TraditionalArabic-Bold|501": {
+"t": "ﻡ",
+"files": 2,
+"nfiles": 2,
+"n": 18,
+"alt": {}
+},
+"TraditionalArabic-Bold|465": {
+"t": "ﺽ",
+"files": 1,
+"nfiles": 1,
+"n": 2,
+"alt": {}
+},
+"TraditionalArabic-Bold|469": {
+"t": "ﻁ",
+"files": 1,
+"nfiles": 1,
+"n": 5,
+"alt": {}
+},
+"TraditionalArabic-Bold|423": {
+"t": "ﺓ",
+"files": 2,
+"nfiles": 2,
+"n": 9,
+"alt": {}
+},
+"TraditionalArabic-Bold|451": {
+"t": "ﺯ",
+"files": 2,
+"nfiles": 2,
+"n": 9,
+"alt": {}
+},
+"TraditionalArabic-Bold|419": {
+"t": "ﺏ",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic-Bold|489": {
+"t": "ﻕ",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic-Bold|407": {
+"t": "ﺃ",
+"files": 2,
+"nfiles": 2,
+"n": 2,
+"alt": {}
+},
+"TraditionalArabic-Bold|373": {
+"t": "نخ",
+"files": 2,
+"nfiles": 2,
+"n": 3,
+"alt": {}
+},
+"TraditionalArabic-Bold|338": {
+"t": "بى",
+"files": 2,
+"nfiles": 2,
+"n": 19,
+"alt": {}
+},
+"TraditionalArabic-Bold|304": {
+"t": "ک",
+"files": 1,
+"nfiles": 2,
+"n": 2,
+"alt": {
+"ب": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|389": {
+"t": "لله",
+"files": 2,
+"nfiles": 3,
+"n": 4,
+"alt": {
+" ": [
+2,
+1
+]
+}
+},
+"TraditionalArabic-Bold|589": {
+"t": "لله",
+"files": 2,
+"nfiles": 2,
+"n": 2,
+"alt": {}
+},
+"TraditionalArabic-Bold|249": {
+"t": "”",
+"files": 2,
+"nfiles": 2,
+"n": 6,
+"alt": {}
+},
+"TraditionalArabic-Bold|522": {
+"t": "لآ",
+"files": 1,
+"nfiles": 2,
+"n": 6,
+"alt": {
+"ف": [
+1,
+1
+]
+}
+},
+"TraditionalArabic-Bold|348": {
+"t": "يى",
+"files": 1,
+"nfiles": 1,
+"n": 5,
+"alt": {}
+},
+"TraditionalArabic-Bold|582": {
+"t": "ى",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic-Bold|206": {
+"t": "١",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic-Bold|207": {
+"t": "٢",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic-Bold|244": {
+"t": "—",
+"files": 1,
+"nfiles": 1,
+"n": 4,
+"alt": {}
+},
+"TraditionalArabic-Bold|1000": {
+"t": "نأ",
+"files": 1,
+"nfiles": 1,
+"n": 12,
+"alt": {}
+},
+"TraditionalArabic-Bold|505": {
+"t": "ﻥ",
+"files": 1,
+"nfiles": 1,
+"n": 3,
+"alt": {}
+},
+"TraditionalArabic-Bold|411": {
+"t": "ﺇ",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic-Bold|409": {
+"t": "ﺅ",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|424": {
+"t": "ة",
+"files": 1,
+"nfiles": 1,
+"n": 24,
+"alt": {}
+},
+"TraditionalArabic|464": {
+"t": "ص",
+"files": 1,
+"nfiles": 1,
+"n": 2,
+"alt": {}
+},
+"TraditionalArabic|491": {
+"t": "ق",
+"files": 1,
+"nfiles": 1,
+"n": 22,
+"alt": {}
+},
+"TraditionalArabic|418": {
+"t": "ا",
+"files": 1,
+"nfiles": 1,
+"n": 21,
+"alt": {}
+},
+"TraditionalArabic|508": {
+"t": "ن",
+"files": 1,
+"nfiles": 1,
+"n": 3,
+"alt": {}
+},
+"TraditionalArabic|365": {
+"t": "لم",
+"files": 1,
+"nfiles": 1,
+"n": 5,
+"alt": {}
+},
+"TraditionalArabic|184": {
+"t": "ع",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|467": {
+"t": "ض",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|503": {
+"t": "م",
+"files": 1,
+"nfiles": 1,
+"n": 17,
+"alt": {}
+},
+"TraditionalArabic|194": {
+"t": "و",
+"files": 1,
+"nfiles": 1,
+"n": 3,
+"alt": {}
+},
+"TraditionalArabic|502": {
+"t": "م",
+"files": 1,
+"nfiles": 1,
+"n": 6,
+"alt": {}
+},
+"TraditionalArabic|176": {
+"t": "ر",
+"files": 1,
+"nfiles": 1,
+"n": 10,
+"alt": {}
+},
+"TraditionalArabic|520": {
+"t": "ي",
+"files": 1,
+"nfiles": 1,
+"n": 16,
+"alt": {}
+},
+"TraditionalArabic|468": {
+"t": "ض",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|519": {
+"t": "ي",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|450": {
+"t": "ر",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|356": {
+"t": "تم",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|504": {
+"t": "م",
+"files": 1,
+"nfiles": 1,
+"n": 19,
+"alt": {}
+},
+"TraditionalArabic|479": {
+"t": "ع",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|346": {
+"t": "ير",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|487": {
+"t": "ف",
+"files": 1,
+"nfiles": 1,
+"n": 2,
+"alt": {}
+},
+"TraditionalArabic|421": {
+"t": "ب",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|455": {
+"t": "س",
+"files": 1,
+"nfiles": 1,
+"n": 4,
+"alt": {}
+},
+"TraditionalArabic|160": {
+"t": "ء",
+"files": 1,
+"nfiles": 1,
+"n": 13,
+"alt": {}
+},
+"TraditionalArabic|472": {
+"t": "ط",
+"files": 1,
+"nfiles": 1,
+"n": 13,
+"alt": {}
+},
+"TraditionalArabic|506": {
+"t": "ن",
+"files": 1,
+"nfiles": 1,
+"n": 13,
+"alt": {}
+},
+"TraditionalArabic|325": {
+"t": "ل",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|527": {
+"t": "لا",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|347": {
+"t": "ين",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|408": {
+"t": "أ",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic|189": {
+"t": "ك",
+"files": 1,
+"nfiles": 1,
+"n": 9,
+"alt": {}
+},
+"TraditionalArabic-Bold|254": {
+"t": "…",
+"files": 1,
+"nfiles": 1,
+"n": 6,
+"alt": {}
+},
+"TraditionalArabic-Bold|204": {
+"t": "ْْ",
+"files": 1,
+"nfiles": 2,
+"n": 9,
+"alt": {
+" ": [
+7,
+1
+]
+}
+},
+"TraditionalArabic-Bold|269": {
+"t": " ",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"TraditionalArabic-Bold|268": {
+"t": "د",
+"files": 1,
+"nfiles": 1,
+"n": 2,
+"alt": {}
+},
+"Traditional Arabic,Bold|191": {
+"t": "م",
+"files": 2,
+"nfiles": 2,
+"n": 525,
+"alt": {}
+},
+"Traditional Arabic,Bold|514": {
+"t": "و",
+"files": 2,
+"nfiles": 2,
+"n": 2712,
+"alt": {}
+},
+"Traditional Arabic,Bold|520": {
+"t": "ي",
+"files": 2,
+"nfiles": 2,
+"n": 2588,
+"alt": {}
+},
+"Traditional Arabic,Bold|499": {
+"t": "ل",
+"files": 2,
+"nfiles": 2,
+"n": 6118,
+"alt": {}
+},
+"Traditional Arabic,Bold|166": {
+"t": "ا",
+"files": 2,
+"nfiles": 2,
+"n": 9723,
+"alt": {}
+},
+"Traditional Arabic,Bold|426": {
+"t": "ت",
+"files": 2,
+"nfiles": 2,
+"n": 274,
+"alt": {}
+},
+"Traditional Arabic,Bold|519": {
+"t": "ي",
+"files": 2,
+"nfiles": 2,
+"n": 2132,
+"alt": {}
+},
+"Traditional Arabic,Bold|496": {
+"t": "ك",
+"files": 2,
+"nfiles": 2,
+"n": 878,
+"alt": {}
+},
+"Traditional Arabic,Bold|490": {
+"t": "ق",
+"files": 2,
+"nfiles": 2,
+"n": 237,
+"alt": {}
+},
+"Traditional Arabic,Bold|440": {
+"t": "ح",
+"files": 2,
+"nfiles": 2,
+"n": 359,
+"alt": {}
+},
+"Traditional Arabic,Bold|500": {
+"t": "ل",
+"files": 2,
+"nfiles": 2,
+"n": 1972,
+"alt": {}
+},
+"Traditional Arabic,Bold|503": {
+"t": "م",
+"files": 2,
+"nfiles": 2,
+"n": 2835,
+"alt": {}
+},
+"Traditional Arabic,Bold|174": {
+"t": "د",
+"files": 2,
+"nfiles": 2,
+"n": 1413,
+"alt": {}
+},
+"Traditional Arabic,Bold|446": {
+"t": "د",
+"files": 2,
+"nfiles": 2,
+"n": 2074,
+"alt": {}
+},
+"Traditional Arabic,Bold|480": {
+"t": "ع",
+"files": 2,
+"nfiles": 2,
+"n": 1373,
+"alt": {}
+},
+"Traditional Arabic,Bold|424": {
+"t": "ة",
+"files": 2,
+"nfiles": 2,
+"n": 3795,
+"alt": {}
+},
+"Traditional Arabic,Bold|508": {
+"t": "ن",
+"files": 2,
+"nfiles": 2,
+"n": 1285,
+"alt": {}
+},
+"Traditional Arabic,Bold|456": {
+"t": "س",
+"files": 2,
+"nfiles": 2,
+"n": 1291,
+"alt": {}
+},
+"Traditional Arabic,Bold|507": {
+"t": "ن",
+"files": 2,
+"nfiles": 2,
+"n": 930,
+"alt": {}
+},
+"Traditional Arabic,Bold|418": {
+"t": "ا",
+"files": 2,
+"nfiles": 2,
+"n": 6418,
+"alt": {}
+},
+"Traditional Arabic,Bold|432": {
+"t": "ث",
+"files": 2,
+"nfiles": 2,
+"n": 238,
+"alt": {}
+},
+"Traditional Arabic,Bold|192": {
+"t": "ن",
+"files": 2,
+"nfiles": 2,
+"n": 1199,
+"alt": {}
+},
+"Traditional Arabic,Bold|428": {
+"t": "ت",
+"files": 2,
+"nfiles": 2,
+"n": 2273,
+"alt": {}
+},
+"Traditional Arabic,Bold|194": {
+"t": "و",
+"files": 2,
+"nfiles": 2,
+"n": 3333,
+"alt": {}
+},
+"Traditional Arabic,Bold|347": {
+"t": "ين",
+"files": 1,
+"nfiles": 1,
+"n": 434,
+"alt": {}
+},
+"Traditional Arabic,Bold|431": {
+"t": "ث",
+"files": 2,
+"nfiles": 2,
+"n": 212,
+"alt": {}
+},
+"Traditional Arabic,Bold|523": {
+"t": "لأ",
+"files": 2,
+"nfiles": 2,
+"n": 555,
+"alt": {}
+},
+"Traditional Arabic,Bold|450": {
+"t": "ر",
+"files": 2,
+"nfiles": 2,
+"n": 3410,
+"alt": {}
+},
+"Traditional Arabic,Bold|443": {
+"t": "خ",
+"files": 2,
+"nfiles": 2,
+"n": 373,
+"alt": {}
+},
+"Traditional Arabic,Bold|521": {
+"t": "لآ",
+"files": 2,
+"nfiles": 2,
+"n": 54,
+"alt": {}
+},
+"Traditional Arabic,Bold|478": {
+"t": "ع",
+"files": 2,
+"nfiles": 2,
+"n": 427,
+"alt": {}
+},
+"Traditional Arabic,Bold|421": {
+"t": "ب",
+"files": 2,
+"nfiles": 2,
+"n": 1191,
+"alt": {}
+},
+"Traditional Arabic,Bold|176": {
+"t": "ر",
+"files": 2,
+"nfiles": 2,
+"n": 1674,
+"alt": {}
+},
+"Traditional Arabic,Bold|186": {
+"t": "ـ",
+"files": 2,
+"nfiles": 2,
+"n": 452,
+"alt": {}
+},
+"Traditional Arabic,Bold|511": {
+"t": "ه",
+"files": 2,
+"nfiles": 2,
+"n": 545,
+"alt": {}
+},
+"Traditional Arabic,Bold|454": {
+"t": "س",
+"files": 2,
+"nfiles": 2,
+"n": 340,
+"alt": {}
+},
+"Traditional Arabic,Bold|367": {
+"t": "مج",
+"files": 1,
+"nfiles": 1,
+"n": 182,
+"alt": {}
+},
+"Traditional Arabic,Bold|160": {
+"t": "ء",
+"files": 2,
+"nfiles": 2,
+"n": 588,
+"alt": {}
+},
+"Traditional Arabic,Bold|177": {
+"t": "ز",
+"files": 2,
+"nfiles": 2,
+"n": 498,
+"alt": {}
+},
+"Traditional Arabic,Bold|491": {
+"t": "ق",
+"files": 2,
+"nfiles": 2,
+"n": 816,
+"alt": {}
+},
+"Traditional Arabic,Bold|502": {
+"t": "م",
+"files": 2,
+"nfiles": 2,
+"n": 801,
+"alt": {}
+},
+"Traditional Arabic,Bold|169": {
+"t": "ت",
+"files": 2,
+"nfiles": 2,
+"n": 803,
+"alt": {}
+},
+"Traditional Arabic,Bold|495": {
+"t": "ك",
+"files": 2,
+"nfiles": 2,
+"n": 1811,
+"alt": {}
+},
+"Traditional Arabic,Bold|460": {
+"t": "ش",
+"files": 2,
+"nfiles": 2,
+"n": 1594,
+"alt": {}
+},
+"Traditional Arabic,Bold|463": {
+"t": "ص",
+"files": 2,
+"nfiles": 2,
+"n": 288,
+"alt": {}
+},
+"Traditional Arabic,Bold|1013": {
+"t": "بإ",
+"files": 1,
+"nfiles": 1,
+"n": 42,
+"alt": {}
+},
+"Traditional Arabic,Bold|527": {
+"t": "لا",
+"files": 2,
+"nfiles": 2,
+"n": 747,
+"alt": {}
+},
+"Traditional Arabic,Bold|455": {
+"t": "س",
+"files": 2,
+"nfiles": 2,
+"n": 939,
+"alt": {}
+},
+"Traditional Arabic,Bold|516": {
+"t": "ى",
+"files": 2,
+"nfiles": 2,
+"n": 612,
+"alt": {}
+},
+"Traditional Arabic,Bold|479": {
+"t": "ع",
+"files": 2,
+"nfiles": 2,
+"n": 1929,
+"alt": {}
+},
+"Traditional Arabic,Bold|184": {
+"t": "ع",
+"files": 2,
+"nfiles": 2,
+"n": 210,
+"alt": {}
+},
+"Traditional Arabic,Bold|528": {
+"t": "لا",
+"files": 2,
+"nfiles": 2,
+"n": 474,
+"alt": {}
+},
+"Traditional Arabic,Bold|471": {
+"t": "ط",
+"files": 2,
+"nfiles": 2,
+"n": 206,
+"alt": {}
+},
+"Traditional Arabic,Bold|157": {
+"t": "،",
+"files": 2,
+"nfiles": 2,
+"n": 873,
+"alt": {}
+},
+"Traditional Arabic,Bold|365": {
+"t": "لم",
+"files": 1,
+"nfiles": 1,
+"n": 1182,
+"alt": {}
+},
+"Traditional Arabic,Bold|408": {
+"t": "أ",
+"files": 2,
+"nfiles": 2,
+"n": 214,
+"alt": {}
+},
+"Traditional Arabic,Bold|422": {
+"t": "ب",
+"files": 2,
+"nfiles": 2,
+"n": 785,
+"alt": {}
+},
+"Traditional Arabic,Bold|467": {
+"t": "ض",
+"files": 2,
+"nfiles": 2,
+"n": 137,
+"alt": {}
+},
+"Traditional Arabic,Bold|498": {
+"t": "ل",
+"files": 2,
+"nfiles": 2,
+"n": 694,
+"alt": {}
+},
+"Traditional Arabic,Bold|510": {
+"t": "ه",
+"files": 2,
+"nfiles": 2,
+"n": 571,
+"alt": {}
+},
+"Traditional Arabic,Bold|492": {
+"t": "ق",
+"files": 2,
+"nfiles": 2,
+"n": 1663,
+"alt": {}
+},
+"Traditional Arabic,Bold|196": {
+"t": "ي",
+"files": 2,
+"nfiles": 2,
+"n": 280,
+"alt": {}
+},
+"Traditional Arabic,Bold|436": {
+"t": "ج",
+"files": 2,
+"nfiles": 2,
+"n": 296,
+"alt": {}
+},
+"Traditional Arabic,Bold|476": {
+"t": "ظ",
+"files": 2,
+"nfiles": 2,
+"n": 112,
+"alt": {}
+},
+"Traditional Arabic,Bold|362": {
+"t": "لج",
+"files": 1,
+"nfiles": 1,
+"n": 205,
+"alt": {}
+},
+"Traditional Arabic,Bold|452": {
+"t": "ز",
+"files": 2,
+"nfiles": 2,
+"n": 305,
+"alt": {}
+},
+"Traditional Arabic,Bold|464": {
+"t": "ص",
+"files": 2,
+"nfiles": 2,
+"n": 859,
+"alt": {}
+},
+"Traditional Arabic,Bold|682": {
+"t": "با",
+"files": 1,
+"nfiles": 1,
+"n": 428,
+"alt": {}
+},
+"Traditional Arabic,Bold|435": {
+"t": "ج",
+"files": 2,
+"nfiles": 2,
+"n": 488,
+"alt": {}
+},
+"Traditional Arabic,Bold|525": {
+"t": "لإ",
+"files": 2,
+"nfiles": 2,
+"n": 279,
+"alt": {}
+},
+"Traditional Arabic,Bold|415": {
+"t": "ئ",
+"files": 2,
+"nfiles": 2,
+"n": 336,
+"alt": {}
+},
+"Traditional Arabic,Bold|504": {
+"t": "م",
+"files": 2,
+"nfiles": 2,
+"n": 1240,
+"alt": {}
+},
+"Traditional Arabic,Bold|388": {
+"t": "لمح",
+"files": 1,
+"nfiles": 1,
+"n": 84,
+"alt": {}
+},
+"Traditional Arabic,Bold|190": {
+"t": "ل",
+"files": 2,
+"nfiles": 2,
+"n": 618,
+"alt": {}
+},
+"Traditional Arabic,Bold|459": {
+"t": "ش",
+"files": 2,
+"nfiles": 2,
+"n": 480,
+"alt": {}
+},
+"Traditional Arabic,Bold|506": {
+"t": "ن",
+"files": 2,
+"nfiles": 2,
+"n": 1193,
+"alt": {}
+},
+"Traditional Arabic,Bold|319": {
+"t": "في",
+"files": 1,
+"nfiles": 1,
+"n": 685,
+"alt": {}
+},
+"Traditional Arabic,Bold|181": {
+"t": "ض",
+"files": 2,
+"nfiles": 2,
+"n": 81,
+"alt": {}
+},
+"Traditional Arabic,Bold|164": {
+"t": "إ",
+"files": 2,
+"nfiles": 2,
+"n": 777,
+"alt": {}
+},
+"Traditional Arabic,Bold|375": {
+"t": "هم",
+"files": 1,
+"nfiles": 1,
+"n": 141,
+"alt": {}
+},
+"Traditional Arabic,Bold|494": {
+"t": "ك",
+"files": 2,
+"nfiles": 2,
+"n": 323,
+"alt": {}
+},
+"Traditional Arabic,Bold|487": {
+"t": "ف",
+"files": 2,
+"nfiles": 2,
+"n": 681,
+"alt": {}
+},
+"Traditional Arabic,Bold|512": {
+"t": "ه",
+"files": 2,
+"nfiles": 2,
+"n": 1001,
+"alt": {}
+},
+"Traditional Arabic,Bold|427": {
+"t": "ت",
+"files": 2,
+"nfiles": 2,
+"n": 1195,
+"alt": {}
+},
+"Traditional Arabic,Bold|518": {
+"t": "ي",
+"files": 2,
+"nfiles": 2,
+"n": 332,
+"alt": {}
+},
+"Traditional Arabic,Bold|364": {
+"t": "لخ",
+"files": 1,
+"nfiles": 1,
+"n": 79,
+"alt": {}
+},
+"Traditional Arabic,Bold|167": {
+"t": "ب",
+"files": 2,
+"nfiles": 2,
+"n": 204,
+"alt": {}
+},
+"Traditional Arabic,Bold|363": {
+"t": "لح",
+"files": 1,
+"nfiles": 1,
+"n": 284,
+"alt": {}
+},
+"Traditional Arabic,Bold|448": {
+"t": "ذ",
+"files": 2,
+"nfiles": 2,
+"n": 537,
+"alt": {}
+},
+"Traditional Arabic,Bold|488": {
+"t": "ف",
+"files": 2,
+"nfiles": 2,
+"n": 569,
+"alt": {}
+},
+"Traditional Arabic,Bold|168": {
+"t": "ة",
+"files": 2,
+"nfiles": 2,
+"n": 1125,
+"alt": {}
+},
+"Traditional Arabic,Bold|187": {
+"t": "ف",
+"files": 2,
+"nfiles": 2,
+"n": 113,
+"alt": {}
+},
+"Traditional Arabic,Bold|162": {
+"t": "أ",
+"files": 2,
+"nfiles": 2,
+"n": 2086,
+"alt": {}
+},
+"Traditional Arabic,Bold|366": {
+"t": "له",
+"files": 1,
+"nfiles": 1,
+"n": 111,
+"alt": {}
+},
+"Traditional Arabic,Bold|188": {
+"t": "ق",
+"files": 2,
+"nfiles": 2,
+"n": 104,
+"alt": {}
+},
+"Traditional Arabic,Bold|345": {
+"t": "ني",
+"files": 1,
+"nfiles": 1,
+"n": 19,
+"alt": {}
+},
+"Traditional Arabic,Bold|172": {
+"t": "ح",
+"files": 2,
+"nfiles": 2,
+"n": 72,
+"alt": {}
+},
+"Traditional Arabic,Bold|468": {
+"t": "ض",
+"files": 2,
+"nfiles": 2,
+"n": 415,
+"alt": {}
+},
+"Traditional Arabic,Bold|998": {
+"t": "تأ",
+"files": 1,
+"nfiles": 1,
+"n": 52,
+"alt": {}
+},
+"Traditional Arabic,Bold|462": {
+"t": "ص",
+"files": 2,
+"nfiles": 2,
+"n": 195,
+"alt": {}
+},
+"Traditional Arabic,Bold|343": {
+"t": "تر",
+"files": 1,
+"nfiles": 1,
+"n": 133,
+"alt": {}
+},
+"Traditional Arabic,Bold|526": {
+"t": "لإ",
+"files": 2,
+"nfiles": 2,
+"n": 9,
+"alt": {}
+},
+"Traditional Arabic,Bold|439": {
+"t": "ح",
+"files": 2,
+"nfiles": 2,
+"n": 714,
+"alt": {}
+},
+"Traditional Arabic,Bold|346": {
+"t": "ير",
+"files": 1,
+"nfiles": 1,
+"n": 190,
+"alt": {}
+},
+"Traditional Arabic,Bold|483": {
+"t": "غ",
+"files": 2,
+"nfiles": 2,
+"n": 191,
+"alt": {}
+},
+"Traditional Arabic,Bold|325": {
+"t": "لي",
+"files": 1,
+"nfiles": 1,
+"n": 15,
+"alt": {}
+},
+"Traditional Arabic,Bold|472": {
+"t": "ط",
+"files": 2,
+"nfiles": 2,
+"n": 276,
+"alt": {}
+},
+"Traditional Arabic,Bold|180": {
+"t": "ص",
+"files": 2,
+"nfiles": 2,
+"n": 78,
+"alt": {}
+},
+"Traditional Arabic,Bold|416": {
+"t": "ئ",
+"files": 2,
+"nfiles": 2,
+"n": 95,
+"alt": {}
+},
+"Traditional Arabic,Bold|182": {
+"t": "ط",
+"files": 2,
+"nfiles": 2,
+"n": 102,
+"alt": {}
+},
+"Traditional Arabic,Bold|434": {
+"t": "ج",
+"files": 2,
+"nfiles": 2,
+"n": 22,
+"alt": {}
+},
+"Traditional Arabic,Bold|444": {
+"t": "خ",
+"files": 2,
+"nfiles": 2,
+"n": 219,
+"alt": {}
+},
+"Traditional Arabic,Bold|466": {
+"t": "ض",
+"files": 2,
+"nfiles": 2,
+"n": 60,
+"alt": {}
+},
+"Traditional Arabic,Bold|316": {
+"t": "تي",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"Traditional Arabic,Bold|685": {
+"t": "نا",
+"files": 1,
+"nfiles": 1,
+"n": 73,
+"alt": {}
+},
+"Traditional Arabic,Bold|509": {
+"t": "ه",
+"files": 2,
+"nfiles": 2,
+"n": 191,
+"alt": {}
+},
+"Traditional Arabic,Bold|997": {
+"t": "بأ",
+"files": 1,
+"nfiles": 1,
+"n": 59,
+"alt": {}
+},
+"Traditional Arabic,Bold|410": {
+"t": "ؤ",
+"files": 2,
+"nfiles": 2,
+"n": 154,
+"alt": {}
+},
+"Traditional Arabic,Bold|342": {
+"t": "تي",
+"files": 1,
+"nfiles": 1,
+"n": 161,
+"alt": {}
+},
+"Traditional Arabic,Bold|323": {
+"t": "لم",
+"files": 1,
+"nfiles": 1,
+"n": 92,
+"alt": {}
+},
+"Traditional Arabic,Bold|354": {
+"t": "تح",
+"files": 1,
+"nfiles": 1,
+"n": 93,
+"alt": {}
+},
+"Traditional Arabic,Bold|470": {
+"t": "ط",
+"files": 2,
+"nfiles": 2,
+"n": 33,
+"alt": {}
+},
+"Traditional Arabic,Bold|197": {
+"t": " ",
+"files": 1,
+"nfiles": 2,
+"n": 344,
+"alt": {
+"ً": [
+36,
+1
+]
+}
+},
+"Traditional Arabic,Bold|442": {
+"t": "خ",
+"files": 2,
+"nfiles": 2,
+"n": 76,
+"alt": {}
+},
+"Traditional Arabic,Bold|683": {
+"t": "تا",
+"files": 1,
+"nfiles": 1,
+"n": 73,
+"alt": {}
+},
+"Traditional Arabic,Bold|361": {
+"t": "سم",
+"files": 1,
+"nfiles": 1,
+"n": 65,
+"alt": {}
+},
+"Traditional Arabic,Bold|195": {
+"t": "ى",
+"files": 2,
+"nfiles": 2,
+"n": 135,
+"alt": {}
+},
+"Traditional Arabic,Bold|243": {
+"t": "–",
+"files": 2,
+"nfiles": 2,
+"n": 12,
+"alt": {}
+},
+"Traditional Arabic,Bold|273": {
+"t": "به",
+"files": 1,
+"nfiles": 1,
+"n": 47,
+"alt": {}
+},
+"Traditional Arabic,Bold|175": {
+"t": "ذ",
+"files": 2,
+"nfiles": 2,
+"n": 462,
+"alt": {}
+},
+"Traditional Arabic,Bold|341": {
+"t": "تى",
+"files": 1,
+"nfiles": 1,
+"n": 14,
+"alt": {}
+},
+"Traditional Arabic,Bold|484": {
+"t": "غ",
+"files": 2,
+"nfiles": 2,
+"n": 167,
+"alt": {}
+},
+"Traditional Arabic,Bold|378": {
+"t": "يخ",
+"files": 1,
+"nfiles": 1,
+"n": 22,
+"alt": {}
+},
+"Traditional Arabic,Bold|336": {
+"t": "بر",
+"files": 1,
+"nfiles": 1,
+"n": 51,
+"alt": {}
+},
+"Traditional Arabic,Bold|430": {
+"t": "ث",
+"files": 2,
+"nfiles": 2,
+"n": 24,
+"alt": {}
+},
+"Traditional Arabic,Bold|328": {
+"t": "ني",
+"files": 1,
+"nfiles": 1,
+"n": 30,
+"alt": {}
+},
+"Traditional Arabic,Bold|359": {
+"t": "حم",
+"files": 1,
+"nfiles": 1,
+"n": 11,
+"alt": {}
+},
+"Traditional Arabic,Bold|486": {
+"t": "ف",
+"files": 2,
+"nfiles": 2,
+"n": 65,
+"alt": {}
+},
+"Traditional Arabic,Bold|344": {
+"t": "نى",
+"files": 1,
+"nfiles": 1,
+"n": 8,
+"alt": {}
+},
+"Traditional Arabic,Bold|438": {
+"t": "ح",
+"files": 2,
+"nfiles": 2,
+"n": 50,
+"alt": {}
+},
+"Traditional Arabic,Bold|368": {
+"t": "مح",
+"files": 1,
+"nfiles": 1,
+"n": 28,
+"alt": {}
+},
+"Traditional Arabic,Bold|189": {
+"t": "ك",
+"files": 1,
+"nfiles": 1,
+"n": 55,
+"alt": {}
+},
+"Traditional Arabic,Bold|350": {
+"t": "بح",
+"files": 1,
+"nfiles": 1,
+"n": 49,
+"alt": {}
+},
+"Traditional Arabic,Bold|178": {
+"t": "س",
+"files": 2,
+"nfiles": 2,
+"n": 161,
+"alt": {}
+},
+"Traditional Arabic,Bold|358": {
+"t": "جم",
+"files": 1,
+"nfiles": 1,
+"n": 81,
+"alt": {}
+},
+"Traditional Arabic,Bold|352": {
+"t": "بم",
+"files": 1,
+"nfiles": 1,
+"n": 73,
+"alt": {}
+},
+"Traditional Arabic,Bold|329": {
+"t": "يم",
+"files": 1,
+"nfiles": 1,
+"n": 37,
+"alt": {}
+},
+"Traditional Arabic,Bold|376": {
+"t": "يج",
+"files": 1,
+"nfiles": 1,
+"n": 275,
+"alt": {}
+},
+"Traditional Arabic,Bold|420": {
+"t": "ب",
+"files": 2,
+"nfiles": 2,
+"n": 411,
+"alt": {}
+},
+"Traditional Arabic,Bold|275": {
+"t": "ته",
+"files": 1,
+"nfiles": 1,
+"n": 79,
+"alt": {}
+},
+"Traditional Arabic,Bold|377": {
+"t": "يح",
+"files": 1,
+"nfiles": 1,
+"n": 38,
+"alt": {}
+},
+"Traditional Arabic,Bold|276": {
+"t": "نه",
+"files": 1,
+"nfiles": 1,
+"n": 33,
+"alt": {}
+},
+"Traditional Arabic,Bold|203": {
+"t": "ّ",
+"files": 2,
+"nfiles": 2,
+"n": 12,
+"alt": {}
+},
+"Traditional Arabic,Bold|171": {
+"t": "ج",
+"files": 2,
+"nfiles": 2,
+"n": 50,
+"alt": {}
+},
+"Traditional Arabic,Bold|374": {
+"t": "نم",
+"files": 1,
+"nfiles": 1,
+"n": 6,
+"alt": {}
+},
+"Traditional Arabic,Bold|686": {
+"t": "يا",
+"files": 1,
+"nfiles": 1,
+"n": 75,
+"alt": {}
+},
+"Traditional Arabic,Bold|355": {
+"t": "تخ",
+"files": 1,
+"nfiles": 1,
+"n": 56,
+"alt": {}
+},
+"Traditional Arabic,Bold|356": {
+"t": "تم",
+"files": 1,
+"nfiles": 1,
+"n": 34,
+"alt": {}
+},
+"Traditional Arabic,Bold|371": {
+"t": "نج",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"Traditional Arabic,Bold|372": {
+"t": "نح",
+"files": 1,
+"nfiles": 1,
+"n": 2,
+"alt": {}
+},
+"Traditional Arabic,Bold|370": {
+"t": "مم",
+"files": 1,
+"nfiles": 1,
+"n": 34,
+"alt": {}
+},
+"Traditional Arabic,Bold|414": {
+"t": "ئ",
+"files": 1,
+"nfiles": 1,
+"n": 2,
+"alt": {}
+},
+"Traditional Arabic,Bold|412": {
+"t": "إ",
+"files": 2,
+"nfiles": 2,
+"n": 72,
+"alt": {}
+},
+"Traditional Arabic,Bold|379": {
+"t": "يم",
+"files": 1,
+"nfiles": 1,
+"n": 59,
+"alt": {}
+},
+"Traditional Arabic,Bold|324": {
+"t": "لى",
+"files": 1,
+"nfiles": 1,
+"n": 146,
+"alt": {}
+},
+"Traditional Arabic,Bold|161": {
+"t": "آ",
+"files": 2,
+"nfiles": 2,
+"n": 57,
+"alt": {}
+},
+"Traditional Arabic,Bold|353": {
+"t": "تج",
+"files": 1,
+"nfiles": 1,
+"n": 32,
+"alt": {}
+},
+"Traditional Arabic,Bold|482": {
+"t": "غ",
+"files": 1,
+"nfiles": 1,
+"n": 18,
+"alt": {}
+},
+"Traditional Arabic,Bold|201": {
+"t": "ُ",
+"files": 2,
+"nfiles": 2,
+"n": 12,
+"alt": {}
+},
+"Traditional Arabic,Bold|351": {
+"t": "بخ",
+"files": 1,
+"nfiles": 1,
+"n": 6,
+"alt": {}
+},
+"Traditional Arabic,Bold|684": {
+"t": "ثا",
+"files": 1,
+"nfiles": 1,
+"n": 16,
+"alt": {}
+},
+"Traditional Arabic,Bold|315": {
+"t": "تم",
+"files": 1,
+"nfiles": 1,
+"n": 20,
+"alt": {}
+},
+"Traditional Arabic,Bold|369": {
+"t": "مخ",
+"files": 1,
+"nfiles": 1,
+"n": 23,
+"alt": {}
+},
+"Traditional Arabic,Bold|360": {
+"t": "خم",
+"files": 1,
+"nfiles": 1,
+"n": 36,
+"alt": {}
+},
+"Traditional Arabic,Bold|474": {
+"t": "ظ",
+"files": 1,
+"nfiles": 1,
+"n": 7,
+"alt": {}
+},
+"Traditional Arabic,Bold|524": {
+"t": "لأ",
+"files": 1,
+"nfiles": 1,
+"n": 27,
+"alt": {}
+},
+"Traditional Arabic,Bold|475": {
+"t": "ظ",
+"files": 2,
+"nfiles": 2,
+"n": 16,
+"alt": {}
+},
+"Traditional Arabic,Bold|163": {
+"t": "ؤ",
+"files": 2,
+"nfiles": 2,
+"n": 5,
+"alt": {}
+},
+"Traditional Arabic,Bold|327": {
+"t": "نى",
+"files": 1,
+"nfiles": 1,
+"n": 14,
+"alt": {}
+},
+"Traditional Arabic,Bold|321": {
+"t": "لح",
+"files": 1,
+"nfiles": 1,
+"n": 7,
+"alt": {}
+},
+"Traditional Arabic,Bold|318": {
+"t": "ف",
+"files": 1,
+"nfiles": 1,
+"n": 2,
+"alt": {}
+},
+"Traditional Arabic,Bold|339": {
+"t": "بي",
+"files": 1,
+"nfiles": 1,
+"n": 7,
+"alt": {}
+},
+"Traditional Arabic,Bold|170": {
+"t": "ث",
+"files": 2,
+"nfiles": 2,
+"n": 21,
+"alt": {}
+},
+"Traditional Arabic,Bold|272": {
+"t": "لمج",
+"files": 1,
+"nfiles": 1,
+"n": 33,
+"alt": {}
+},
+"Traditional Arabic,Bold|165": {
+"t": "ئ",
+"files": 1,
+"nfiles": 1,
+"n": 4,
+"alt": {}
+},
+"Traditional Arabic,Bold|314": {
+"t": "بي",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"Traditional Arabic,Bold|458": {
+"t": "ش",
+"files": 2,
+"nfiles": 2,
+"n": 24,
+"alt": {}
+},
+"Traditional Arabic,Bold|349": {
+"t": "بج",
+"files": 1,
+"nfiles": 1,
+"n": 8,
+"alt": {}
+},
+"Traditional Arabic,Bold|179": {
+"t": "ش",
+"files": 1,
+"nfiles": 1,
+"n": 2,
+"alt": {}
+},
+"Traditional Arabic,Bold|183": {
+"t": "ظ",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"Traditional Arabic,Bold|269": {
+"t": " ",
+"files": 1,
+"nfiles": 1,
+"n": 2,
+"alt": {}
+},
+"Traditional Arabic,Bold|202": {
+"t": "ِ",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"Traditional Arabic,Bold|199": {
+"t": " ",
+"files": 1,
+"nfiles": 1,
+"n": 4,
+"alt": {}
+},
+"Traditional Arabic,Bold|185": {
+"t": "غ",
+"files": 2,
+"nfiles": 2,
+"n": 5,
+"alt": {}
+},
+"Traditional Arabic,Bold|357": {
+"t": "ثم",
+"files": 1,
+"nfiles": 1,
+"n": 2,
+"alt": {}
+},
+"Traditional Arabic,Bold|317": {
+"t": "ثم",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"Traditional Arabic,Bold|406": {
+"t": "آ",
+"files": 2,
+"nfiles": 2,
+"n": 11,
+"alt": {}
+},
+"Traditional Arabic,Bold|158": {
+"t": "؛",
+"files": 1,
+"nfiles": 1,
+"n": 2,
+"alt": {}
+},
+"Traditional Arabic,Bold|200": {
+"t": "َ",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"Traditional Arabic,Bold|383": {
+"t": "شم",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+},
+"Traditional Arabic,Bold|320": {
+"t": "لج",
+"files": 1,
+"nfiles": 1,
+"n": 1,
+"alt": {}
+}
+}
