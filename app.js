@@ -108,14 +108,66 @@ const FAMS=[...new Set(TORD.map(famOf))];const famLetter={};TORD.forEach(t=>famL
 const LORD=Object.keys(lcount).sort((a,b)=>lcount[b]-lcount[a]);
 const CHS=[...new Set(PR.flatMap(p=>p.c.map(c=>c.ch)).filter(Boolean))];
 const printed=p=>p.pg.map(g=>g+COLS[p.col].off);
+// ---------- legislation
+const LAWS=[],LAWBYKEY={},ARTBYID={},ARTMAP={};
+try{const LI=await fetch('data/laws/index.json').then(r=>r.json());
+  const LF=await Promise.all(LI.laws.map(x=>fetch('data/laws/'+x.id+'.json').then(r=>r.json()).catch(()=>null)));
+  LF.filter(Boolean).forEach(L=>{LAWS.push(L);LAWBYKEY[L.key]=L;L.byN={};
+    L.articles.forEach((a,i)=>{a.law=L;a.i=i;a.ns=norm(a.label+' '+a.paras.join(' '));ARTBYID[a.id]=a;L.byN[a.n]=a;});});}catch(_){}
+PR.forEach(p=>p.lw.forEach(([l,as])=>{if(!LAWBYKEY[l])return;new Set(as.map(a=>parseInt(west(a).split('/')[0]))).forEach(n=>{if(!n)return;const k=l+'#'+n;(ARTMAP[k]=ARTMAP[k]||[]).push(p.id);});}));
+function artOf(l,a){const L=LAWBYKEY[l];if(!L||a==null)return null;return L.byN[parseInt(west(String(a)).split('/')[0])]||null;}
+function artHits(){const ts=terms(F.q);if(!ts.length||F.col||F.tp||F.ch||F.rv||F.sec)return [];const o=[];
+  LAWS.forEach(L=>{if(F.lw&&F.lw!==L.key)return;L.articles.forEach(a=>{if(ts.every(t=>a.ns.includes(t)))o.push([L,a]);});});return o;}
+const artPR=a=>(ARTMAP[a.law.key+'#'+a.n]||[]).map(i=>BYID[i]).filter(Boolean);
+const lawTitle=L=>`${L.type} رقم ${L.number} لسنة ${L.year}`;
+function artQuote(a){const L=a.law;return `المادة (${a.n}) من ${L.title}:\n${a.paras.join('\n')}\n— ${L.text_version}.`;}
+function lawPagesHTML(a){const L=a.law,M=L.page_meta,gp=M.gp||20,gc=gp/10;
+  return a.pages.map(g=>{const reg=(a.rg||[]).find(r=>r.page===g);
+    const box=reg?`<div class="hlbox" style="left:${(reg.bbox[0]-6)/M.pw*100}%;top:${(reg.bbox[1]-4)/M.ph*100}%;width:${(reg.bbox[2]-reg.bbox[0]+12)/M.pw*100}%;height:${(reg.bbox[3]-reg.bbox[1]+8)/M.ph*100}%"></div>`:'';
+    const b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
+    return `<figure class="pg"><div class="pgimg" role="img" aria-label="صورة الصفحة ${g}" style="aspect-ratio:${M.cell[0]}/${M.cell[1]};background-image:url(pages/${L.pages_col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>الصفحة ${g} من ملف المصدر</figcaption></figure>`;}).join('');}
+function viewLaws(){const el=$('v-laws');document.title='التشريعات — مبادئ التمييز';
+  el.innerHTML=`<div class="vh"><h2>التشريعات</h2></div><p class="muted">نصوص القوانين مادةً مادة، وكل مادة موصولة بمبادئ التمييز التي تذكرها. تُضاف القوانين تباعًا، ويُذكر مع كل قانون مصدر نصه وأيّ نسخة هو.</p>
+   <div class="grid g3">${LAWS.map(L=>`<button class="tile card lawtile" data-go="#/law/${L.id}"><span class="ic">${svg('scroll')}</span><b>${esc(L.short)}</b><small>${esc(lawTitle(L))} · ${L.articles.length} مادة · ${nf(lcount[L.key]||0)} مبدأ</small><small class="ver">${esc(L.text_version)}</small></button>`).join('')||'<div class="empty">لا توجد تشريعات بعد.</div>'}</div>
+   <div class="card note"><b>قيد المرحلة الحالية</b><p class="muted" style="margin:.3em 0 0">القوانين غير المتاحة نصًّا تبقى متاحة من الفهرس ← القوانين، بعدد مبادئها وموادها المذكورة.</p></div>`;}
+function viewLaw(id){const el=$('v-item'),L=LAWS.find(x=>x.id===id);if(!L){el.innerHTML='<div class="empty">القانون غير موجود.</div>';return;}
+  document.title=L.short+' — مبادئ التمييز';
+  const row=a=>{const n=(ARTMAP[L.key+'#'+a.n]||[]).length,t=a.paras.join(' ');return `<button class="arow" data-go="#/a/${a.id}"><b>${esc(a.label)}${n?`<span class="n" title="مبادئ تذكر المادة">${n}</span>`:''}</b><span>${esc(t.slice(0,160))}${t.length>160?'…':''}</span></button>`;};
+  const sec=(t,from,to,h)=>`<details class="lsec"${h?' open':''}><summary>${esc(t)}<small>المواد ${from}–${to}</small></summary><div class="rows">${L.articles.filter(a=>a.n>=from&&a.n<=to).map(row).join('')}</div></details>`;
+  const toc=L.toc.map(b=>b.children&&b.children.length?`<details class="lsec"><summary>${esc(b.head+' — '+b.title)}<small>المواد ${b.from}–${b.to}</small></summary>${b.children.map(c=>sec(c.head+' — '+c.title,c.from,c.to)).join('')}</details>`:sec(b.head+' — '+b.title,b.from,b.to)).join('');
+  el.innerHTML=`<div class="crumbs no-print"><button data-go="#/laws">التشريعات</button>›<span>${esc(L.short)}</span></div>
+   <div class="vh"><h2>${esc(L.title)}</h2><button class="btn" data-go="#/index/law/${encodeURIComponent(L.key)}">مبادئه (${nf(lcount[L.key]||0)})</button></div>
+   <div class="card rhead"><div class="kv"><span><b>صدر</b>${esc(L.issued.split('-').reverse().join('/'))} (${esc(L.issued_hijri||'')})</span><span><b>المواد</b>${L.articles.length}</span><span><b>الحالة</b>${esc(L.status)}</span></div></div>
+   <div class="verban">${svg('info')}<span><b>النص الأصلي كما صدر سنة ${L.year}، ولا يشمل التعديلات اللاحقة.</b> المصدر: ${esc(L.source.kind)}. ${esc(L.source.note||'')}</span></div>
+   <input class="flt" id="lq" type="search" placeholder="ابحث في مواد هذا القانون أو اكتب رقم مادة…"><div id="lres"></div>
+   <div id="ltoc">${L.preamble&&L.preamble.length?`<details class="lsec"><summary>الديباجة</summary><div class="ltxt">${L.preamble.map(x=>`<p>${esc(x)}</p>`).join('')}</div></details>`:''}${toc}
+   ${L.signature?`<div class="card ltxt sig">${L.signature.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}</div>`;
+  $('lq').oninput=()=>{const v=west($('lq').value).trim();$('ltoc').hidden=!!v;if(!v){$('lres').innerHTML='';return;}
+    let hits;if(/^\d+$/.test(v))hits=L.articles.filter(a=>String(a.n).startsWith(v));else{const ts=terms(v);hits=L.articles.filter(a=>ts.every(t=>a.ns.includes(t)));}
+    $('lres').innerHTML=hits.length?`<p class="muted">${hits.length} مادة</p><div class="rows">${hits.slice(0,60).map(row).join('')}</div>`:'<div class="empty">لا نتائج.</div>';};}
+function viewArt(id){const el=$('v-item'),a=ARTBYID[id];if(!a){el.innerHTML='<div class="empty">المادة غير موجودة.</div>';return;}
+  const L=a.law,pv=L.articles[a.i-1],nx=L.articles[a.i+1],ps=artPR(a);document.title=`${a.label} — ${L.short}`;
+  el.innerHTML=`<div class="crumbs no-print"><button data-go="#/laws">التشريعات</button>›<button data-go="#/law/${L.id}">${esc(L.short)}</button>›<span>${esc(a.part||'')}${a.chapter?' › '+esc(a.chapter):''}</span></div>
+   <div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>${esc(a.label)} — ${esc(lawTitle(L))}</h2><button class="btn" data-print>${svg('print')}طباعة</button></div>
+   <article class="card artcard"><div class="ltxt">${a.paras.map(x=>`<p>${esc(x)}</p>`).join('')}</div>
+    <div class="verban small">${svg('info')}<span>النص الأصلي كما صدر سنة ${L.year}، ولا يشمل التعديلات اللاحقة.</span></div>
+    <div class="acts no-print"><button class="btn" id="acp">${svg('copy')}نسخ</button><button class="btn" id="ash">${svg('share')}مشاركة</button><button class="btn" id="alk">${svg('link')}الرابط</button></div></article>
+   <div class="card inline-src"><h3 style="margin-top:0">صفحة المصدر</h3>${lawPagesHTML(a)}</div>
+   <div class="pn no-print">${pv?`<button class="btn" data-go="#/a/${pv.id}">${svg('back')}<span>${esc(pv.label)}</span></button>`:'<span></span>'}${nx?`<button class="btn" data-go="#/a/${nx.id}"><span>${esc(nx.label)}</span><svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)"><path d="${IC.back}"/></svg></button>`:''}</div>
+   <h2>مبادئ تذكر هذه المادة (${ps.length})</h2>${ps.length?`<div class="list">${ps.slice(0,40).map(p=>card(p,null)).join('')}</div>${ps.length>40?`<button class="btn" data-f2="1">عرض الكل (${ps.length})</button>`:''}`:'<p class="muted">لا توجد في المكتبة مبادئ تحيل إلى هذه المادة بعد.</p>'}`;
+  const url=location.href.split('#')[0]+'#/a/'+a.id;
+  $('acp').onclick=()=>clip(artQuote(a),()=>toast('نُسخ نص المادة'));
+  $('alk').onclick=()=>clip(url,()=>toast('نُسخ الرابط'));
+  $('ash').onclick=()=>shareAny(`${a.label} — ${L.title}`,artQuote(a),url,'مشاركة المادة','يُرسل نص المادة مع رابطها في المكتبة.');
+  const f2=el.querySelector('[data-f2]');if(f2)f2.onclick=()=>{Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:L.key,art:String(a.n),rv:false,sec:''});go('#/search');};}
 // ---------- views scaffold
 const main=$('main');
-const SNAV=[['home','home','الرئيسية','مبدأ اليوم وما فتحته مؤخرًا'],['search','search','البحث',`في ${nf(PR.length)} مبدأً`],['index','book','الفهرس','الموضوعات والقوانين والكتب'],['saved','star','المحفوظات','مجلداتك وملاحظاتك'],['report','report','التقارير','طريقة الاستخراج والتحقق'],['about','info','عن المكتبة','المصادر وقواعد النزاهة']];
+const SNAV=[['home','home','الرئيسية','مبدأ اليوم وما فتحته مؤخرًا'],['search','search','البحث',`في ${nf(PR.length)} مبدأً`],['index','book','الفهرس','الموضوعات والقوانين والكتب'],['saved','star','المحفوظات','مجلداتك وملاحظاتك'],['report','report','التقارير','طريقة الاستخراج والتحقق'],['laws','scroll','التشريعات','نصوص القوانين مادةً مادة'],['about','info','عن المكتبة','المصادر وقواعد النزاهة']];
 IC.home='M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z';
 main.innerHTML=`<div class="shell"><aside class="sidenav" aria-label="الأقسام">${SNAV.map(([k,i,t,d])=>`<button class="navcard" data-nav="${k}"><span class="ic">${svg(i)}</span><span><b>${t}</b><small>${d}</small></span></button>`).join('')}
  <button class="navcard" data-a2="settings"><span class="ic">${svg('gear')}</span><span><b>الإعدادات</b><small>الخط والمظهر والقفل</small></span></button>
  ${FB.url?`<button class="navcard" data-a2="rate"><span class="ic">${svg('star')}</span><span><b>قيّم التطبيق</b><small>رأيك يصلنا مباشرة</small></span></button>`:''}</aside>
- <div class="views">${['home','search','index','saved','more','item','report','about'].map(v=>`<section id="v-${v}" hidden></section>`).join('')}</div></div>`;
+ <div class="views">${['home','search','index','saved','more','item','report','about','laws'].map(v=>`<section id="v-${v}" hidden></section>`).join('')}</div></div>`;
 // ---------- search engine
 const F={q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:''};
 function terms(q){const o=[];west(q).replace(/"([^"]+)"|«([^»]+)»|(\S+)/g,(m,a,b,c)=>{const t=norm(a||b||c);if(t)o.push(t)});return o;}
@@ -137,7 +189,7 @@ function card(p,re,o={}){
   if(open)h.push('</ul>');if(!p.c.length)h.push('<ul class="cits"><li>لا يوجد إسناد في المصدر</li></ul>');
   const rel=(p.rel||[]).map(id=>BYID[id]?`<button class="chip" data-go="#/p/${id}">${esc(COLS[BYID[id].col].name)} ${BYID[id].n}</button>`:'').join('');
   const tps=p.tp.filter(x=>TL[x[0]]).map(([t,m,lo])=>`<button class="chip${m==='a'?' auto':''}${lo?' low':''}" data-f="tp" data-v="${esc(t)}" title="${esc(TL[t][0])} — ${MT[m]||''}">${esc(TL[t][1])}</button>`).join('');
-  const lws=p.lw.map(([l,as,su])=>`<button class="chip lw${su?' sus':''}" data-f="lw" data-v="${esc(l)}" title="${esc(LL[l]||l)}">${as.length?'م '+esc(as.slice(0,3).join('، '))+(as.length>3?'…':'')+' · ':''}${l==='دستور'?'الدستور':'ق '+esc(l)}</button>`).join('');
+  const lws=p.lw.map(([l,as,su])=>`<button class="chip lw${su?' sus':''}${LAWBYKEY[l]?' full':''}" ${LAWBYKEY[l]?(artOf(l,as[0])?`data-go="#/a/${artOf(l,as[0]).id}"`:`data-go="#/law/${LAWBYKEY[l].id}"`):`data-f="lw" data-v="${esc(l)}"`} title="${esc(LL[l]||l)}${LAWBYKEY[l]?' — افتح نص المادة':''}">${as.length?'م '+esc(as.slice(0,3).join('، '))+(as.length>3?'…':'')+' · ':''}${l==='دستور'?'الدستور':'ق '+esc(l)}</button>`).join('');
   const fav=!!FAV[p.id],note=NOTE[p.id];
   return `<article class="pr card" id="p${p.id}" data-id="${p.id}">
    <div class="num">${p.n}${p.np!==p.n?`<small>طُبع ${p.np}</small>`:''}<div class="idchip">${p.id}</div></div>
@@ -173,17 +225,18 @@ function dlg(title,html,cls=''){closeDlg();const L=$('layer');L.innerHTML=`<div 
 function side(title,html){closeDlg();const L=$('layer');L.innerHTML=`<div class="scrim" data-close></div><aside class="side" role="dialog"><div class="side-h"><b>${esc(title)}</b><button class="btn" data-close>إغلاق</button></div><div class="side-b">${html}</div></aside>`;return L.querySelector('.side-b');}
 function closeDlg(){$('layer').innerHTML='';}
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeDlg();if(e.key==='/'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();go('#/search');setTimeout(()=>$('sq')?.focus(),30);}});
-function shareDlg(p){
-  const text=quoteText(p)+'\n'+plink(p), subj=`${COLS[p.col].name} ${p.n} — مبادئ التمييز`;
-  const d=dlg('مشاركة المبدأ',`<div class="sharegrid">
+function shareDlg(p){shareAny(`${COLS[p.col].name} ${p.n} — مبادئ التمييز`,quoteText(p),plink(p),'مشاركة المبدأ','يُرسل النص حرفيًا مع سطر الإسناد والمصدر ورابط المبدأ.');}
+function shareAny(subj,body,url,title,hint){
+  const text=body+'\n'+url;
+  const d=dlg(title,`<div class="sharegrid">
    <a href="https://wa.me/?text=${encodeURIComponent(text)}" target="_blank" rel="noopener"><span class="ic" style="background:#25d366">${svg('wa')}</span>واتساب</a>
-   <a href="mailto:?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(text)}"><span class="ic" style="background:#1d5aa6">${svg('mail')}</span>البريد</a>
-   ${navigator.share?`<button data-s="native"><span class="ic" style="background:#0b2545">${svg('share')}</span>مشاركة…</button>`:''}
-   <button data-s="link"><span class="ic" style="background:#b8912f">${svg('link')}</span>نسخ الرابط</button>
-  </div><p class="hint" style="margin-top:12px">يُرسل النص حرفيًا مع سطر الإسناد والمصدر ورابط المبدأ.</p>`);
+   <a href="mailto:?subject=${encodeURIComponent(subj)}&body=${encodeURIComponent(text)}"><span class="ic" style="background:#1a4b8c">${svg('mail')}</span>البريد</a>
+   ${navigator.share?`<button data-s="native"><span class="ic" style="background:#0b1f3b">${svg('share')}</span>مشاركة…</button>`:''}
+   <button data-s="link"><span class="ic" style="background:#b8923a">${svg('link')}</span>نسخ الرابط</button>
+  </div><p class="hint" style="margin-top:12px">${hint}</p>`);
   d.addEventListener('click',e=>{const b=e.target.closest('[data-s]');if(!b)return;
-    if(b.dataset.s==='native')navigator.share({title:subj,text:quoteText(p),url:plink(p)}).catch(()=>{});
-    if(b.dataset.s==='link')clip(plink(p),()=>{toast('نُسخ الرابط');closeDlg();});});
+    if(b.dataset.s==='native')navigator.share({title:subj,text:body,url}).catch(()=>{});
+    if(b.dataset.s==='link')clip(url,()=>{toast('نُسخ الرابط');closeDlg();});});
 }
 function favDlg(p){
   const cur=FAV[p.id];
@@ -282,7 +335,7 @@ function runSearch(){shown=30;cur=filterPR();renderList();
   const L={col:v=>COLS[v]?.name,tp:v=>TL[v]?.[1],ch:v=>v,lw:v=>LL[v]||v,art:v=>'المادة '+v,rv:()=>'يحتاج مراجعة',sec:v=>v.split('›').slice(-1)[0]};
   $('actf').innerHTML=Object.keys(L).filter(k=>F[k]).map(k=>`<button class="chip" data-clr="${k}">${esc(L[k](F[k]))}</button>`).join('');
   $('count').textContent=`${nf(cur.length)} من ${nf(PR.length)}`;}
-function renderList(){const re=hlRe(terms(F.q));$('list').innerHTML=cur.length?cur.slice(0,shown).map(p=>card(p,re)).join(''):'<div class="empty">لا توجد نتائج. جرّب كلمة أقصر أو أزل أحد المرشحات.</div>';$('more').hidden=cur.length<=shown;}
+function renderList(){const re=hlRe(terms(F.q));const ah=artHits();$('list').innerHTML=(ah.length?`<div class="arthits card"><h3>${svg('scroll')} في نصوص التشريعات (${ah.length>5?'أول 5 من '+ah.length:ah.length})</h3>${ah.slice(0,5).map(([L,a])=>`<button class="arow" data-go="#/a/${a.id}"><b>${esc(a.label)} · ${esc(L.short)}</b><span>${hl(a.paras.join(' ').slice(0,220),re)}${a.paras.join(' ').length>220?'…':''}</span></button>`).join('')}</div>`:'')+(cur.length?cur.slice(0,shown).map(p=>card(p,re)).join(''):'<div class="empty">لا توجد نتائج. جرّب كلمة أقصر أو أزل أحد المرشحات.</div>');$('more').hidden=cur.length<=shown;}
 function setFilter(k,v){Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:''});F[k]=v;go('#/search');}
 // ---------- INDEX
 let idxTab='topics';
@@ -309,11 +362,12 @@ function famPage(el,f){const ts=TORD.filter(t=>famOf(t)===f),mx=Math.max(...ts.m
 function lawPage(el,l){const as=Object.keys(acount).filter(k=>k.startsWith(l+'|')).map(k=>k.slice(l.length+1)).sort((a,b)=>(parseInt(a)||1e9)-(parseInt(b)||1e9)||a.localeCompare(b));
   const cs=as.map(a=>acount[l+'|'+a]).sort((a,b)=>a-b),q=i=>cs[Math.floor(cs.length*i)]||1;
   el.innerHTML=`<div class="crumbs"><button data-go="#/index/laws">القوانين</button>›<span>${esc(l)}</span></div><div class="vh"><h2>${esc(LL[l]||l)}</h2><button class="btn primary" data-f="lw" data-v="${esc(l)}">كل المبادئ (${nf(lcount[l])})</button></div>
+   ${LAWBYKEY[l]?`<button class="lawbanner card" data-go="#/law/${LAWBYKEY[l].id}">${svg('scroll')}<span><b>النص الكامل لهذا القانون متاح</b><small>${LAWBYKEY[l].articles.length} مادة، وكل مادة مع مبادئها</small></span></button>`:''}
    ${as.length?`<p class="muted">المواد التي تذكرها المبادئ. كلما اشتد اللون كثرت المبادئ.</p><input class="flt" id="aflt" inputmode="numeric" placeholder="رقم المادة…" style="max-width:200px"><div class="arts" id="arts"></div>`:'<p class="muted">لم تُذكر مواد محددة من هذا القانون.</p>'}`;
   if(!as.length)return;
   const draw=v=>$('arts').innerHTML=as.filter(a=>!v||a.startsWith(v)).map(a=>{const n=acount[l+'|'+a];return `<button data-art="${esc(a)}" class="${n>=q(.9)?'h3':n>=q(.7)?'h2':n>=q(.4)?'h1':''}"><b>${esc(a)}</b><small>${n}</small></button>`}).join('');
   draw('');$('aflt').oninput=()=>draw(west($('aflt').value).trim());
-  $('arts').onclick=e=>{const b=e.target.closest('[data-art]');if(!b)return;Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:l,art:b.dataset.art,rv:false,sec:''});go('#/search');};}
+  $('arts').onclick=e=>{const b=e.target.closest('[data-art]');if(!b)return;const A=artOf(l,b.dataset.art);if(A){go('#/a/'+A.id);return;}Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:l,art:b.dataset.art,rv:false,sec:''});go('#/search');};}
 function bookPage(el,c){const C=COLS[c];if(!C){el.innerHTML='<div class="empty">غير موجود.</div>';return;}
   const root={k:{},n:0};PR.forEach(p=>{if(p.col!==c)return;let node=root;node.n++;p.sec.forEach(s=>{node.k[s]=node.k[s]||{k:{},n:0};node=node.k[s];node.n++;});});
   const tree=(node,path,d)=>Object.entries(node.k).map(([s,ch])=>{const pth=path?path+'›'+s:s;const kids=Object.keys(ch.k).length;
@@ -364,6 +418,7 @@ function printSaved(){const favs=Object.entries(FAV).filter(([id,v])=>BYID[id]&&
 function viewMore(){$('v-more').innerHTML=`<h2>المزيد</h2><div class="grid g3">
   <button class="tile" data-a2="settings"><span class="ic">${svg('gear')}</span><b>الإعدادات</b><span class="n">الخط والحجم والمظهر، واسمك وصورتك، والقفل</span></button>
   <button class="tile" data-go="#/index/topics"><span class="ic">${svg('book')}</span><b>الفهرس</b><span class="n">الموضوعات والقوانين والكتب</span></button>
+  <button class="tile" data-go="#/laws"><span class="ic">${svg('scroll')}</span><b>التشريعات</b><span class="n">نصوص القوانين مادةً مادة، وكل مادة مع مبادئها</span></button>
   <button class="tile" data-go="#/report"><span class="ic">${svg('report')}</span><b>تقارير الاستخراج</b><span class="n">طريقة العمل والفحوص وما يحتاج مراجعة</span></button>
   <button class="tile" data-go="#/about"><span class="ic">${svg('info')}</span><b>عن المكتبة</b><span class="n">المصادر وقواعد النزاهة والروابط</span></button>
   <button class="tile" data-a2="offline"><span class="ic">${svg('download')}</span><b>العمل دون اتصال</b><span class="n">نزّل المكتبة كاملة مع صور الصفحات</span></button>
@@ -463,8 +518,8 @@ function rateDlg(){
     try{await fbSend(rec);closeDlg();toast('وصل تقييمك، شكرًا لك');}catch(_){const q=LS.get('fbq',[]);q.push(rec);LS.set('fbq',q);closeDlg();toast('حُفظ تقييمك، وسيُرسل لاحقًا');}};
 }
 // ---------- router
-const NAVMAP={home:'#/',search:'#/search',index:'#/index/topics',saved:'#/saved',more:'#/more',report:'#/report',about:'#/about'};
-function show(v,nav){['home','search','index','saved','more','item','report','about'].forEach(x=>$('v-'+x).hidden=x!==v);
+const NAVMAP={laws:'#/laws',home:'#/',search:'#/search',index:'#/index/topics',saved:'#/saved',more:'#/more',report:'#/report',about:'#/about'};
+function show(v,nav){['home','search','index','saved','more','item','report','about','laws'].forEach(x=>$('v-'+x).hidden=x!==v);
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',b.dataset.nav===nav));}
 function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));closeDlg();if(speakingId){speechSynthesis.cancel();speakingId=null;}
   document.title='مبادئ التمييز';
@@ -476,6 +531,9 @@ function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,
   else if(h==='more'){viewMore();show('more','more');}
   else if(h==='report'){viewReport();show('report',innerWidth>=1000?'report':'more');}
   else if(h==='about'){viewAbout();show('about',innerWidth>=1000?'about':'more');}
+  else if(h==='laws'){viewLaws();show('laws',innerWidth>=1000?'laws':'more');}
+  else if(h.startsWith('law/')){viewLaw(h.slice(4));show('item',innerWidth>=1000?'laws':'more');}
+  else if(h.startsWith('a/')){viewArt(h.slice(2));show('item',innerWidth>=1000?'laws':'more');}
   else{viewHome();show('home','home');}
   window.scrollTo({top:0});}
 let navs=0;window.addEventListener('hashchange',()=>{navs++;route();});
