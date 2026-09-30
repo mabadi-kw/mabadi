@@ -139,11 +139,14 @@ const LOADMSG='<div class="empty">جارٍ تحميل النص…</div>';
 function viewLaws(){const el=$('v-laws');document.title='التشريعات — مبادئ التمييز';
   const L=[...LAWIX].sort((a,b)=>(lcount[b.key]||0)-(lcount[a.key]||0));
   el.innerHTML=`<div class="vh"><h2>التشريعات</h2><span class="muted">${nf(LAWIX.length)} تشريعًا</span></div><p class="muted">نصوص القوانين مادةً مادة، وكل مادة موصولة بمبادئ التمييز التي تذكرها وبصورة صفحتها في المصدر. يُذكر مع كل قانون مصدر نصه وتاريخ النسخة.</p>
-   <input class="flt" id="lwf" type="search" placeholder="ابحث باسم القانون أو رقمه…"><div class="grid g3" id="lwg"></div>
+   <input class="flt" id="lwf" type="search" placeholder="ابحث باسم القانون أو رقمه…"><div class="quick" id="lwc"></div><div class="grid g3" id="lwg"></div>
    <div class="card note"><b>عن النسخ</b><p class="muted" style="margin:.3em 0 0">أغلب النصوص من «مجموعة التشريعات الكويتية» الصادرة عن وزارة العدل (الطبعة الأولى، فبراير 2011)، وتشمل التعديلات حتى تاريخها كما تذكرها حواشي الطبعة. ما صدر بعد ذلك لا يظهر في النص، فارجع إلى الجريدة الرسمية قبل الاعتماد عليه.</p></div>`;
   const tile=x=>`<button class="tile card lawtile" data-go="#/law/${x.id}"><span class="ic">${svg('scroll')}</span><b>${esc(x.short)}</b><small>${esc(lawTitle(x))} · ${nf(x.articles)} مادة${lcount[x.key]?` · ${nf(lcount[x.key])} مبدأ`:''}${x.memo?' · مع المذكرة':''}</small><small class="ver">${esc(x.ver||x.text_version)}</small></button>`;
-  const draw=q=>$('lwg').innerHTML=L.filter(x=>!q||norm(x.short+' '+x.title+' '+x.key).includes(q)||west(x.key).includes(q)).map(tile).join('')||'<div class="empty">لا نتائج.</div>';
-  draw('');$('lwf').oninput=()=>draw(norm(west($('lwf').value).trim()));}
+  const G=[...new Set(L.map(x=>x.group).filter(Boolean))];let g='';
+  const draw=q=>$('lwg').innerHTML=L.filter(x=>(!g||x.group===g)&&(!q||norm(x.short+' '+x.title+' '+x.key).includes(q)||west(x.key).includes(q))).map(tile).join('')||'<div class="empty">لا نتائج.</div>';
+  const chips=()=>$('lwc').innerHTML=[['','الكل'],...G.map(x=>[x,x])].map(([k,t])=>`<button class="chip${g===k?' on':''}" data-lg="${esc(k)}">${esc(t)}</button>`).join('');
+  chips();draw('');$('lwf').oninput=()=>draw(norm(west($('lwf').value).trim()));
+  $('lwc').onclick=e=>{const b=e.target.closest('[data-lg]');if(!b)return;g=b.dataset.lg;chips();draw(norm(west($('lwf').value).trim()));};}
 function lawTree(L){const tree=[],st=[];(L.toc||[]).filter(t=>t.i0>=0).forEach(t0=>{const t={...t0,kids:[]};while(st.length&&st[st.length-1].level>=t.level)st.pop();(st.length?st[st.length-1].kids:tree).push(t);st.push(t);});return tree;}
 function viewLaw(id){const el=$('v-item');el.innerHTML=LOADMSG;
   loadLaw(id).then(L=>{
@@ -163,7 +166,9 @@ function viewLaw(id){const el=$('v-item');el.innerHTML=LOADMSG;
    <input class="flt" id="lq" type="search" placeholder="ابحث في مواد هذا القانون أو اكتب رقم مادة…"><div id="lres"></div>
    <div id="ltoc">${L.preamble&&L.preamble.length?`<details class="lsec"><summary>${iss.length?'مرسوم الإصدار ومواده':'الديباجة'}</summary><div class="ltxt">${(L.title_lines||[]).map(x=>`<p class="tl">${esc(x)}</p>`).join('')}${L.preamble.map(x=>`<p>${esc(x)}</p>`).join('')}</div>${iss.length?`<div class="rows">${iss.map(row).join('')}</div>`:''}${L.signature&&L.signature.length?`<div class="ltxt sig">${L.signature.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}</details>`:''}
    ${body}
+   ${L.annex&&L.annex.length?`<details class="lsec"><summary>الجداول والملاحق<small>نص مستخرج؛ للتنسيق انظر صورة الصفحة</small></summary><div class="ltxt annex">${L.annex.map(x=>`<p>${esc(x.t)} <button class="pgref" data-lpg="${x.pg}">${esc((L.page_meta.printed&&L.page_meta.printed[x.pg-1])||x.pg)}</button></p>`).join('')}</div></details>`:''}
    ${!iss.length&&L.signature&&L.signature.length?`<div class="card ltxt sig">${L.signature.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}</div>`;
+  el.onclick=e=>{const b=e.target.closest('[data-lpg]');if(!b)return;const g=+b.dataset.lpg;side(pgCaption(L.page_meta,g),lawPageHTML(L.pages_col,L.page_meta,g,null));};
   $('lq').oninput=()=>{const v=west($('lq').value).trim();$('ltoc').hidden=!!v;if(!v){$('lres').innerHTML='';return;}
     let hits;if(/^\d+$/.test(v))hits=A.filter(a=>!a.issue&&String(a.n).startsWith(v));else{const ts=terms(v);hits=A.filter(a=>ts.every(t=>a.ns.includes(t)));}
     $('lres').innerHTML=hits.length?`<p class="muted">${hits.length} مادة</p><div class="rows">${hits.slice(0,80).map(row).join('')}</div>`:'<div class="empty">لا نتائج.</div>';};

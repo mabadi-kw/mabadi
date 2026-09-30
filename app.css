@@ -335,3 +335,10 @@ svg.weave{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .mh{font-family:var(--f-ui);font-size:1.02rem;margin:1.2em 0 .5em;color:var(--navy2)}
 [data-theme=dark] .mh{color:var(--gold)}
 .pgref{border:1px solid var(--rule);background:var(--bg2);color:var(--muted);border-radius:8px;font:inherit;font-size:.7rem;padding:0 6px;cursor:pointer;vertical-align:middle}
+.chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+[data-theme=dark] .chip.on{background:var(--gold);color:#10213b}
+.annex p{margin:0 0 .35em;font-size:.92em}
+#lwc{margin:8px 0 12px}
+#lwc .chip{background:var(--sheet);color:var(--ink);border:1px solid var(--rule)}
+#lwc .chip.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+[data-theme=dark] #lwc .chip.on{background:var(--gold);color:#10213b}
