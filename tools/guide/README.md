@@ -15,7 +15,7 @@ npx playwright install chromium
 |---|---|
 | `npm run guide` | يلتقط الصور (حاسوب 1280×800 وآيفون 390×844)، ويبني `docs/guide.pdf`، ويتحقق أن جدول `GUIDE` في `app.js` مطابق لصفحات الفصول، وينبّه إن اختلفا |
 | `npm run guide:fix` | مثل السابق، ويحدّث جدول `GUIDE` في `app.js` تلقائيًا |
-| `npm run video` | يسجّل الفيديو التعريفي إلى `docs/intro.mp4` وصورة الغلاف `docs/intro.jpg` |
+| `npm run video` | يسجّل الفيديو التعريفي إلى `docs/intro.mp4` وصورة الغلاف `docs/intro.jpg` (يحتاج `ffmpeg`) |
 | `npm run test` | يتحقق أن روابط «الدليل» في كل قسم تفتح الصفحة الصحيحة، وأن الدليل والفيديو موجودان |
 
 خيار `--no-shots` مع `node build-guide.mjs` يعيد بناء PDF من الصور الملتقطة سابقًا دون التقاط جديد.
