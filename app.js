@@ -55,6 +55,7 @@ function applyLook(){
   if(S.theme==='auto')delete r.dataset.theme;else r.dataset.theme=S.theme;
   document.querySelector('meta[name=theme-color]').content='#0b2545';
   const ini=(S.name||'').trim().charAt(0)||'';
+  if($('hback')&&!$('hback').firstChild)$('hback').innerHTML=svg('back');
   $('meav').innerHTML=S.photo?`<img src="${S.photo}" alt="">`:(ini?esc(ini):svg('gear'));
   $('mename').textContent=S.name||'الإعدادات';
 }
@@ -451,17 +452,17 @@ function listen(target,btn){const r=new SR();r.lang='ar-KW';r.interimResults=fal
 // ---------- SEARCH
 function buildSearch(){
   const el=$('v-search');
-  el.innerHTML=`<div class="searchbar"><form class="sbox" id="ssf">${svg('search')}<input id="sq" type="search" placeholder="ابحث في نص المبدأ أو الإسناد: مكافأة نهاية الخدمة، 423/2003، «الفصل التعسفي»" autocomplete="off" enterkeyhint="search">${micBtn('sq')}<button class="btn" type="button" id="ftog">${svg('filter')}تصفية</button></form>
+  el.innerHTML=`<div class="searchbar"><form class="sbox" id="ssf">${svg('search')}<input id="sq" type="search" placeholder="ابحث في نص المبدأ أو الإسناد: مكافأة نهاية الخدمة، 423/2003، «الفصل التعسفي»" autocomplete="off" enterkeyhint="search">${micBtn('sq')}<button class="btn" type="button" id="ftog">${svg('filter')}تصفية</button></form></div>
    <div class="card filters" id="fbox" hidden>
     <label>المجموعة<select id="fcol"><option value="">الكل</option>${ORDER.map(k=>`<option value="${k}">${esc(COLS[k].name)} (${nf(COLS[k].n)})</option>`).join('')}</select></label>
-    <label>الموضوع<select id="ftp"><option value="">الكل</option>${FAMS.map(f=>`<optgroup label="${esc(f)}">${TORD.filter(t=>famOf(t)===f).map(t=>`<option value="${esc(t)}">${esc(TL[t][1])} (${tcount[t]})</option>`).join('')}</optgroup>`).join('')}</select></label>
-    <label>الدائرة<select id="fch"><option value="">الكل</option>${CHS.map(s=>`<option>${esc(s)}</option>`).join('')}</select></label>
-    <label>القانون<select id="flw"><option value="">الكل</option>${LORD.map(l=>`<option value="${esc(l)}">${esc(LL[l]||l)} (${lcount[l]})</option>`).join('')}</select></label>
+    <label>الموضوع<input class="fsrch" type="search" data-for="ftp" placeholder="ابحث في الموضوعات…" autocomplete="off" enterkeyhint="done"><select id="ftp"><option value="">الكل</option>${FAMS.map(f=>`<optgroup label="${esc(f)}">${TORD.filter(t=>famOf(t)===f).map(t=>`<option value="${esc(t)}">${esc(TL[t][1])} (${tcount[t]})</option>`).join('')}</optgroup>`).join('')}</select></label>
+    <label>الدائرة<input class="fsrch" type="search" data-for="fch" placeholder="ابحث في الدوائر…" autocomplete="off" enterkeyhint="done"><select id="fch"><option value="">الكل</option>${CHS.map(s=>`<option>${esc(s)}</option>`).join('')}</select></label>
+    <label>القانون<input class="fsrch" type="search" data-for="flw" placeholder="ابحث باسم القانون أو رقمه…" autocomplete="off" enterkeyhint="done"><select id="flw"><option value="">الكل</option>${LORD.map(l=>`<option value="${esc(l)}">${esc(LL[l]||l)} (${lcount[l]})</option>`).join('')}</select></label>
     <label>المادة<input id="fart" inputmode="numeric" placeholder="مثل 51" autocomplete="off"></label>
     <label class="ck"><input id="frv" type="checkbox"> يحتاج مراجعة فقط</label>
    </div>
    <div class="bar2"><div class="active-f" id="actf"></div><span class="count" id="count"></span></div>
-   <div class="hint">البحث يتجاهل التشكيل والهمزات والتاء المربوطة. ضع العبارة بين علامتي تنصيص للبحث عنها متصلة. اضغط «/» للبحث من أي مكان.</div></div>
+   <div class="hint">البحث يتجاهل التشكيل والهمزات والتاء المربوطة. ضع العبارة بين علامتي تنصيص للبحث عنها متصلة. اضغط «/» للبحث من أي مكان.</div>
    <div class="list" id="list"></div><div class="more"><button class="btn" id="more" hidden>عرض المزيد</button></div>`;
   let t;$('sq').addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>{F.q=$('sq').value;runSearch()},150)});
   $('ssf').onsubmit=e=>{e.preventDefault();const q=$('sq').value.trim();if(q){QH=[q,...QH.filter(x=>x!==q)].slice(0,8);LS.set('qhist',QH);}$('sq').blur();};
@@ -469,9 +470,18 @@ function buildSearch(){
   [['fcol','col'],['ftp','tp'],['fch','ch'],['flw','lw']].forEach(([i,k])=>$(i).onchange=()=>{F[k]=$(i).value;runSearch()});
   $('fart').oninput=()=>{clearTimeout(t);t=setTimeout(()=>{F.art=$('fart').value;runSearch()},200)};
   $('frv').onchange=()=>{F.rv=$('frv').checked;runSearch()};
+  el.querySelectorAll('.fsrch').forEach(selFilter);
   $('more').onclick=()=>{shown+=30;renderList()};
 }
-function syncInputs(){$('sq').value=F.q;$('fcol').value=F.col;$('ftp').value=F.tp;$('fch').value=F.ch;$('flw').value=F.lw;$('fart').value=F.art;$('frv').checked=F.rv;}
+// صندوق بحث فوق القائمة المنسدلة: يُبقي الخيارات المطابقة فقط (يتجاهل التشكيل والهمزات)، ويحفظ الاختيار الحالي
+const FSORIG={};
+function selFilter(inp){const sel=$(inp.dataset.for);FSORIG[sel.id]=sel.innerHTML;
+  inp.addEventListener('input',()=>{const q=norm(inp.value.trim()),cur=sel.value;sel.innerHTML=FSORIG[sel.id];if(!q)return;
+    sel.querySelectorAll('option').forEach(o=>{if(o.value===''||o.value===cur)return;if(!norm(o.textContent).includes(q)&&!norm(o.value).includes(q))o.remove();});
+    sel.querySelectorAll('optgroup').forEach(g=>{if(!g.querySelector('option'))g.remove();});sel.value=cur;
+    const n=sel.querySelectorAll('option').length-1;inp.setAttribute('aria-label',`${n} نتيجة`);});}
+function fsReset(){document.querySelectorAll('.fsrch').forEach(i=>{if(i.value){i.value='';const sel=$(i.dataset.for);sel.innerHTML=FSORIG[sel.id];}});}
+function syncInputs(){fsReset();$('sq').value=F.q;$('fcol').value=F.col;$('ftp').value=F.tp;$('fch').value=F.ch;$('flw').value=F.lw;$('fart').value=F.art;$('frv').checked=F.rv;}
 function runSearch(){shown=30;cur=filterPR();renderList();
   const L={col:v=>COLS[v]?.name,tp:v=>TL[v]?.[1],ch:v=>v,lw:v=>LL[v]||v,art:v=>'المادة '+v,rv:()=>'يحتاج مراجعة',sec:v=>v.split('›').slice(-1)[0]};
   $('actf').innerHTML=Object.keys(L).filter(k=>F[k]).map(k=>`<button class="chip" data-clr="${k}">${esc(L[k](F[k]))}</button>`).join('');
@@ -606,13 +616,14 @@ function settingsDlg(toSync){
     <div class="rowi"><span>السرعة</span><input type="range" id="vrate" min=".7" max="1.4" step=".05" value="${S.rate||1}"><b id="vratev" dir="ltr">${S.rate||1}×</b><button class="btn" id="vtest">${svg('speak')}تجربة</button></div>
     <span class="hint">جودة الصوت من أصوات جهازك. الأصوات المعلَّمة ☁ يقرؤها المتصفح عبر الإنترنت، والبقية تعمل في الجهاز. لصوت أوضح: على الآيفون الإعدادات ← تسهيلات الاستخدام ← المحتوى المنطوق ← الأصوات ← العربية ← نزّل «ماجد (محسّن)». وعلى ويندوز: الإعدادات ← الوقت واللغة ← الكلام ← أضف صوتًا عربيًا.</span>
     <span class="hint" id="vnone" hidden>لا يوجد صوت عربي في هذا الجهاز بعد؛ أضفه من إعدادات النظام كما في الأعلى.</span>`:'<span class="hint">الاستماع غير متاح في هذا المتصفح.</span>'}</section>
-   <section><h4>الدليل والفيديو</h4><div id="gvid"></div><div class="rowi"><a class="btn primary" href="${GUIDE_PDF}" target="_blank" rel="noopener">${svg('open')}عرض الدليل</a><span class="hint">دليل مصوّر بفصل لكل قسم. وفي أعلى كل قسم رابط «الدليل» يفتح فصله مباشرة.</span></div></section>
+   <section><h4>الدليل والفيديو</h4><div id="gvid"></div><div class="rowi"><button class="btn primary" id="gopen">${svg('open')}عرض الدليل</button><a class="btn" href="${GUIDE_PDF}" download="دليل-مبادئ-التمييز.pdf">${svg('download')}PDF</a><span class="hint">دليل مصوّر بفصل لكل قسم. وفي أعلى كل قسم رابط «الدليل» يفتح فصله مباشرة.</span></div></section>
    <section><h4>رأيك</h4><div class="rowi"><button class="btn primary" data-a2="rate">${svg('star')}ملاحظاتك واقتراحاتك</button><span class="hint">تقييم لكل قسم، يُحفظ في جهازك وترسله أنت.</span></div></section>
    <section id="syncsec"><h4>المزامنة بين أجهزتك</h4><div id="syncbox"></div></section>
    <section><h4>بياناتي</h4><div class="rowi"><button class="btn" id="bk">${svg('download')}نسخة احتياطية</button><label class="btn" style="cursor:pointer">استعادة<input type="file" accept="application/json" id="rs" hidden></label></div>
     <span class="hint">نسخة غير مشفّرة: المحفوظات والمجلدات والملاحظات والإعدادات والسجل في ملف واحد، للاحتفاظ به أو نقله يدويًا.</span></section></div>`);
   ttsVoiceUI();if($('vsel')){$('vsel').onchange=()=>{S.voice=$('vsel').value;upd();};$('vrate').oninput=()=>{S.rate=+$('vrate').value;$('vratev').textContent=S.rate+'×';upd();};
    $('vtest').onclick=()=>ttsSpeak('test','تجربة الصوت','المادة 41 من القانون رقم 6/2010: يستحق العامل مكافأة نهاية الخدمة. (الطعن 730/2012 عمالي جلسة 21/1/2014)',null);}
+  $('gopen').onclick=()=>{closeDlg();openGuide('');};
   syncUI();if(toSync===true)setTimeout(()=>{const x=$('syncsec');if(x)x.scrollIntoView({block:'start'});},60);
   fetch('docs/intro.jpg',{method:'HEAD'}).then(r=>{if(!r.ok||!$('gvid'))return;$('gvid').innerHTML=`<button class="vposter" id="gvp" aria-label="تشغيل الفيديو التعريفي"><img src="docs/intro.jpg" alt=""><span class="play">${svg('open')}تشغيل الفيديو التعريفي</span></button>`;
     $('gvp').onclick=()=>{$('gvid').innerHTML='<video src="docs/intro.mp4" controls autoplay playsinline preload="none" poster="docs/intro.jpg" style="width:100%;border-radius:12px"></video>';};}).catch(()=>{});
@@ -725,13 +736,23 @@ function installDlg(){if(deferredInstall){deferredInstall.prompt();deferredInsta
 // ---------- التقييم والملاحظات (نموذج Google خاص بصاحب المكتبة)
 // ---------- guide: جدول القسم ← صفحة الدليل (يتحقق منه ويحدّثه tools/guide/build-guide.mjs)
 const GUIDE={home:3,search:4,filters:5,item:6,source:8,ruling:9,index:10,laws:12,saved:14,offline:15,settings:16,feedback:18,about:19};
-const GUIDE_PDF='docs/guide.pdf';
+const GUIDE_PDF='docs/guide.pdf',GUIDE_WEB='docs/guide/index.html';
+// الدليل داخل التطبيق: طبقة بشريط علوي فيه «إغلاق» وتنزيل PDF، فلا يُحبس المستخدم في ملف PDF داخل التطبيق المثبّت
+function openGuide(k){closeGuide(true);const w=document.createElement('div');w.className='gview';w.id='gview';w.setAttribute('role','dialog');w.setAttribute('aria-label','دليل الاستخدام');
+  w.innerHTML=`<div class="gvtop"><button class="btn" id="gvx" aria-label="إغلاق الدليل">${svg('x')}إغلاق</button><b>دليل الاستخدام</b><a class="btn" href="${GUIDE_PDF}" download="دليل-مبادئ-التمييز.pdf">${svg('download')}PDF</a></div>
+   <iframe src="${GUIDE_WEB}${k?'#ch-'+k:''}" title="دليل الاستخدام"></iframe>`;
+  document.body.appendChild(w);document.body.classList.add('noscroll');history.pushState({guide:1},'');
+  $('gvx').onclick=()=>history.back();}
+function closeGuide(silent){const w=$('gview');if(!w)return false;w.remove();document.body.classList.remove('noscroll');return true;}
+window.addEventListener('popstate',()=>{closeGuide();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('gview'))history.back();});
 function guideKey(v){const h=(location.hash||'').replace(/^#\/?/,'');
   if(v==='item')return h.startsWith('r/')?'ruling':(h.startsWith('law/')||h.startsWith('a/')||h.startsWith('m/'))?'laws':'item';
   return {home:'home',search:'search',index:'index',saved:'saved',report:'about',about:'about',laws:'laws',more:'settings'}[v];}
 function guideLink(v){const el=$('v-'+v);if(!el)return;const k=guideKey(v),pg=GUIDE[k];let a=el.querySelector(':scope > .guidelnk');
   if(!pg){if(a)a.remove();return;}
-  if(!a){a=document.createElement('a');a.className='guidelnk no-print';a.target='_blank';a.rel='noopener';el.prepend(a);}
+  if(!a){a=document.createElement('a');a.className='guidelnk no-print';a.target='_blank';a.rel='noopener';el.prepend(a);a.addEventListener('click',e=>{e.preventDefault();openGuide(a.dataset.k);});}
+  a.dataset.k=k;
   a.href=`${GUIDE_PDF}#page=${pg}`;a.innerHTML=`${svg('info')}الدليل`;a.title='افتح فصل هذا القسم في دليل الاستخدام';}
 // ---------- feedback (local only; nothing is sent by the app)
 const FB_PHONE='';   // رقم واتساب اختياري بصيغة دولية دون + (مثال 965XXXXXXXX)، يبقى فارغًا في المستودع العام
@@ -803,7 +824,7 @@ function feedbackScreen(){closeDlg();let st=fbLoad();const save=()=>LS.set('fb2'
 const NAVMAP={laws:'#/laws',home:'#/',search:'#/search',index:'#/index/topics',saved:'#/saved',more:'#/more',report:'#/report',about:'#/about'};
 function show(v,nav){['home','search','index','saved','more','item','report','about','laws'].forEach(x=>$('v-'+x).hidden=x!==v);guideLink(v);
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',b.dataset.nav===nav));}
-function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));closeDlg();if(TTS.id)ttsStop();
+function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));closeDlg();if(TTS.id)ttsStop();if($('hback'))$('hback').hidden=!h;
   document.title='مبادئ التمييز';
   if(h.startsWith('p/')){viewItem(h.slice(2));show('item','');}
   else if(h.startsWith('r/')){viewRuling(h.slice(2));show('item','');}

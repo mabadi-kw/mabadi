@@ -42,10 +42,16 @@ async function shoot(b,url){
       console.log('لقطة',s.name,dv);}
     await c.close();}
 }
+// نقش السدو نفسه المستعمل في التطبيق (sdUnit في app.js)، يُرسم مربعات متجهة فيبقى حادًّا عند التكبير
+function sdUnit(){const dm=(cx,cy,r,ring)=>{const o=[];for(let x=cx-r;x<=cx+r;x++)for(let y=cy-r;y<=cy+r;y++){const d=Math.abs(x-cx)+Math.abs(y-cy);if(ring?d===r:d<=r)o.push([x,y]);}return o;};
+  let c=[];for(let x=0;x<24;x++)c.push(x%4<2?[x,0]:[x,15]);c=c.concat(dm(12,8,5,1),dm(12,8,3,1),[[12,8]]);
+  [3,21].forEach(cx=>c.push([cx,8],[cx-1,7],[cx-2,6],[cx-1,9],[cx-2,10],[cx+1,7],[cx+2,6],[cx+1,9],[cx+2,10]));return c.filter(p=>p[0]>=0&&p[0]<24);}
+function saduSVG(W,H,cs,color){const u=sdUnit();let r='';for(let ty=0;ty*16*cs<H;ty++)for(let tx=0;tx*24*cs<W;tx++)for(const [x,y] of u){const X=(tx*24+x)*cs,Y=(ty*16+y)*cs;if(X<W&&Y<H)r+=`<rect x="${(X+cs*.08).toFixed(2)}" y="${(Y+cs*.08).toFixed(2)}" width="${(cs*.84).toFixed(2)}" height="${(cs*.84).toFixed(2)}"/>`;}
+  return `<svg class="sadu" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><g fill="none" stroke="${color}" stroke-width="${(cs*.1).toFixed(2)}">${r}</g></svg>`;}
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function html(pages){const F=fontCSS('../fonts/');
-  const toc=CHAPTERS.map((c,i)=>`<li><span class="tn">${i+1}</span><span class="tt">${esc(c.title)}</span><span class="dots"></span><span class="tp">${pages[c.key]||'…'}</span></li>`).join('');
-  const chap=(c,i)=>`<section class="ch"><span class="mk">GUIDECH:${c.key}:END</span>
+function html(pages,web){const F=fontCSS(web?'fonts/':'../fonts/');
+  const toc=CHAPTERS.map((c,i)=>{const row=`<span class="tn">${i+1}</span><span class="tt">${esc(c.title)}</span><span class="dots"></span><span class="tp">${web?'':(pages[c.key]||'…')}</span>`;return `<li>${web?`<a href="#ch-${c.key}" data-go="ch-${c.key}">${row}</a>`:row}</li>`;}).join('');
+  const chap=(c,i)=>`<section class="ch" id="ch-${c.key}"><span class="mk">GUIDECH:${c.key}:END</span>
    <header class="chh"><span class="chn">${i+1}</span><h2>${esc(c.title)}</h2></header>
    <p class="what">${esc(c.what)}</p>
    <h3>خطوات الاستعمال</h3><ol class="steps">${c.steps.map(s=>`<li>${esc(s)}</li>`).join('')}</ol>
@@ -57,7 +63,9 @@ function html(pages){const F=fontCSS('../fonts/');
   :root{--navy:#0b1f3b;--navy2:#12325e;--gold:#b8923a;--gold-soft:#f3ead3;--ivory:#f4f1ea;--ink:#10213b;--muted:#5e6b80;--rule:#e4ddcc}
   body{margin:0;font-family:Cairo,sans-serif;color:var(--ink);font-size:10.5pt;line-height:1.8}
   .cover{height:265mm;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10mm;background:var(--navy);color:#fff;border-radius:6mm;position:relative;overflow:hidden;break-after:page}
-  .cover svg.sadu{position:absolute;inset:0;width:100%;height:100%;opacity:.12}
+  .cover svg.sadu{position:absolute;inset:0;width:100%;height:100%}
+  .cover .fade{position:absolute;inset:0;background:radial-gradient(ellipse 62% 40% at 50% 50%,#0b1f3b 58%,rgba(11,31,59,0) 100%)}
+  .cover>svg:not(.sadu){position:relative}
   .cover h1{font-family:'Reem Kufi';font-size:44pt;margin:0;color:#fff;position:relative}
   .cover p{margin:0;font-size:15pt;color:#e9dcb8;position:relative}.cover .line{width:60mm;height:1.2mm;background:var(--gold);position:relative}
   .toc{break-after:page}.toc h2,.chh h2{font-family:'Reem Kufi';color:var(--navy2);margin:0}
@@ -72,12 +80,19 @@ function html(pages){const F=fontCSS('../fonts/');
   .shot{margin:5mm 0 0;break-inside:avoid}.pair{display:flex;gap:4mm;align-items:flex-start}.dsk{flex:1}.mob{width:42mm;flex:none}
   .pair img{width:100%;border:.3mm solid var(--rule);border-radius:2mm;display:block}.mob img{border-radius:4mm}
   .pair figcaption{font-size:8pt;color:var(--muted);text-align:center}.cap{font-size:9.5pt;color:var(--navy2);font-weight:600;text-align:center;margin-top:1mm}
+  ${web?`@media screen{html{background:#f4f1ea}body{max-width:860px;margin:0 auto;padding:14px 16px 40px;box-sizing:border-box;background:#fff;font-size:15px}
+   .cover{height:auto;min-height:0;aspect-ratio:auto;padding:38px 16px;border-radius:14px;gap:14px}.cover h1{font-size:34px}.cover p{font-size:16px}.cover .line{width:120px;height:4px}
+   .toc,.ch{break-before:auto;break-after:auto}.ch{padding-top:18px;margin-top:18px;border-top:1px solid var(--rule)}.mk{display:none}
+   .toc a{color:inherit;text-decoration:none;display:flex;align-items:baseline;gap:10px;width:100%}.toc li{padding:10px 0}
+   .pair{flex-wrap:wrap}.dsk{flex:1 1 360px}.mob{width:150px}img{max-width:100%;height:auto}}`:''}
   </style></head><body>
-  <div class="cover"><svg class="sadu" viewBox="0 0 120 80" preserveAspectRatio="xMidYMid slice"><defs><pattern id="p" width="24" height="16" patternUnits="userSpaceOnUse"><path d="M12 2 L20 8 L12 14 L4 8 Z M12 5 L16 8 L12 11 L8 8 Z" fill="none" stroke="#b8923a" stroke-width=".8"/><path d="M0 0 H24 M0 16 H24" stroke="#b8923a" stroke-width=".6" stroke-dasharray="2 2"/></pattern></defs><rect width="120" height="80" fill="url(#p)"/></svg>
+  <div class="cover">${saduSVG(182,265,2.4,'#3d4552')}<div class="fade"></div>
    <svg width="90" height="90" viewBox="0 0 512 512" style="position:relative"><rect x="96" y="340" width="320" height="50" rx="8" fill="#b8923a"/><rect x="126" y="282" width="260" height="50" rx="8" fill="#c9a44b"/><path d="M156 224 H356 L336 264 H176 Z" fill="#e3c77f"/><polygon points="256,110 282,146 256,182 230,146" fill="#f2dc9e"/></svg>
    <h1>مبادئ التمييز</h1><div class="line"></div><p>دليل الاستخدام المصوّر</p></div>
   <div class="toc"><h2>المحتويات</h2><ol>${toc}</ol></div>
-  ${CHAPTERS.map(chap).join('')}</body></html>`;}
+  ${CHAPTERS.map(chap).join('')}${web?`<script>document.addEventListener('click',e=>{const a=e.target.closest('[data-go]');if(!a)return;e.preventDefault();document.getElementById(a.dataset.go).scrollIntoView({behavior:'smooth'});});
+   // فتح الفصل المطلوب دون إضافة سجل تصفح (حتى يغلق زر «إغلاق» الدليل مباشرة)
+   if(location.hash){const t=document.getElementById(location.hash.slice(1));if(t)requestAnimationFrame(()=>t.scrollIntoView());}<\/script>`:''}</body></html>`;}
 async function render(b,url,pages,file){const c=await b.newContext();const p=await c.newPage();
   fs.writeFileSync(path.join(OUT,'guide.html'),html(pages));
   await p.goto(url+'tools/guide/out/guide.html');await p.evaluate(()=>document.fonts.ready);await p.waitForTimeout(500);
@@ -92,6 +107,11 @@ export async function pdfPages(file){const pdfjs=await import('pdfjs-dist/legacy
 export function appTable(){const s=fs.readFileSync(path.join(ROOT,'app.js'),'utf8');const m=s.match(/const GUIDE=(\{[^}]*\});/);return m?JSON.parse(m[1].replace(/(\w+):/g,'"$1":')):null;}
 function writeTable(map){const f=path.join(ROOT,'app.js');let s=fs.readFileSync(f,'utf8');const t='const GUIDE='+JSON.stringify(map).replace(/"(\w+)":/g,'$1:')+';';
   s=s.match(/const GUIDE=\{[^}]*\};/)?s.replace(/const GUIDE=\{[^}]*\};/,t):s;fs.writeFileSync(f,s);}
+// نسخة ويب من الدليل تُعرض داخل التطبيق (docs/guide/): الصفحة نفسها بتنسيق شاشة، مع اللقطات والخطوط
+function writeWeb(map){const W=path.join(ROOT,'docs','guide');fs.rmSync(W,{recursive:true,force:true});mkdirp(path.join(W,'shots'));mkdirp(path.join(W,'fonts'));
+  for(const f of fs.readdirSync(SHOTS))fs.copyFileSync(path.join(SHOTS,f),path.join(W,'shots',f));
+  for(const f of fs.readdirSync(path.join(HERE,'fonts')))fs.copyFileSync(path.join(HERE,'fonts',f),path.join(W,'fonts',f));
+  fs.writeFileSync(path.join(W,'index.html'),html(map,true));console.log('نسخة الويب: docs/guide/index.html');}
 if(import.meta.url===`file://${process.argv[1]}`){
   const {server,url}=await serve();const b=await browser();
   try{
@@ -101,6 +121,7 @@ if(import.meta.url===`file://${process.argv[1]}`){
     const fin=await pdfPages(dst);
     if(JSON.stringify(fin.map)!==JSON.stringify(map))console.warn('تنبيه: تغيّرت أرقام الصفحات بين الطبعتين؛ أعد التشغيل.');
     fs.writeFileSync(path.join(ROOT,'docs','guide-pages.json'),JSON.stringify(fin.map,null,1));
+    writeWeb(fin.map);
     if(Object.keys(fin.map).length!==CHAPTERS.length)throw new Error('لم تُعثر على كل علامات الفصول في PDF: '+Object.keys(fin.map).join(','));
     const tab=appTable();const diff=Object.keys(fin.map).filter(k=>!tab||tab[k]!==fin.map[k]);
     console.log(`الدليل: docs/guide.pdf — ${fin.n} صفحة`);console.log('صفحات الفصول:',fin.map);
