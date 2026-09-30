@@ -14,7 +14,6 @@ let S=Object.assign({},DEF,LS.get('settings',{}));
 let FAV=LS.get('favs',{}), FOLD=LS.get('folders',['عام']), NOTE=LS.get('notes',{}), HIST=LS.get('hist',[]), QH=LS.get('qhist',[]);
 const saveS=()=>LS.set('settings',S);
 // نموذج التقييم: يُملأ عند إنشاء نموذج Google الخاص بالمكتبة
-const FB={url:'',f:{section:'',rating:'',note:'',contact:'',meta:''}};
 // ---------- icons
 const IC={
  gavel:'M14 3l7 7-3 3-7-7zM11 6l-7 7 3 3 7-7M3 21h10', briefcase:'M3 8h18v11H3zM8 8V5h8v3M3 13h18',
@@ -218,7 +217,7 @@ const SNAV=[['home','home','الرئيسية','مبدأ اليوم وما فتح
 IC.home='M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z';
 main.innerHTML=`<div class="shell"><aside class="sidenav" aria-label="الأقسام">${SNAV.map(([k,i,t,d])=>`<button class="navcard" data-nav="${k}"><span class="ic">${svg(i)}</span><span><b>${t}</b><small>${d}</small></span></button>`).join('')}
  <button class="navcard" data-a2="settings"><span class="ic">${svg('gear')}</span><span><b>الإعدادات</b><small>الخط والمظهر والقفل</small></span></button>
- ${FB.url?`<button class="navcard" data-a2="rate"><span class="ic">${svg('star')}</span><span><b>قيّم التطبيق</b><small>رأيك يصلنا مباشرة</small></span></button>`:''}</aside>
+ <button class="navcard" data-a2="rate"><span class="ic">${svg('star')}</span><span><b>ملاحظاتك واقتراحاتك</b><small>قيّم الأقسام وأرسل رأيك</small></span></button></aside>
  <div class="views">${['home','search','index','saved','more','item','report','about','laws'].map(v=>`<section id="v-${v}" hidden></section>`).join('')}</div></div>`;
 // ---------- search engine
 const F={q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:''};
@@ -474,7 +473,7 @@ function viewMore(){$('v-more').innerHTML=`<h2>المزيد</h2><div class="grid
   <button class="tile" data-go="#/report"><span class="ic">${svg('report')}</span><b>تقارير الاستخراج</b><span class="n">طريقة العمل والفحوص وما يحتاج مراجعة</span></button>
   <button class="tile" data-go="#/about"><span class="ic">${svg('info')}</span><b>عن المكتبة</b><span class="n">المصادر وقواعد النزاهة والروابط</span></button>
   <button class="tile" data-a2="offline"><span class="ic">${svg('download')}</span><b>العمل دون اتصال</b><span class="n">نزّل المكتبة كاملة مع صور الصفحات</span></button>
-  ${FB.url?`<button class="tile" data-a2="rate"><span class="ic">${svg('star')}</span><b>قيّم التطبيق</b><span class="n">تقييمك وملاحظاتك تصل إلى صاحب المكتبة وحده</span></button>`:''}
+  <button class="tile" data-a2="rate"><span class="ic">${svg('star')}</span><b>ملاحظاتك واقتراحاتك</b><span class="n">قيّم الأقسام وأرسل رأيك عبر واتساب أو البريد</span></button>
   <button class="tile" data-a2="install"><span class="ic">${svg('open')}</span><b>ثبّت التطبيق</b><span class="n">أضفه إلى الشاشة الرئيسية أو سطح المكتب</span></button>
  </div>`;}
 let repDone=false;
@@ -513,7 +512,7 @@ function settingsDlg(){
     <div class="rowi"><span>تباعد الأسطر</span><input type="range" id="lh" min="1.6" max="2.4" step=".05" value="${S.lh}"></div>
     <div class="preview">عقد العمل. الخصيصتان الأساسيتان له التبعية والأجر.</div><span class="hint">عنوان «مبادئ التمييز» ثابت ولا يتغير بتغيير الخط.</span></section>
    <section><h4>المظهر</h4><div class="seg">${[['auto','تلقائي'],['light','فاتح'],['dark','داكن']].map(([k,l])=>`<button data-theme="${k}" aria-pressed="${S.theme===k}">${l}</button>`).join('')}</div></section>
-   ${FB.url?`<section><h4>رأيك</h4><div class="rowi"><button class="btn primary" data-a2="rate">${svg('star')}قيّم التطبيق</button><span class="hint">دقيقة واحدة، ودون أي بيانات شخصية.</span></div></section>`:''}
+   <section><h4>رأيك</h4><div class="rowi"><button class="btn primary" data-a2="rate">${svg('star')}ملاحظاتك واقتراحاتك</button><span class="hint">تقييم لكل قسم، يُحفظ في جهازك وترسله أنت.</span></div></section>
    <section><h4>بياناتي</h4><div class="rowi"><button class="btn" id="bk">${svg('download')}نسخة احتياطية</button><label class="btn" style="cursor:pointer">استعادة<input type="file" accept="application/json" id="rs" hidden></label></div>
     <span class="hint">المحفوظات والمجلدات والملاحظات والإعدادات في ملف واحد، تنقله إلى جهاز آخر.</span></section></div>`);
   const upd=()=>{saveS();applyLook();};
@@ -544,30 +543,71 @@ let deferredInstall=null;window.addEventListener('beforeinstallprompt',e=>{e.pre
 function installDlg(){if(deferredInstall){deferredInstall.prompt();deferredInstall=null;return;}
   dlg('ثبّت التطبيق',`<div class="prose"><ul><li><b>آيفون وآيباد (Safari):</b> زر المشاركة ← «إضافة إلى الشاشة الرئيسية».</li><li><b>أندرويد (Chrome):</b> القائمة ⋮ ← «تثبيت التطبيق».</li><li><b>الحاسوب (Chrome أو Edge):</b> أيقونة التثبيت في شريط العنوان.</li></ul></div>`);}
 // ---------- التقييم والملاحظات (نموذج Google خاص بصاحب المكتبة)
-function curSection(){const h=(location.hash||'').replace(/^#\/?/,'');if(h.startsWith('p/')||h.startsWith('r/'))return 'صفحة المبدأ';if(h.startsWith('search'))return 'البحث';if(h.startsWith('index'))return 'الفهرس';if(h.startsWith('saved'))return 'المحفوظات';if(h.startsWith('report'))return 'التقارير';return 'عام';}
-const FBSEC=['عام','البحث','الفهرس','صفحة المبدأ','المحفوظات','الإعدادات والمظهر','التقارير'];
-function fbSend(rec){const body=new URLSearchParams();body.set(FB.f.section,rec.section);body.set(FB.f.rating,String(rec.rating));body.set(FB.f.note,rec.note||'');body.set(FB.f.contact,rec.contact||'');body.set(FB.f.meta,rec.meta);
-  return fetch(FB.url,{method:'POST',mode:'no-cors',body});}
-function fbFlush(){const q=LS.get('fbq',[]);if(!q.length||!navigator.onLine||!FB.url)return;const rest=[];
-  Promise.all(q.map(r=>fbSend(r).catch(()=>rest.push(r)))).then(()=>LS.set('fbq',rest));}
-addEventListener('online',fbFlush);
-function rateDlg(){
-  const st={section:curSection(),rating:0};
-  const d=dlg(`${svg('star')} قيّم التطبيق`,`<div class="set rate">
-   <section><h4>عن أي قسم؟</h4><div class="folders">${FBSEC.map(x=>`<button type="button" data-sec="${x}" aria-pressed="${x===st.section}">${x}</button>`).join('')}</div></section>
-   <section><h4>تقييمك</h4><div class="stars" role="radiogroup" aria-label="التقييم من 1 إلى 5">${[1,2,3,4,5].map(n=>`<button type="button" role="radio" aria-checked="false" data-r="${n}" aria-label="${n} من 5">${svg('star')}</button>`).join('')}</div><span class="hint" id="rlab">اختر من نجمة إلى خمس</span></section>
-   <section><h4>ملاحظتك (اختياري)</h4><textarea id="fbn" rows="4" maxlength="2000" placeholder="ما الذي أعجبك؟ وما الذي تقترح تحسينه؟"></textarea>
-    <input type="text" id="fbc" maxlength="120" placeholder="وسيلة تواصل إن أردت ردًا (اختياري)"></section>
-   <div class="privacy">${svg('lock')}<span><b>خصوصيتك محفوظة.</b> لا نجمع اسمك ولا بريدك ولا موقعك ولا أي معرّف لجهازك. يصل التقييم والملاحظة فقط إلى صاحب المكتبة، ولا يُنشر ولا يُشارك مع أحد. وسيلة التواصل اختيارية، ولا تُستعمل إلا للرد عليك.</span></div>
-   <button class="btn primary" id="fbs" disabled>إرسال</button></div>`);
-  const labs=['','ضعيف','مقبول','جيد','جيد جدًا','ممتاز'];
-  d.addEventListener('click',e=>{const sb=e.target.closest('[data-sec]');if(sb){st.section=sb.dataset.sec;d.querySelectorAll('[data-sec]').forEach(x=>x.setAttribute('aria-pressed',x===sb));}
-    const rb=e.target.closest('[data-r]');if(rb){st.rating=+rb.dataset.r;d.querySelectorAll('[data-r]').forEach(x=>{const on=+x.dataset.r<=st.rating;x.classList.toggle('on',on);x.setAttribute('aria-checked',+x.dataset.r===st.rating);});$('rlab').textContent=labs[st.rating];$('fbs').disabled=false;}});
-  $('fbs').onclick=async()=>{const rec={section:st.section,rating:st.rating,note:$('fbn').value.trim(),contact:$('fbc').value.trim(),
-      meta:`${innerWidth<761?'جوال':innerWidth<1000?'لوحي':'حاسوب'} · ${document.documentElement.dataset.theme||'تلقائي'} · ${new Date().toISOString().slice(0,10)}`};
-    $('fbs').disabled=true;
-    if(!navigator.onLine){const q=LS.get('fbq',[]);q.push(rec);LS.set('fbq',q);closeDlg();toast('حُفظ تقييمك، وسيُرسل عند عودة الاتصال');return;}
-    try{await fbSend(rec);closeDlg();toast('وصل تقييمك، شكرًا لك');}catch(_){const q=LS.get('fbq',[]);q.push(rec);LS.set('fbq',q);closeDlg();toast('حُفظ تقييمك، وسيُرسل لاحقًا');}};
+// ---------- feedback (local only; nothing is sent by the app)
+const FB_PHONE='';   // رقم واتساب اختياري بصيغة دولية دون + (مثال 965XXXXXXXX)، يبقى فارغًا في المستودع العام
+const FB_EMAIL='';   // بريد اختياري، يبقى فارغًا في المستودع العام
+const FBS=[['search','البحث','الكلمات والعبارات، أرقام الطعون والمواد، وسرعة النتائج'],
+ ['read','قراءة المبدأ ونسخه','عرض النص، النسخ بالإسناد، المشاركة والطباعة'],
+ ['source','صور الصفحات والمصادر','صورة الصفحة الأصلية، تحديد موضع المبدأ، نص الصفحة'],
+ ['index','الفهرس والمرشحات','الموضوعات والقوانين والكتب، وتضييق النتائج'],
+ ['ruling','بطاقة الحكم والإحالات','المبادئ المستخلصة من الطعن نفسه في أكثر من مجموعة'],
+ ['laws','التشريعات','نصوص القوانين واللوائح، المذكرات، وربط المواد بالمبادئ'],
+ ['saved','المحفوظات والملاحظات','المجلدات، الملاحظات الخاصة، النسخة الاحتياطية'],
+ ['offline','العمل دون اتصال والتثبيت','تنزيل المكتبة، الفتح دون إنترنت، الإضافة إلى الشاشة'],
+ ['look','المظهر والخطوط','الألوان، الوضع الداكن، الخط وحجمه، القفل']];
+const FBV={easy:['🟢','سهل وواضح'],ok:['🟡','مقبول'],bad:['🔴','فيه خلل'],na:['⚪','لم أجرّبه']};
+const FBP=['بطء','صعوبة الفهم','خطأ في النتيجة','لا يعمل على جهازي','الترتيب مربك','ينقصه شيء'];
+const FBD=['آيفون','آيباد','أندرويد','حاسوب'];
+function fbGuess(){const u=navigator.userAgent;if(/iPad|Macintosh/.test(u)&&navigator.maxTouchPoints>1)return 'آيباد';if(/iPhone/.test(u))return 'آيفون';if(/Android/.test(u))return 'أندرويد';return 'حاسوب';}
+function fbLoad(){return LS.get('fb2',null)||{sec:{},device:fbGuess(),stars:0,rec:'',best:'',improve:'',name:''};}
+function fbText(st){const L=['📋 استبيان تجربة تطبيق «مبادئ التمييز»'];
+  L.push([st.device||'—',`التقييم ${st.stars||'—'}/5`,st.rec?`يوصي بالاعتماد: ${st.rec}`:'يوصي بالاعتماد: —'].join(' | '));
+  if(st.name.trim())L.push('المُقيّم: '+st.name.trim());
+  const rows=FBS.filter(([k])=>st.sec[k]&&st.sec[k].v&&st.sec[k].v!=='na');
+  if(rows.length){L.push('');rows.forEach(([k,t])=>{const s=st.sec[k];L.push(`• ${t}: ${FBV[s.v][0]} ${FBV[s.v][1]}${s.p&&s.p.length&&s.v!=='easy'?' — '+s.p.join('، '):''}`);if(s.n&&s.n.trim()&&s.v!=='easy')L.push('   '+s.n.trim().replace(/\n+/g,' '));});}
+  if(st.best.trim()||st.improve.trim())L.push('');
+  if(st.best.trim())L.push('👍 أكثر ما نفعني: '+st.best.trim());
+  if(st.improve.trim())L.push('🛠 أهم تحسين: '+st.improve.trim());
+  L.push('','— الشاشة '+innerWidth+'×'+innerHeight+' · '+new Date().toISOString().slice(0,10));
+  return L.join('\n');}
+function feedbackScreen(){closeDlg();let st=fbLoad();const save=()=>LS.set('fb2',st);
+  const o=document.createElement('div');o.className='fbx';o.setAttribute('role','dialog');o.setAttribute('aria-label','ملاحظاتك واقتراحاتك');
+  const secHTML=([k,t,d])=>{const s=st.sec[k]||{};return `<div class="fbsec" data-k="${k}"><div class="fbh"><b>${t}</b><small>${d}</small></div>
+    <div class="fbv">${Object.entries(FBV).map(([v,[e,l]])=>`<button type="button" data-v="${v}" aria-pressed="${s.v===v}">${e} ${l}</button>`).join('')}</div>
+    <div class="fbmore"${s.v==='ok'||s.v==='bad'?'':' hidden'}><div class="fbp">${FBP.map(p=>`<button type="button" data-p="${p}" aria-pressed="${!!(s.p||[]).includes(p)}">${p}</button>`).join('')}</div>
+    <label class="fbl">الموضع بدقة واقتراح التحسين<textarea rows="3" data-n>${esc(s.n||'')}</textarea></label></div></div>`;};
+  o.innerHTML=`<header class="fbtop"><button class="btn icon" data-fbclose aria-label="إغلاق">${svg('x')}</button><b>ملاحظاتك واقتراحاتك</b><span class="fbcount" id="fbcnt"></span></header>
+   <div class="fbbody"><p class="muted">قيّم ما جرّبته من أقسام التطبيق. ما تكتبه يُحفظ في جهازك فقط حتى ترسله أنت بنفسك، والتطبيق لا يرسل شيئًا.</p>
+   <h3>تقييم الأقسام</h3>${FBS.map(secHTML).join('')}
+   <h3>أسئلة عامة</h3>
+   <div class="fbq"><b>الجهاز</b><div class="fbv" data-g="device">${FBD.map(x=>`<button type="button" data-o="${x}" aria-pressed="${st.device===x}">${x}</button>`).join('')}</div></div>
+   <div class="fbq"><b>التقييم العام</b><div class="stars fbstars">${[1,2,3,4,5].map(n=>`<button type="button" data-s="${n}" class="${n<=st.stars?'on':''}" aria-label="${n} من 5">${svg('star')}</button>`).join('')}</div></div>
+   <div class="fbq"><b>هل توصي باعتماده؟</b><div class="fbv" data-g="rec">${['نعم','بتحفّظ','لا'].map(x=>`<button type="button" data-o="${x}" aria-pressed="${st.rec===x}">${x}</button>`).join('')}</div></div>
+   <label class="fbl">أكثر ما نفعني<textarea rows="2" data-f="best">${esc(st.best)}</textarea></label>
+   <label class="fbl">أهم تحسين تقترحه<textarea rows="2" data-f="improve">${esc(st.improve)}</textarea></label>
+   <label class="fbl">اسمك (اختياري)<input type="text" data-f="name" value="${esc(st.name)}" maxlength="80"></label>
+   <h3>الإرسال</h3><p class="muted">يفتح واتساب أو البريد والنص جاهز، وتختار أنت المرسَل إليه.</p>
+   <div class="fbsend"><button class="btn primary" id="fbwa">${svg('wa')}أرسل عبر واتساب</button><button class="btn" id="fbml">${svg('mail')}بالبريد</button><button class="btn" id="fbcp">${svg('copy')}نسخ</button></div>
+   <details class="fbprev"><summary>معاينة النص</summary><pre id="fbpre"></pre></details>
+   <button class="btn fbclear" id="fbclr">مسح والبدء من جديد</button></div>`;
+  document.body.appendChild(o);document.body.classList.add('noscroll');
+  const upd=()=>{save();const n=FBS.filter(([k])=>st.sec[k]&&st.sec[k].v).length;$('fbcnt').textContent=`قُيِّم ${n} من ${FBS.length}`;$('fbpre').textContent=fbText(st);};upd();
+  const close=()=>{o.remove();document.body.classList.remove('noscroll');};
+  o.addEventListener('click',e=>{const t=e.target;
+    if(t.closest('[data-fbclose]'))return close();
+    const sec=t.closest('.fbsec');
+    const vb=t.closest('[data-v]');if(vb&&sec){const k=sec.dataset.k,s=st.sec[k]=st.sec[k]||{};s.v=vb.dataset.v;sec.querySelectorAll('[data-v]').forEach(b=>b.setAttribute('aria-pressed',b===vb));sec.querySelector('.fbmore').hidden=!(s.v==='ok'||s.v==='bad');upd();return;}
+    const pb=t.closest('[data-p]');if(pb&&sec){const s=st.sec[sec.dataset.k]=st.sec[sec.dataset.k]||{};s.p=s.p||[];const p=pb.dataset.p,i=s.p.indexOf(p);i<0?s.p.push(p):s.p.splice(i,1);pb.setAttribute('aria-pressed',i<0);upd();return;}
+    const ob=t.closest('[data-o]');if(ob){const g=ob.parentElement.dataset.g;st[g]=ob.dataset.o;ob.parentElement.querySelectorAll('[data-o]').forEach(b=>b.setAttribute('aria-pressed',b===ob));upd();return;}
+    const sb=t.closest('[data-s]');if(sb){st.stars=+sb.dataset.s;o.querySelectorAll('[data-s]').forEach(b=>b.classList.toggle('on',+b.dataset.s<=st.stars));upd();return;}});
+  o.addEventListener('input',e=>{const t=e.target;if(t.matches('[data-n]')){const k=t.closest('.fbsec').dataset.k;(st.sec[k]=st.sec[k]||{}).n=t.value;}else if(t.dataset.f)st[t.dataset.f]=t.value;upd();});
+  $('fbwa').onclick=()=>open(`https://wa.me/${FB_PHONE}?text=${encodeURIComponent(fbText(st))}`,'_blank','noopener');
+  $('fbml').onclick=()=>{location.href=`mailto:${FB_EMAIL}?subject=${encodeURIComponent('استبيان تجربة تطبيق «مبادئ التمييز»')}&body=${encodeURIComponent(fbText(st))}`;};
+  $('fbcp').onclick=()=>clip(fbText(st),()=>toast('نُسخ النص'));
+  let arm=0;$('fbclr').onclick=()=>{if(!arm){arm=1;$('fbclr').textContent='اضغط مرة أخرى للتأكيد';$('fbclr').classList.add('danger');setTimeout(()=>{arm=0;if($('fbclr')){$('fbclr').textContent='مسح والبدء من جديد';$('fbclr').classList.remove('danger');}},4000);return;}
+    try{localStorage.removeItem('mabadi:fb2')}catch(_){}close();feedbackScreen();toast('بدأت من جديد');};
+  o.querySelector('[data-fbclose]').focus();
+  addEventListener('keydown',function esc_(e){if(e.key==='Escape'&&document.body.contains(o)){close();removeEventListener('keydown',esc_);}});
 }
 // ---------- router
 const NAVMAP={laws:'#/laws',home:'#/',search:'#/search',index:'#/index/topics',saved:'#/saved',more:'#/more',report:'#/report',about:'#/about'};
@@ -598,7 +638,7 @@ document.addEventListener('click',e=>{const t=e.target;
   if(t.closest('[data-close]')){closeDlg();return;}
   const act=t.closest('[data-a]');if(act){const p=BYID[act.closest('[data-id]').dataset.id],a=act.dataset.a;
     if(a==='copy')clip(quoteText(p),()=>toast('نُسخ النص مع الإسناد والمصدر'));if(a==='share')shareDlg(p);if(a==='fav')favDlg(p);if(a==='note')noteDlg(p);if(a==='speak')speak(p,act);if(a==='src')openSrc(p);return;}
-  const a2=t.closest('[data-a2]');if(a2){const k=a2.dataset.a2;if(k==='settings')settingsDlg();if(k==='rate')rateDlg();if(k==='offline')offlineDlg();if(k==='install')installDlg();if(k==='printsaved')printSaved();
+  const a2=t.closest('[data-a2]');if(a2){const k=a2.dataset.a2;if(k==='settings')settingsDlg();if(k==='rate')feedbackScreen();if(k==='offline')offlineDlg();if(k==='install')installDlg();if(k==='printsaved')printSaved();
     if(k==='copysaved'){const ps=Object.entries(FAV).filter(([id,v])=>BYID[id]&&(!savedFold||v.f===savedFold)).map(x=>quoteText(BYID[x[0]]));clip(ps.join('\n\n———\n\n'),()=>toast(`نُسخ ${ps.length} مبدأ`));}
     if(k==='clrhist'){HIST=[];LS.set('hist',HIST);viewSaved();}return;}
   const st=t.closest('[data-st]');if(st){savedTab=st.dataset.st;viewSaved();return;}
@@ -612,7 +652,7 @@ document.addEventListener('click',e=>{const t=e.target;
   const cl=t.closest('[data-clr]');if(cl){F[cl.dataset.clr]=cl.dataset.clr==='rv'?false:'';syncInputs();runSearch();return;}
 });
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-buildSearch();route();fbFlush();setTimeout(loadAllLaws,1500);if(!location.hash||location.hash==='#/')playWeave();else wovenOnce=true;
+buildSearch();route();setTimeout(loadAllLaws,1500);if(!location.hash||location.hash==='#/')playWeave();else wovenOnce=true;
 document.body.insertAdjacentHTML('beforeend',`<button class="totop" id="totop" hidden aria-label="العودة إلى الأعلى">${svg('back').replace('<svg','<svg style="transform:rotate(-90deg)"')}</button>`);
 $('totop').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 addEventListener('scroll',()=>{$('totop').hidden=scrollY<900;},{passive:true});
