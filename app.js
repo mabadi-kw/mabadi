@@ -128,7 +128,7 @@ function artOf(l,a){const L=LAWBYKEY[l];if(!L||a==null)return null;const n=parse
 function artHits(){const ts=terms(F.q);if(!ts.length||F.col||F.tp||F.ch||F.rv||F.sec)return [];const o=[];
   LAWIX.forEach(x=>{const L=LAWDATA[x.id];if(!L||(F.lw&&F.lw!==L.key))return;L.articles.forEach(a=>{if(ts.every(t=>a.ns.includes(t)))o.push([L,a]);});});return o;}
 const artPR=a=>a.issue?[]:(ARTMAP[a.law.key+'#'+a.n]||[]).map(i=>BYID[i]).filter(Boolean);
-const lawTitle=L=>L.number?`${L.type} رقم ${L.number} لسنة ${L.year}`:`${L.type} ${L.year||''}`;
+const lawTitle=L=>L.number?`${L.type} رقم ${L.number} لسنة ${L.year}`:`${L.type}${L.year?' — '+L.year:''}`;
 function artQuote(a){const L=a.law;return `${a.label} — ${L.title}:\n${a.paras.join('\n')}\n— ${L.text_version}.`;}
 function pgCaption(M,g){const pr=M.printed&&M.printed[g-1];return pr?`الصفحة ${pr} من الطبعة`:`الصفحة ${g} من ملف المصدر`;}
 function lawPageHTML(col,M,g,reg){const gp=M.gp||20,gc=gp/10,b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
@@ -138,13 +138,17 @@ function lawPagesHTML(a){const L=a.law;return a.pages.map(g=>lawPageHTML(L.pages
 const LOADMSG='<div class="empty">جارٍ تحميل النص…</div>';
 function viewLaws(){const el=$('v-laws');document.title='التشريعات — مبادئ التمييز';
   const L=[...LAWIX].sort((a,b)=>(lcount[b.key]||0)-(lcount[a.key]||0));
-  el.innerHTML=`<div class="vh"><h2>التشريعات</h2><span class="muted">${nf(LAWIX.length)} تشريعًا</span></div><p class="muted">نصوص القوانين مادةً مادة، وكل مادة موصولة بمبادئ التمييز التي تذكرها وبصورة صفحتها في المصدر. يُذكر مع كل قانون مصدر نصه وتاريخ النسخة.</p>
-   <input class="flt" id="lwf" type="search" placeholder="ابحث باسم القانون أو رقمه…"><div class="quick" id="lwc"></div><div class="grid g3" id="lwg"></div>
+  el.innerHTML=`<div class="vh"><h2>التشريعات</h2><span class="muted">${nf(LAWIX.length)} وثيقة</span></div><p class="muted">نصوص القوانين مادةً مادة، وكل مادة موصولة بمبادئ التمييز التي تذكرها وبصورة صفحتها في المصدر. يُذكر مع كل قانون مصدر نصه وتاريخ النسخة.</p>
+   <div class="ltabs" id="lwt"></div><input class="flt" id="lwf" type="search" placeholder="ابحث بالاسم أو الرقم…"><div class="quick" id="lwc"></div><div class="grid g3" id="lwg"></div>
    <div class="card note"><b>عن النسخ</b><p class="muted" style="margin:.3em 0 0">أغلب النصوص من «مجموعة التشريعات الكويتية» الصادرة عن وزارة العدل (الطبعة الأولى، فبراير 2011)، وتشمل التعديلات حتى تاريخها كما تذكرها حواشي الطبعة. ما صدر بعد ذلك لا يظهر في النص، فارجع إلى الجريدة الرسمية قبل الاعتماد عليه.</p></div>`;
-  const tile=x=>`<button class="tile card lawtile" data-go="#/law/${x.id}"><span class="ic">${svg('scroll')}</span><b>${esc(x.short)}</b><small>${esc(lawTitle(x))} · ${nf(x.articles)} مادة${lcount[x.key]?` · ${nf(lcount[x.key])} مبدأ`:''}${x.memo?' · مع المذكرة':''}</small><small class="ver">${esc(x.ver||x.text_version)}</small></button>`;
-  const G=[...new Set(L.map(x=>x.group).filter(Boolean))];let g='';
-  const draw=q=>$('lwg').innerHTML=L.filter(x=>(!g||x.group===g)&&(!q||norm(x.short+' '+x.title+' '+x.key).includes(q)||west(x.key).includes(q))).map(tile).join('')||'<div class="empty">لا نتائج.</div>';
-  const chips=()=>$('lwc').innerHTML=[['','الكل'],...G.map(x=>[x,x])].map(([k,t])=>`<button class="chip${g===k?' on':''}" data-lg="${esc(k)}">${esc(t)}</button>`).join('');
+  const tile=x=>`<button class="tile card lawtile" data-go="#/law/${x.id}"><span class="ic">${svg('scroll')}</span><b>${esc(x.short)}</b><small>${esc(lawTitle(x))} · ${x.articles?nf(x.articles)+' مادة':'بلا مواد مرقمة'}${lcount[x.key]?` · ${nf(lcount[x.key])} مبدأ`:''}${x.memo?' · مع المذكرة':''}</small><small class="ver">${esc(x.ver||x.text_version)}</small></button>`;
+  let cat='law',g='';const G=()=>[...new Set(L.filter(x=>(x.cat||'law')===cat).map(x=>x.group).filter(Boolean))];
+  const nL=L.filter(x=>(x.cat||'law')==='law').length,nR=L.length-nL;
+  $('lwt').innerHTML=`<button class="tab" data-lc="law">القوانين والمراسيم بقوانين <b>${nf(nL)}</b></button><button class="tab" data-lc="reg">المراسيم واللوائح والقرارات <b>${nf(nR)}</b></button>`;
+  const tabs=()=>$('lwt').querySelectorAll('[data-lc]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lc===cat));tabs();
+  $('lwt').onclick=e=>{const b=e.target.closest('[data-lc]');if(!b)return;cat=b.dataset.lc;g='';tabs();chips();draw(norm(west($('lwf').value).trim()));};
+  const draw=q=>$('lwg').innerHTML=L.filter(x=>(x.cat||'law')===cat&&(!g||x.group===g)&&(!q||norm(x.short+' '+x.title+' '+x.key).includes(q)||west(x.key).includes(q))).map(tile).join('')||'<div class="empty">لا نتائج.</div>';
+  const chips=()=>$('lwc').innerHTML=[['','الكل'],...G().map(x=>[x,x])].map(([k,t])=>`<button class="chip${g===k?' on':''}" data-lg="${esc(k)}">${esc(t)}</button>`).join('');
   chips();draw('');$('lwf').oninput=()=>draw(norm(west($('lwf').value).trim()));
   $('lwc').onclick=e=>{const b=e.target.closest('[data-lg]');if(!b)return;g=b.dataset.lg;chips();draw(norm(west($('lwf').value).trim()));};}
 function lawTree(L){const tree=[],st=[];(L.toc||[]).filter(t=>t.i0>=0).forEach(t0=>{const t={...t0,kids:[]};while(st.length&&st[st.length-1].level>=t.level)st.pop();(st.length?st[st.length-1].kids:tree).push(t);st.push(t);});return tree;}
