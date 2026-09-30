@@ -10,7 +10,7 @@ const DEVS={iphone:{viewport:{width:390,height:844},deviceScaleFactor:3,isMobile
 const ROUTES=['#/','#/search','#/p/V09L-0184','#/index/topics','#/index/law/6%2F2010','#/laws','#/law/LAW-6-2010','#/a/LAW-67-1980-A0001','#/m/LAW-67-1980','#/saved','#/more','#/report','#/about'];
 const {server,url}=await serve();const b=await browser();
 try{for(const [dn,opt] of Object.entries(DEVS)){const c=await context(b,opt,url);
-  await c.addInitScript(()=>{localStorage.setItem('mabadi:bknudge','9999999999999');localStorage.setItem('mabadi:iosnudge','9999999999999');});
+  await c.addInitScript(()=>{localStorage.setItem('mabadi:bknudge','9999999999999');localStorage.setItem('mabadi:intro','1');localStorage.setItem('mabadi:iosnudge','9999999999999');});
   const p=await c.newPage();p.on('pageerror',e=>{bad++;console.log('✘ خطأ',dn,String(e));});
   await p.goto(url+'index.html#/');await p.waitForFunction(()=>document.querySelector('.shell')&&!document.getElementById('loading'),null,{timeout:120000});await p.waitForTimeout(800);
   const wide=[];for(const r of ROUTES){await p.evaluate(r=>{location.hash=r;},r);await p.waitForTimeout(1300);
@@ -49,5 +49,31 @@ try{for(const [dn,opt] of Object.entries(DEVS)){const c=await context(b,opt,url)
   const fx=await p.evaluate(()=>{const t=document.querySelector('.fbtop'),x=t.querySelector('.btn');const r=x.getBoundingClientRect();return {h:r.height,w:r.width};});
   await p.click('.fbtop .btn');await p.waitForTimeout(300);ck(`${dn}: زر إغلاق الملاحظات ≥44px ويغلق`,fx.h>=44&&fx.w>=44&&!(await p.$('.fbx')),JSON.stringify(fx));
   await c.close();}
+  // الجولة التعريفية: تظهر لأول مرة فقط، و«تخطٍّ» يغلقها، وآخر شريحة تشرح التثبيت على الآيفون
+  {const c=await context(b,DEVS.iphone,url);const p=await c.newPage();p.on('pageerror',e=>{bad++;console.log('✘ خطأ',String(e));});
+    await p.goto(url+'index.html#/');await p.waitForSelector('#intro',{timeout:120000});
+    let n=0;while(await p.$('#itskip')){await p.click('#itnext');n++;if(n>10)break;}
+    const last=await p.textContent('#intro .islide');await p.screenshot({path:path.join(OUT,'intro-install.png')});
+    ck('الجولة: 6 شرائح، وآخرها خطوات «إضافة إلى الشاشة الرئيسية» في الآيفون',n===5&&last.includes('إضافة إلى الشاشة الرئيسية'),`${n} | ${last.slice(0,80)}`);
+    await p.click('#itnext');await p.waitForTimeout(200);await p.reload();await p.waitForTimeout(4000);ck('الجولة لا تظهر ثانية بعد إنهائها',!(await p.$('#intro')));
+    await p.evaluate(()=>localStorage.removeItem('mabadi:intro'));await p.reload();await p.waitForSelector('#intro');await p.screenshot({path:path.join(OUT,'intro-1.png')});
+    await p.click('#itskip');ck('«تخطٍّ» يغلق الجولة',!(await p.$('#intro')));
+    // ترتيب بطاقات الرئيسية
+    const first=()=>p.$eval('#v-home .grid.g3 .tile.book b',e=>e.textContent);const before=await first();
+    await p.click('[data-arrange="cols"]');await p.waitForSelector('.arr');const lastName=await p.$eval('.arr li:last-child b',e=>e.textContent);
+    await p.click('.arr li:last-child [data-mv="top"]');await p.waitForTimeout(200);await p.screenshot({path:path.join(OUT,'arrange.png')});await p.click('.dlg [data-close].btn.primary');
+    await p.reload();await p.waitForTimeout(4000);ck(`ترتيب الكتب: «${lastName}» صار الأول ويبقى بعد إعادة التحميل`,(await first())===lastName&&before!==lastName);
+    await p.click('[data-arrange="cols"]');await p.click('#ardef');await p.waitForTimeout(200);ck('«الترتيب الأصلي» يعيده',(await first())===before);
+    await p.evaluate(()=>document.querySelector('[data-a2="settings"]').click());await p.waitForSelector('.verline');ck('رقم الإصدار ظاهر في الإعدادات',/الإصدار \d{4}\.\d{2}\.\d{2}/.test(await p.textContent('.verline')));
+    await c.close();}
+  // الآيباد: زر «طباعة» لا يتداخل مع رابط «الدليل»
+  for(const [n,vp] of [['ipad-land',{width:1180,height:820}],['ipad-port',{width:820,height:1180}]]){const c=await context(b,{viewport:vp,deviceScaleFactor:2,isMobile:true,hasTouch:true},url);
+    await c.addInitScript(()=>{localStorage.setItem('mabadi:intro','1');localStorage.setItem('mabadi:bknudge','9999999999999');});const p=await c.newPage();
+    const bad2=[];for(const r of ['#/p/V09L-0184','#/a/LAW-67-1980-A0001','#/law/LAW-6-2010','#/saved']){await p.goto(url+'index.html'+r);await p.waitForTimeout(3500);
+      const ov=await p.evaluate(()=>{const v=document.querySelector('.view:not([hidden])')||document,g=[...document.querySelectorAll('.guidelnk')].find(e=>e.offsetParent);if(!g)return null;const a=g.getBoundingClientRect();
+        return [...document.querySelectorAll('.vh .btn, .vh h2')].filter(e=>e.offsetParent).some(e=>{const r=e.getBoundingClientRect();return !(r.right<=a.left||r.left>=a.right||r.bottom<=a.top||r.top>=a.bottom);});});
+      if(ov)bad2.push(r);}
+    await p.goto(url+'index.html#/p/V09L-0184');await p.waitForTimeout(3500);await p.screenshot({path:path.join(OUT,n+'-item.png')});
+    ck(`${n}: رابط «الدليل» لا يتداخل مع أزرار الرأس`,!bad2.length,bad2.join(', '));await c.close();}
 }finally{await b.close();server.close();}
 console.log(`\n${ok} ✔ / ${bad} ✘`);process.exit(bad?1:0);

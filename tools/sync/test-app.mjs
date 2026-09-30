@@ -11,7 +11,7 @@ const {server,url}=await serve();const b=await browser();
 async function dev(name,opts,seed){const c=await context(b,{acceptDownloads:true,...opts},url);
   // في الاختبار لا نافذة اختيار ملفات للنظام: يُعطَّل File System Access فيُستعمل التنزيل و<input type=file>
   await c.addInitScript(seed=>{delete window.showSaveFilePicker;delete window.showOpenFilePicker;delete window.showDirectoryPicker;
-    if(!sessionStorage.getItem('seeded')){localStorage.clear();for(const k in seed)localStorage.setItem(k,seed[k]);sessionStorage.setItem('seeded','1');}},seed||{});
+    if(!sessionStorage.getItem('seeded')){localStorage.clear();for(const k in seed)localStorage.setItem(k,seed[k]);localStorage.setItem('mabadi:intro','1');sessionStorage.setItem('seeded','1');}},seed||{});
   const p=await c.newPage();p.on('dialog',d=>d.accept());p.on('pageerror',e=>{bad++;console.log('✘ خطأ في صفحة',name,String(e));});
   await p.goto(url+'index.html#/saved');await p.waitForFunction(()=>document.querySelector('.shell')&&!document.getElementById('loading')&&typeof AmaliSync==='object',null,{timeout:120000});await p.waitForTimeout(600);return {c,p};}
 const openSync=async p=>{await p.evaluate(()=>document.querySelector('[data-a2="settings"]').click());await p.waitForSelector('#syncsec');await p.evaluate(()=>document.getElementById('syncsec').scrollIntoView());await p.waitForSelector('#syncbox .syncstep');};

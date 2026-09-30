@@ -418,6 +418,51 @@ function wirePages(root){root.querySelectorAll('details.pgtxt').forEach(d=>d.add
   const p=BYID[d.dataset.id],g=+d.dataset.g,reg=p.rg.find(r=>r.page===g),ls=await pageLines(p.col,g);
   d.querySelector('.ptx').innerHTML=ls.map(([t,top,size,bb])=>`<div class="ln${reg&&top>=reg.bbox[1]-1&&top<=reg.bbox[3]?' hit':''}${bb||size>=18?' h':''}${size<=12?' small':''}">${esc(t)}</div>`).join('')||'—';}));}
 function openSrc(p){const b=side(`${COLS[p.col].name} · ${p.n} · ص ${printed(p).join('–')}`,pagesHTML(p));wirePages(b);const hb=b.querySelector('.hlbox');if(hb)setTimeout(()=>{b.scrollTop=Math.max(0,hb.offsetTop+hb.parentElement.offsetTop-b.clientHeight/3)},40);}
+// ---------- ترتيب بطاقات الرئيسية بحسب اهتمام المستخدم (يُحفظ في هذا الجهاز)
+function ordered(kind,list){const o=((S.ord||{})[kind]||[]).filter(k=>list.includes(k));return [...o,...list.filter(k=>!o.includes(k))];}
+function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fams'?k:COLS[k].name;
+  const draw=()=>{const L=ordered(kind,base);const d=dlg(`${svg('filter')} ترتيب ${kind==='fams'?'الموضوعات':'الكتب'}`,`<div class="set"><p class="hint" style="margin:0">ضع ما تعمل فيه أولًا. يُحفظ الترتيب في هذا الجهاز.</p>
+    <ol class="arr">${L.map((k,i)=>`<li><span class="an">${i+1}</span><b>${esc(name(k))}</b><span class="ab"><button class="btn icon" data-mv="top" data-k="${esc(k)}" aria-label="إلى الأول"${i?'':' disabled'}>⤒</button><button class="btn icon" data-mv="up" data-k="${esc(k)}" aria-label="أعلى"${i?'':' disabled'}>▲</button><button class="btn icon" data-mv="down" data-k="${esc(k)}" aria-label="أسفل"${i<L.length-1?'':' disabled'}>▼</button></span></li>`).join('')}</ol>
+    <div class="rowi"><button class="btn primary" data-close>تم</button><button class="btn" id="ardef">الترتيب الأصلي</button></div></div>`);
+    d.addEventListener('click',e=>{const b=e.target.closest('[data-mv]');if(!b)return;const L2=ordered(kind,base),i=L2.indexOf(b.dataset.k);L2.splice(i,1);
+      L2.splice(b.dataset.mv==='top'?0:b.dataset.mv==='up'?i-1:i+1,0,b.dataset.k);S.ord=Object.assign({},S.ord,{[kind]:L2});saveS();viewHome();draw();
+      const nb=document.querySelector(`.arr [data-mv="${b.dataset.mv}"][data-k="${CSS.escape(b.dataset.k)}"]`);if(nb&&!nb.disabled)nb.focus();});
+    $('ardef').onclick=()=>{const o=Object.assign({},S.ord);delete o[kind];S.ord=o;saveS();viewHome();draw();};};
+  draw();}
+// صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
+function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
+// ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
+const APP_BUILD='202609301920';
+const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
+// ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
+const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
+function introInstall(){const ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+  if(IS_STANDALONE_APP())return `<p class="ok">✓ التطبيق مثبّت على هذا الجهاز.</p>`;
+  if(ios)return `<ol class="steps"><li>اضغط زر المشاركة <span class="kbd">${svg('share')}</span> في Safari${/iPad/.test(navigator.userAgent)||navigator.maxTouchPoints>1&&!/iPhone/.test(navigator.userAgent)?' (أعلى الشاشة)':' (أسفل الشاشة)'}.</li><li>اختر «إضافة إلى الشاشة الرئيسية».</li><li>اضغط «إضافة». يفتح بعدها كتطبيق، ويعمل دون اتصال، وتبقى محفوظاتك في أمان.</li></ol>`;
+  return `${deferredInstall?`<p><button class="btn primary" id="itinst">${svg('download')}تثبيت الآن</button></p>`:''}<ol class="steps"><li><b>أندرويد:</b> قائمة Chrome ⋮ ← «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».</li><li><b>الحاسوب:</b> أيقونة التثبيت في شريط العنوان في Chrome أو Edge.</li></ol>`;}
+const INTRO=[
+ ['landmark','أهلًا بك في «مبادئ التمييز»','مبادئ محكمة التمييز الكويتية والتشريعات الكويتية في مكان واحد: منقولة حرفيًا من مصادرها، مجانية، وتعمل دون اتصال.'],
+ ['search','ابحث كما تفكّر','بكلمة أو عبارة أو رقم طعن أو رقم مادة. البحث يتجاهل التشكيل والهمزات، و«تصفية» تضيّق النتائج بالموضوع والدائرة والقانون.'],
+ ['page','المبدأ ومصدره','نص المبدأ مع إسناده، وصورة صفحته في الكتاب لتطابقه بنظرة. انسخه جاهزًا للإيراد، أو اطبعه، أو استمع إليه.'],
+ ['scroll','التشريعات مادةً مادة','القوانين والمراسيم واللوائح، مع صورة صفحة كل مادة، ومذكرتها الإيضاحية، ومبادئ التمييز التي تحيل إليها.'],
+ ['star','محفوظاتك معك','احفظ المبادئ في مجلدات مثل «قضية 12/2026» وأضف ملاحظاتك. وانقلها إلى أجهزتك الأخرى بمزامنة مشفّرة، بلا حساب ولا خادم.'],
+ ['download','ثبّته على جهازك',null]];
+function introShow(force){if(!force&&(LS.get('intro',0)||window.self!==window.top))return;let i=0;const w=document.createElement('div');w.className='intro';w.id='intro';w.setAttribute('role','dialog');w.setAttribute('aria-label','جولة تعريفية');
+  document.body.appendChild(w);document.body.classList.add('noscroll');
+  const end=()=>{LS.set('intro',Date.now());w.remove();document.body.classList.remove('noscroll');};
+  const draw=()=>{const [ic,t,x]=INTRO[i],last=i===INTRO.length-1;
+    w.innerHTML=`<div class="itop"><span class="ist">${i+1} / ${INTRO.length}</span>${last?'':'<button class="btn" id="itskip">تخطٍّ</button>'}</div>
+     <div class="islide"><div class="iic">${svg(ic)}</div><h2>${esc(t)}</h2>${x?`<p>${esc(x)}</p>`:`<p>ليفتح بلمسة من الشاشة الرئيسية كأي تطبيق، ويعمل دون اتصال، ولا يمسح المتصفح محفوظاتك.</p>${introInstall()}`}</div>
+     <div class="ibot"><div class="dots">${INTRO.map((_,k)=>`<i${k===i?' class="on"':''}></i>`).join('')}</div>
+      <div class="inav">${i?'<button class="btn" id="itprev">السابق</button>':'<span></span>'}<button class="btn primary" id="itnext">${last?'ابدأ الاستعمال':'التالي'}</button></div></div>`;
+    weave(w.querySelector('.itop'),7);
+    if($('itskip'))$('itskip').onclick=end;if($('itprev'))$('itprev').onclick=()=>{i--;draw();};$('itnext').onclick=()=>{if(last)end();else{i++;draw();}};
+    if($('itinst'))$('itinst').onclick=()=>installDlg();$('itnext').focus();};
+  let x0=null;w.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;},{passive:true});
+  w.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)<50)return;
+    if(dx>0&&i<INTRO.length-1){i++;draw();}else if(dx<0&&i>0){i--;draw();}},{passive:true});   // في العربية السحب يمينًا = التالي
+  w.addEventListener('keydown',e=>{if(e.key==='Escape')end();if(e.key==='ArrowLeft'&&i<INTRO.length-1){i++;draw();}if(e.key==='ArrowRight'&&i>0){i--;draw();}});
+  draw();}
 // ---------- HOME
 function dailyPick(){const pool=PR.filter(p=>!p.rv.length&&p.c.length);const d=new Date();const k=d.getFullYear()*372+d.getMonth()*31+d.getDate();return pool[(k*2654435761>>>0)%pool.length];}
 function mini(p){return `<button class="mini card" data-go="#/p/${p.id}"><span class="s">${esc(COLS[p.col].name)} · ${p.n}</span><span class="t">${esc(p.ttl||p.p[0])}</span></button>`;}
@@ -432,8 +477,8 @@ function viewHome(){
    <div>
    <h2>مبدأ اليوم</h2><div class="card daily"><div class="lbl">${svg('star')} ${esc(COLS[dp.col].title)} — ${dp.n}</div><div class="text">${esc(dp.p.join(' '))}</div><ul class="cits">${dp.c.map(c=>`<li>${esc(c.raw)}</li>`).join('')}</ul><button class="btn" data-go="#/p/${dp.id}">${svg('open')}فتح المبدأ</button></div>
    ${recent.length?`<h2>فتحتها مؤخرًا</h2><div class="hrow">${recent.map(mini).join('')}</div>`:''}
-   <h2>تصفح حسب الموضوع</h2><div class="grid g3">${FAMS.map(famTile).join('')}</div>
-   <h2>الكتب والمجموعات</h2><div class="grid g3">${ORDER.map(bookTile).join('')}</div>
+   <div class="sech"><h2>تصفح حسب الموضوع</h2><button class="btn sm" data-arrange="fams">${svg('filter')}ترتيب</button></div><div class="grid g3">${ordered('fams',FAMS).map(famTile).join('')}</div>
+   <div class="sech"><h2>الكتب والمجموعات</h2><button class="btn sm" data-arrange="cols">${svg('filter')}ترتيب</button></div><div class="grid g3">${ordered('cols',ORDER).map(bookTile).join('')}</div>
    <h2>المكتبة بالأرقام</h2><div class="stats"><div class="stat card"><b>${nf(PR.length)}</b><span>مبدأ</span></div><div class="stat card"><b>${nf(Object.keys(RUL).length)}</b><span>حكمًا مفهرسًا</span></div><div class="stat card"><b>${ORDER.length}</b><span>مجموعة</span></div><div class="stat card"><b>${LORD.length}</b><span>قانونًا مُحالًا إليه</span></div></div>
    </div>`;
   weave(el.querySelector('.hero'),8);
@@ -586,7 +631,7 @@ async function viewReport(){const el=$('v-report');if(repDone)return;repDone=tru
     <h3>الفحوص</h3><div class="tbl"><table><thead><tr><th>الفحص</th><th>النتيجة</th><th>التفصيل</th></tr></thead><tbody>${R.checks.map(([a,ok,c])=>`<tr><td>${esc(a)}</td><td class="${ok?'okc':'flc'}">${ok?'اجتاز':'ملاحظات'}</td><td>${esc(c)}</td></tr>`).join('')}</tbody></table></div>
     <h3>يحتاج مراجعة (${ps.length})</h3><div class="tbl"><table><tbody>${ps.map(p=>`<tr><td><button class="btn" data-go="#/p/${p.id}">${p.n}</button></td><td>${p.pg.map(g=>g+COLS[p.col].off).join('–')}</td><td>${p.rv.map(esc).join('<br>')}</td></tr>`).join('')}</tbody></table></div>
     ${R.notes&&R.notes.length?`<h3>ملاحظات</h3><div class="prose"><ul>${R.notes.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:''}</details>`}).join('');}
-function viewAbout(){$('v-about').innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>عن المكتبة</h2></div><div class="prose">
+function viewAbout(){setTimeout(aboutVer,0);$('v-about').innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>عن المكتبة</h2></div><div class="prose">
   <p>«مبادئ التمييز» مبادرة شخصية مجانية غير تجارية، تجمع مبادئ محكمة التمييز الكويتية من مجموعاتها الرسمية وإصدارات مكتبها الفني في مكان واحد، ليسهل البحث فيها ونسخها وطباعتها، ولو دون اتصال.</p>
   <h3>قواعد النزاهة</h3><ul>
    <li>نص كل مبدأ منقول <b>حرفيًا</b> كما ورد في مصدره. لا يُعاد صياغته ولا يُختصر ولا يُصحَّح إملائيًا.</li>
@@ -619,10 +664,13 @@ function settingsDlg(toSync){
    <section><h4>الدليل والفيديو</h4><div id="gvid"></div><div class="rowi"><button class="btn primary" id="gopen">${svg('open')}عرض الدليل</button><a class="btn" href="${GUIDE_PDF}" download="دليل-مبادئ-التمييز.pdf">${svg('download')}PDF</a><span class="hint">دليل مصوّر بفصل لكل قسم. وفي أعلى كل قسم رابط «الدليل» يفتح فصله مباشرة.</span></div></section>
    <section><h4>رأيك</h4><div class="rowi"><button class="btn primary" data-a2="rate">${svg('star')}ملاحظاتك واقتراحاتك</button><span class="hint">تقييم لكل قسم، يُحفظ في جهازك وترسله أنت.</span></div></section>
    <section id="syncsec"><h4>المزامنة بين أجهزتك</h4><div id="syncbox"></div></section>
+   <section><h4>الجولة التعريفية</h4><div class="rowi"><button class="btn" id="tour">${svg('info')}عرض الجولة التعريفية</button><button class="btn" data-a2="install">${svg('download')}تثبيت التطبيق</button></div></section>
    <section><h4>بياناتي</h4><div class="rowi"><button class="btn" id="bk">${svg('download')}نسخة احتياطية</button><label class="btn" style="cursor:pointer">استعادة<input type="file" accept="application/json" id="rs" hidden></label></div>
-    <span class="hint">نسخة غير مشفّرة: المحفوظات والمجلدات والملاحظات والإعدادات والسجل في ملف واحد، للاحتفاظ به أو نقله يدويًا.</span></section></div>`);
+    <span class="hint">نسخة غير مشفّرة: المحفوظات والمجلدات والملاحظات والإعدادات والسجل في ملف واحد، للاحتفاظ به أو نقله يدويًا.</span></section>
+   <p class="verline">الإصدار ${buildLabel()}</p></div>`);
   ttsVoiceUI();if($('vsel')){$('vsel').onchange=()=>{S.voice=$('vsel').value;upd();};$('vrate').oninput=()=>{S.rate=+$('vrate').value;$('vratev').textContent=S.rate+'×';upd();};
    $('vtest').onclick=()=>ttsSpeak('test','تجربة الصوت','المادة 41 من القانون رقم 6/2010: يستحق العامل مكافأة نهاية الخدمة. (الطعن 730/2012 عمالي جلسة 21/1/2014)',null);}
+  $('tour').onclick=()=>{closeDlg();introShow(true);};
   $('gopen').onclick=()=>{closeDlg();openGuide('');};
   syncUI();if(toSync===true)setTimeout(()=>{const x=$('syncsec');if(x)x.scrollIntoView({block:'start'});},60);
   fetch('docs/intro.jpg',{method:'HEAD'}).then(r=>{if(!r.ok||!$('gvid'))return;$('gvid').innerHTML=`<button class="vposter" id="gvp" aria-label="تشغيل الفيديو التعريفي"><img src="docs/intro.jpg" alt=""><span class="play">${svg('open')}تشغيل الفيديو التعريفي</span></button>`;
@@ -854,6 +902,7 @@ document.addEventListener('click',e=>{const t=e.target;
     if(k==='clrhist'){HIST=[];LS.set('hist',HIST);viewSaved();}return;}
   const st=t.closest('[data-st]');if(st){savedTab=st.dataset.st;viewSaved();return;}
   const hf=t.closest('[data-hfav]');if(hf){if(BYID[hf.dataset.hfav])favDlg(BYID[hf.dataset.hfav]);return;}
+  const ar=t.closest('[data-arrange]');if(ar){arrangeDlg(ar.dataset.arrange);return;}
   const sf=t.closest('[data-sf]');if(sf){savedFold=sf.dataset.sf;viewSaved();return;}
   const mic=t.closest('[data-mic]');if(mic){listen(mic.dataset.mic,mic);return;}
   const gb=t.closest('[data-go]');if(gb){go(gb.dataset.go);return;}
@@ -863,8 +912,12 @@ document.addEventListener('click',e=>{const t=e.target;
   const qb=t.closest('[data-q]');if(qb){doSearch(qb.dataset.q);return;}
   const cl=t.closest('[data-clr]');if(cl){F[cl.dataset.clr]=cl.dataset.clr==='rv'?false:'';syncInputs();runSearch();return;}
 });
-if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-buildSearch();route();setTimeout(loadAllLaws,1500);if(SYNC)SYNC.restore().then(()=>{if($('syncbox'))syncUI();}).catch(()=>{});setTimeout(syncNudge,2500);if(!location.hash||location.hash==='#/')playWeave();else wovenOnce=true;
+if('serviceWorker' in navigator){const hadSW=!!navigator.serviceWorker.controller;navigator.serviceWorker.register('sw.js').catch(()=>{});
+  // عند وصول إصدار جديد: شريط يعرض رقمه ويعيد التحميل بضغطة
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!hadSW||$('updbar'))return;const e=document.createElement('div');e.id='updbar';e.className='nudge';e.setAttribute('role','status');
+    e.innerHTML=`<b>صدر تحديث للتطبيق.</b> أعد التحميل لتعمل بالإصدار الجديد.<span><button class="btn primary" id="updgo">إعادة التحميل</button><button class="btn" id="updno">لاحقًا</button></span>`;
+    document.body.appendChild(e);$('updgo').onclick=()=>location.reload();$('updno').onclick=()=>e.remove();});}
+buildSearch();route();setTimeout(loadAllLaws,1500);if(SYNC)SYNC.restore().then(()=>{if($('syncbox'))syncUI();}).catch(()=>{});setTimeout(syncNudge,2500);introShow();if(!location.hash||location.hash==='#/')playWeave();else wovenOnce=true;
 document.body.insertAdjacentHTML('beforeend',`<button class="totop" id="totop" hidden aria-label="العودة إلى الأعلى">${svg('back').replace('<svg','<svg style="transform:rotate(-90deg)"')}</button>`);
 $('totop').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 addEventListener('scroll',()=>{$('totop').hidden=scrollY<900;},{passive:true});

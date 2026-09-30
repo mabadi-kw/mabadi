@@ -6,7 +6,7 @@ let ok=0,bad=0;const ck=(n,c,x='')=>{if(c){ok++;console.log('✔',n);}else{bad++
 const {server,url}=await serve();const b=await browser();
 try{const c=await context(b,{viewport:{width:1280,height:800}},url);
   // الطباعة الفعلية تُستبدل بتسجيل الحالة لحظة الطباعة
-  await c.addInitScript(()=>{localStorage.setItem('mabadi:bknudge','9999999999999');window.print=()=>{const r=document.getElementById('printroot');
+  await c.addInitScript(()=>{localStorage.setItem('mabadi:bknudge','9999999999999');localStorage.setItem('mabadi:intro','1');window.print=()=>{const r=document.getElementById('printroot');
     window.__pr={on:document.body.classList.contains('printing'),text:r.innerText,imgs:r.querySelectorAll('img.pgcut').length,title:document.title};};});
   const p=await c.newPage();p.on('pageerror',e=>{bad++;console.log('✘ خطأ',String(e));});
   await p.goto(url+'index.html#/');await p.waitForTimeout(3000);
