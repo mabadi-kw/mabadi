@@ -316,20 +316,22 @@ function noteDlg(p){
 }
 // ---------- الطباعة: تُطبع المادة المطلوبة وحدها (لا صفحة التطبيق)، في طبقة طباعة داخل الصفحة نفسها بخطوطها
 const prDate=()=>new Date().toLocaleDateString('ar-KW',{year:'numeric',month:'long',day:'numeric'});
-// تحوّل صور الصفحات (خلايا من شبكة) إلى صور مقصوصة، لأن المتصفح لا يطبع خلفيات CSS افتراضيًا
-async function prCutPages(root){await Promise.all([...root.querySelectorAll('.pgimg[data-gc]')].map(async d=>{try{
-  const gc=+d.dataset.gc,cx=+d.dataset.cx,ry=+d.dataset.ry,im=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=d.dataset.src;});
-  const w=Math.round(im.naturalWidth/gc),h=Math.round(im.naturalHeight/10),c=document.createElement('canvas');c.width=w;c.height=h;
-  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,cx*w,ry*h,w,h,0,0,w,h);
-  const img=document.createElement('img');img.className='pgcut';img.alt='';img.src=c.toDataURL('image/jpeg',.9);d.style.backgroundImage='none';d.prepend(img);}catch(_){}}));}
-async function printHTML(title,html,sub=''){let r=$('printroot');if(!r){r=document.createElement('div');r.id='printroot';document.body.appendChild(r);}
+// صور الصفحات في الطباعة: عنصر <img> للشبكة مقصوص داخل إطاره (المتصفح لا يطبع خلفيات CSS افتراضيًا).
+// تُبنى الطبقة وتُطبع مباشرة داخل ضغطة المستخدم، لأن Safari يحجب الطباعة إن تأخرت عن الضغطة.
+function prImgs(root){root.querySelectorAll('.pgimg[data-gc]').forEach(d=>{const gc=+d.dataset.gc,cx=+d.dataset.cx,ry=+d.dataset.ry;
+  const img=document.createElement('img');img.className='pgcut';img.alt='';img.src=d.dataset.src;img.style.cssText=`position:absolute;width:${gc*100}%;height:1000%;left:${-cx*100}%;top:${-ry*100}%;max-width:none`;
+  d.style.backgroundImage='none';d.prepend(img);});}
+// تحميل صور الشبكات مسبقًا عند فتح حوار الطباعة، لتكون جاهزة لحظة الضغط
+const PRPRE={};function prPreload(html){(html.match(/data-src="([^"]+)"/g)||[]).forEach(m=>{const u=m.slice(10,-1);if(!PRPRE[u]){const i=new Image();i.src=u;PRPRE[u]=i;}});}
+function printHTML(title,html,sub=''){let r=$('printroot');if(!r){r=document.createElement('div');r.id='printroot';document.body.appendChild(r);}
   r.innerHTML=`<header class="prh"><span>مبادئ التمييز</span><span>${esc(prDate())}</span></header><h1>${esc(title)}</h1>${sub?`<div class="prsub">${esc(sub)}</div>`:''}${html}
    <footer class="prf">طُبع من «مبادئ التمييز» — النصوص منقولة حرفيًا من مصادرها. راجع المصدر الرسمي قبل الاعتماد.</footer>`;
-  r.querySelectorAll('details').forEach(d=>d.remove());
-  await prCutPages(r);if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+  r.querySelectorAll('details').forEach(d=>d.remove());prImgs(r);
   const t0=document.title;document.title=title;document.body.classList.add('printing');
   const done=()=>{document.body.classList.remove('printing');document.title=t0;r.innerHTML='';window.removeEventListener('afterprint',done);};
-  window.addEventListener('afterprint',done);setTimeout(()=>{window.print();if(/iP(hone|ad)/.test(navigator.userAgent))setTimeout(done,1500);},80);}
+  window.addEventListener('afterprint',done);
+  window.print();   // متزامن داخل الضغطة
+  if(/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1))setTimeout(done,1500);}
 const prPara=t=>`<p>${esc(t)}</p>`;
 function prPrinciple(p,withPg){const C=COLS[p.col];
   return `<section class="prblock"><div class="prmeta">${esc(C.title)} — المبدأ ${p.n} — ص ${printed(p).join('–')}</div>${p.ttl?`<h2>${esc(p.ttl)}</h2>`:''}
@@ -363,6 +365,9 @@ function printDlg(){const h=decodeURIComponent((location.hash||'').replace(/^#\/
   else if(h.startsWith('m/')){const lid=h.slice(2).split('/')[0],M=MEMO[lid+'-M'];if(!M)return;T=M.title;
     const np=new Set(M.paras.map(x=>x.pg)).size;O=[['المذكرة كاملة',`نصها كما في الطبعة — ${np} صفحة في الأصل${np>60?'، فالطباعة طويلة':''}`,()=>printHTML(T,M.paras.map(p=>p.h?`<h2 class="prsec">${esc(p.t)}</h2>`:prPara(p.t)).join(''),M.note)]];}
   else return window.print();
+  const cur=h.startsWith('p/')?BYID[h.slice(2)]:h.startsWith('a/')?ARTBYID[h.slice(2)]:null;
+  if(cur)prPreload(h.startsWith('p/')?pagesHTML(cur):lawPagesHTML(cur));
+  if(h.startsWith('r/'))prPreload((RUL[h.slice(2)]||[]).filter(i=>BYID[i]).map(i=>pagesHTML(BYID[i])).join(''));
   if(O.length===1&&!h.startsWith('m/'))return O[0][2]();
   const d=dlg(`${svg('print')} طباعة`,`<div class="set"><p class="hint" style="margin:0">${esc(T)}</p><div class="prchoices">${O.map((o,i)=>`<button class="btn" data-pr="${i}"><b>${esc(o[0])}</b><small>${esc(o[1])}</small></button>`).join('')}</div></div>`);
   d.addEventListener('click',e=>{const b=e.target.closest('[data-pr]');if(!b)return;closeDlg();O[+b.dataset.pr][2]();});}
@@ -432,7 +437,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202609301936';
+const APP_BUILD='202609302007';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -440,28 +445,41 @@ function introInstall(){const ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(n
   if(IS_STANDALONE_APP())return `<p class="ok">✓ التطبيق مثبّت على هذا الجهاز.</p>`;
   if(ios)return `<ol class="steps"><li>اضغط زر المشاركة <span class="kbd">${svg('share')}</span> في Safari${/iPad/.test(navigator.userAgent)||navigator.maxTouchPoints>1&&!/iPhone/.test(navigator.userAgent)?' (أعلى الشاشة)':' (أسفل الشاشة)'}.</li><li>اختر «إضافة إلى الشاشة الرئيسية».</li><li>اضغط «إضافة». يفتح بعدها كتطبيق، ويعمل دون اتصال، وتبقى محفوظاتك في أمان.</li></ol>`;
   return `${deferredInstall?`<p><button class="btn primary" id="itinst">${svg('download')}تثبيت الآن</button></p>`:''}<ol class="steps"><li><b>أندرويد:</b> قائمة Chrome ⋮ ← «تثبيت التطبيق» أو «إضافة إلى الشاشة الرئيسية».</li><li><b>الحاسوب:</b> أيقونة التثبيت في شريط العنوان في Chrome أو Edge.</li></ol>`;}
+// لكل شريحة: أيقونة، عنوان، نص، ومشهد مصغّر من التطبيق نفسه (بيانات حقيقية، دون أي نص مخترع)
+function introVis(k){
+  if(k==='search')return `<div class="ivis"><div class="isb">${svg('search')}<span>مكافأة نهاية الخدمة</span><em>${svg('filter')}تصفية</em></div>
+    <div class="ichips">${['قانون العمل','المادة 51','عمالي'].map(x=>`<span>${x}</span>`).join('')}</div></div>`;
+  if(k==='item'){const p=BYID['V09L-0184']||PR[0];if(!p)return '';const t=p.p[0].split(' ').slice(0,18).join(' ');
+    return `<div class="ivis icard"><b>${esc(COLS[p.col].name)} · ${p.n}</b><p>${esc(t)}…</p><small>${esc((p.c[0]||{}).raw||'')}</small>
+     <div class="iacts">${[['copy','نسخ'],['print','طباعة'],['speak','استماع'],['page','ص '+printed(p)[0]]].map(([i,l])=>`<span>${svg(i)}${l}</span>`).join('')}</div></div>`;}
+  if(k==='laws'){const L=['LAW-67-1980','LAW-6-2010','LAW-68-1980'].map(i=>LAWBYID[i]).filter(Boolean);
+    return `<div class="ivis ilist">${L.map(l=>`<div>${svg('scroll')}<b>${esc(l.short||l.title)}</b><small>${esc(l.type||'')} ${l.number||''}/${l.year||''}</small></div>`).join('')}</div>`;}
+  if(k==='saved')return `<div class="ivis ichips big">${['قضية 12/2026','إنهاء الخدمة','الإثبات'].map(x=>`<span>${svg('star')}${x}</span>`).join('')}<div class="isync">${svg('lock')}مزامنة مشفّرة بين الحاسوب والآيفون والآيباد</div></div>`;
+  return '';}
 const INTRO=[
- ['landmark','أهلًا بك في «مبادئ التمييز»','مبادئ محكمة التمييز الكويتية والتشريعات الكويتية في مكان واحد: منقولة حرفيًا من مصادرها، مجانية، وتعمل دون اتصال.'],
- ['search','ابحث كما تفكّر','بكلمة أو عبارة أو رقم طعن أو رقم مادة. البحث يتجاهل التشكيل والهمزات، و«تصفية» تضيّق النتائج بالموضوع والدائرة والقانون.'],
- ['page','المبدأ ومصدره','نص المبدأ مع إسناده، وصورة صفحته في الكتاب لتطابقه بنظرة. انسخه جاهزًا للإيراد، أو اطبعه، أو استمع إليه.'],
- ['scroll','التشريعات مادةً مادة','القوانين والمراسيم واللوائح، مع صورة صفحة كل مادة، ومذكرتها الإيضاحية، ومبادئ التمييز التي تحيل إليها.'],
- ['star','محفوظاتك معك','احفظ المبادئ في مجلدات مثل «قضية 12/2026» وأضف ملاحظاتك. وانقلها إلى أجهزتك الأخرى بمزامنة مشفّرة، بلا حساب ولا خادم.'],
- ['download','ثبّته على جهازك',null]];
+ ['home','','مكتبة مبادئ محكمة التمييز الكويتية والتشريعات الكويتية في مكان واحد: منقولة حرفيًا من مصادرها، مجانية، وتعمل دون اتصال.'],
+ ['search','ابحث كما تفكّر','بكلمة أو عبارة أو رقم طعن أو رقم مادة. البحث يتجاهل التشكيل والهمزات، و«تصفية» تضيّق النتائج.'],
+ ['item','المبدأ ومصدره','نص المبدأ مع إسناده وصورة صفحته في الكتاب. انسخه جاهزًا للإيراد، أو اطبعه، أو استمع إليه.'],
+ ['laws','التشريعات مادةً مادة','القوانين والمراسيم واللوائح، مع صورة صفحة كل مادة ومذكرتها الإيضاحية والمبادئ التي تحيل إليها.'],
+ ['saved','محفوظاتك معك','مجلدات لقضاياك وملاحظاتك، تنقلها إلى أجهزتك الأخرى بلا حساب ولا خادم.'],
+ ['install','ثبّته على جهازك','يفتح بلمسة من الشاشة الرئيسية كأي تطبيق، ويعمل دون اتصال، ويحفظ محفوظاتك.']];
 function introShow(force){if(!force&&(LS.get('intro',0)||window.self!==window.top))return;let i=0;const w=document.createElement('div');w.className='intro';w.id='intro';w.setAttribute('role','dialog');w.setAttribute('aria-label','جولة تعريفية');
   document.body.appendChild(w);document.body.classList.add('noscroll');
+  w.innerHTML='<div class="iin"></div>';weave(w,10);const inn=w.querySelector('.iin');
   const end=()=>{LS.set('intro',Date.now());w.remove();document.body.classList.remove('noscroll');};
-  const draw=()=>{const [ic,t,x]=INTRO[i],last=i===INTRO.length-1;
-    w.innerHTML=`<div class="itop"><span class="ist">${i+1} / ${INTRO.length}</span>${last?'':'<button class="btn" id="itskip">تخطٍّ</button>'}</div>
-     <div class="islide"><div class="iic">${svg(ic)}</div><h2>${esc(t)}</h2>${x?`<p>${esc(x)}</p>`:`<p>ليفتح بلمسة من الشاشة الرئيسية كأي تطبيق، ويعمل دون اتصال، ولا يمسح المتصفح محفوظاتك.</p>${introInstall()}`}</div>
-     <div class="ibot"><div class="dots">${INTRO.map((_,k)=>`<i${k===i?' class="on"':''}></i>`).join('')}</div>
-      <div class="inav">${i?'<button class="btn" id="itprev">السابق</button>':'<span></span>'}<button class="btn primary" id="itnext">${last?'ابدأ الاستعمال':'التالي'}</button></div></div>`;
-    weave(w.querySelector('.itop'),7);
+  const draw=()=>{const [k,t,x]=INTRO[i],last=i===INTRO.length-1;
+    inn.innerHTML=`<div class="itop"><span class="ist">${i+1} / ${INTRO.length}</span>${last?'':'<button class="ibtn ghost" id="itskip">تخطٍّ</button>'}</div>
+     <div class="islide" data-k="${k}">${k==='home'?`<img class="ilogo" src="icons/icon.svg" alt=""><h1 class="iword">مبادئ التمييز</h1><div class="iline"></div><p class="ilead">${esc(x)}</p>
+       <div class="istats"><span><b>${nf(PR.length)}</b>مبدأ</span><span><b>${nf(LAWIX.length||0)}</b>تشريع</span><span><b>${ORDER.length}</b>مجموعة</span></div>`
+      :`<div class="iic">${svg(k==='install'?'download':k==='item'?'page':k==='laws'?'scroll':k==='saved'?'star':'search')}</div><h2>${esc(t)}</h2><p>${esc(x)}</p>${k==='install'?introInstall():introVis(k)}`}</div>
+     <div class="ibot"><div class="dots" aria-hidden="true">${INTRO.map((_,j)=>`<i${j===i?' class="on"':''}></i>`).join('')}</div>
+      <div class="inav${i?'':' one'}">${i?'<button class="ibtn ghost" id="itprev">السابق</button>':''}<button class="ibtn gold" id="itnext">${last?'ابدأ الاستعمال':i?'التالي':'ابدأ الجولة'}</button></div></div>`;
     if($('itskip'))$('itskip').onclick=end;if($('itprev'))$('itprev').onclick=()=>{i--;draw();};$('itnext').onclick=()=>{if(last)end();else{i++;draw();}};
-    if($('itinst'))$('itinst').onclick=()=>installDlg();$('itnext').focus();};
+    if($('itinst'))$('itinst').onclick=()=>installDlg();};
   let x0=null;w.addEventListener('touchstart',e=>{x0=e.touches[0].clientX;},{passive:true});
   w.addEventListener('touchend',e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)<50)return;
     if(dx>0&&i<INTRO.length-1){i++;draw();}else if(dx<0&&i>0){i--;draw();}},{passive:true});   // في العربية السحب يمينًا = التالي
-  w.addEventListener('keydown',e=>{if(e.key==='Escape')end();if(e.key==='ArrowLeft'&&i<INTRO.length-1){i++;draw();}if(e.key==='ArrowRight'&&i>0){i--;draw();}});
+  const kd=e=>{if(!document.body.contains(w)){document.removeEventListener('keydown',kd);return;}if(e.key==='Escape')end();if(e.key==='ArrowLeft'&&i<INTRO.length-1){i++;draw();}if(e.key==='ArrowRight'&&i>0){i--;draw();}};document.addEventListener('keydown',kd);
   draw();}
 // ---------- HOME
 function dailyPick(){const pool=PR.filter(p=>!p.rv.length&&p.c.length);const d=new Date();const k=d.getFullYear()*372+d.getMonth()*31+d.getDate();return pool[(k*2654435761>>>0)%pool.length];}

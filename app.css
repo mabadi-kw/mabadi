@@ -490,3 +490,63 @@ body::before{content:"";position:fixed;inset:0 0 auto 0;height:env(safe-area-ins
 #v-home{position:relative}
 #v-home>.guidelnk{position:absolute;z-index:3;top:0;inset-inline-end:0;margin:0;background:rgba(255,255,255,.14);color:#fff;border-color:rgba(255,255,255,.3)}
 @media (min-width:761px){#v-home>.guidelnk{top:12px;inset-inline-end:14px}}
+/* الطباعة (تصحيح): لا شريط علوي، وصورة الصفحة بحجم يتسع مع العنوان في ورقة واحدة */
+@page{margin:12mm}
+@media print{
+  body::before{display:none!important}
+  body.printing #printroot .prpages .pg{max-width:12.5cm;margin:6pt auto;break-inside:avoid}
+  body.printing #printroot .pgimg{position:relative;overflow:hidden;border:.6pt solid #999;background:none!important}
+  body.printing #printroot .pgcut{display:block;position:absolute;height:1000%;max-width:none}
+  body.printing #printroot .pgimg .hlbox{z-index:1}
+  body.printing #printroot .prf{break-before:avoid}
+}
+/* ===== الجولة التعريفية (تصميم ثابت بهوية التطبيق في الوضعين) ===== */
+.intro{background:radial-gradient(120% 70% at 50% 0%,#1b3f73 0%,#0e2748 45%,#081a33 100%);color:#fff;font-family:"Cairo",sans-serif}
+.intro svg.weave{opacity:.55}
+.intro .iin{position:relative;z-index:1;display:flex;flex-direction:column;height:100%}
+.intro .itop{background:none;border:0;min-height:0;padding:12px 18px;padding-top:calc(12px + env(safe-area-inset-top,0px));justify-content:space-between}
+.intro .ist{font:600 .9rem Cairo,sans-serif;color:#e9dcb8;letter-spacing:.5px}
+.ibtn{font:700 1rem Cairo,sans-serif;border-radius:14px;min-height:50px;padding:10px 26px;cursor:pointer;border:1.5px solid transparent;transition:transform .12s,background .2s}
+.ibtn:active{transform:scale(.97)}
+.ibtn.gold{background:linear-gradient(180deg,#d9b865,#b8923a);color:#0b1f3b;box-shadow:0 8px 24px rgba(184,146,58,.35)}
+.ibtn.ghost{background:rgba(255,255,255,.08);color:#fff;border-color:rgba(255,255,255,.28)}
+.intro .itop .ibtn.ghost{min-height:40px;padding:6px 16px;font-size:.92rem}
+.intro .islide{justify-content:center;gap:14px;padding:18px 24px;max-width:600px}
+.intro .islide h2{font:800 1.75rem/1.4 Cairo,sans-serif;color:#fff;margin:6px 0 0}
+.intro .islide p{font:500 1.08rem/1.95 Cairo,sans-serif;color:#dbe4f2;margin:0;max-width:30em}
+.intro .iic{width:84px;height:84px;border-radius:26px;background:linear-gradient(160deg,#d9b865,#9c7a2c);color:#0b1f3b;box-shadow:0 12px 30px rgba(0,0,0,.35),0 0 0 8px rgba(217,184,101,.12)}
+.intro .iic .i{width:42px;height:42px;stroke-width:2}
+/* الشريحة الأولى */
+.intro .ilogo{width:112px;height:112px;border-radius:30px;box-shadow:0 16px 40px rgba(0,0,0,.4),0 0 0 1px rgba(255,255,255,.2)}
+.intro .iword{font:700 2.8rem/1.2 "Reem Kufi",Cairo,sans-serif;margin:8px 0 0;color:#fff;letter-spacing:0}
+.intro .iline{width:120px;height:4px;border-radius:2px;background:linear-gradient(90deg,transparent,#d9b865,transparent)}
+.intro .ilead{font-size:1.15rem!important;color:#e9eef7!important}
+.intro .istats{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+.intro .istats span{display:flex;flex-direction:column;align-items:center;min-width:92px;padding:10px 14px;border-radius:14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);font-size:.85rem;color:#c9d4e6}
+.intro .istats b{font:800 1.35rem Cairo,sans-serif;color:#d9b865;font-variant-numeric:tabular-nums}
+/* المشاهد المصغّرة */
+.ivis{width:100%;max-width:440px;margin-top:6px;text-align:start}
+.isb{display:flex;align-items:center;gap:10px;background:#fff;color:#10213b;border-radius:14px;padding:12px 14px;box-shadow:0 10px 30px rgba(0,0,0,.3);font-weight:600}
+.isb .i{width:20px;height:20px;color:#5e6b80}.isb span{flex:1}.isb em{font-style:normal;display:flex;gap:4px;align-items:center;font-size:.85rem;color:#1a4b8c}
+.ichips{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+.ichips span{display:inline-flex;gap:6px;align-items:center;padding:6px 14px;border-radius:999px;background:rgba(217,184,101,.16);border:1px solid rgba(217,184,101,.4);color:#f1e3bd;font-size:.9rem}
+.ichips.big span{font-size:1rem;padding:8px 16px}.ichips .i{width:16px;height:16px}
+.isync{width:100%;display:flex;gap:8px;align-items:center;justify-content:center;margin-top:8px;color:#c9d4e6;font-size:.92rem}.isync .i{width:18px;height:18px;color:#d9b865}
+.icard{background:#fbf8f1;color:#10213b;border-radius:16px;padding:14px 16px;box-shadow:0 12px 34px rgba(0,0,0,.35);border-top:4px solid #b8923a}
+.icard b{font-size:.85rem;color:#8a6d25}.icard p{font:400 1.02rem/1.9 "Noto Naskh Arabic",serif!important;color:#10213b!important;margin:4px 0!important}
+.icard small{display:block;color:#5e6b80;font-size:.8rem}
+.iacts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}.iacts span{display:inline-flex;gap:4px;align-items:center;font-size:.8rem;border:1px solid #e4ddcc;border-radius:10px;padding:4px 8px;background:#fff}.iacts .i{width:14px;height:14px}
+.ilist{display:grid;gap:8px}.ilist div{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:10px 14px}
+.ilist .i{grid-row:span 2;width:22px;height:22px;color:#d9b865}.ilist b{font-weight:700;color:#fff}.ilist small{color:#b9c6da;font-size:.8rem}
+/* التثبيت */
+.intro .islide .steps{color:#e3e9f3;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:14px;padding:12px 16px 12px 16px;padding-inline-start:34px;max-width:440px}
+.intro .islide .kbd{background:#fff;color:#1a4b8c;border:0}.intro .islide .ok{color:#8fe0a8}
+.intro .islide .btn.primary{background:linear-gradient(180deg,#d9b865,#b8923a);color:#0b1f3b;border:0}
+.intro .ibot{padding-bottom:calc(18px + env(safe-area-inset-bottom,0px))}
+.intro .ibot .dots i{background:rgba(255,255,255,.25)}.intro .ibot .dots i.on{background:#d9b865}
+.intro .inav .ibtn{min-width:130px}
+@media (max-width:420px){.intro .islide h2{font-size:1.5rem}.intro .iword{font-size:2.3rem}.intro .islide{padding:10px 18px;gap:10px}.ivis{max-width:100%}}
+@media (max-height:700px){.intro .ilogo{width:80px;height:80px}.intro .iic{width:64px;height:64px}.intro .istats{display:none}}
+.intro svg.weave{opacity:.35}
+.intro .inav.one{justify-content:center}
+.ibtn:focus{outline:none}.ibtn:focus-visible{outline:3px solid #fff;outline-offset:3px}
