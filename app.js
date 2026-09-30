@@ -246,7 +246,7 @@ function viewMemo(lid,k){const el=$('v-item');el.innerHTML=LOADMSG;k=k==null?nul
   }).catch(()=>{el.innerHTML='<div class="empty">تعذّر تحميل المذكرة.</div>';});}
 // ---------- views scaffold
 const main=$('main');
-const SNAV=[['home','home','الرئيسية','مبدأ اليوم وما فتحته مؤخرًا'],['search','search','البحث',`في ${nf(PR.length)} مبدأً`],['index','book','الفهرس','الموضوعات والقوانين والكتب'],['saved','star','المحفوظات','مجلداتك وملاحظاتك'],['report','report','التقارير','طريقة الاستخراج والتحقق'],['laws','scroll','التشريعات','نصوص القوانين مادةً مادة'],['about','info','عن المكتبة','المصادر وقواعد النزاهة']];
+const SNAV=[['home','home','الرئيسية','مبدأ اليوم وما فتحته مؤخرًا'],['search','search','البحث',`في ${nf(PR.length)} مبدأً`],['laws','scroll','التشريعات','نصوص القوانين مادةً مادة'],['index','book','الفهرس','الموضوعات والقوانين والكتب'],['saved','star','المحفوظات','مجلداتك وملاحظاتك'],['about','info','عن المكتبة','المصادر وقواعد النزاهة'],['report','report','التقارير','طريقة الاستخراج والتحقق']];
 IC.home='M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z';
 main.innerHTML=`<div class="shell"><aside class="sidenav" aria-label="الأقسام">${SNAV.map(([k,i,t,d])=>`<button class="navcard" data-nav="${k}"><span class="ic">${svg(i)}</span><span><b>${t}</b><small>${d}</small></span></button>`).join('')}
  <button class="navcard" data-a2="settings"><span class="ic">${svg('gear')}</span><span><b>الإعدادات</b><small>الخط والمظهر والقفل</small></span></button>
@@ -538,7 +538,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610010030';
+const APP_BUILD='202610010052';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -731,15 +731,19 @@ function printSaved(){const favs=Object.entries(FAV).filter(([id,v])=>BYID[id]&&
    ${favs.map((p,i)=>`<div class="p"><div class="h">${i+1}. ${esc(COLS[p.col].title)} — ${p.n} — ص ${printed(p).join('–')}</div>${p.ttl?`<b>${esc(p.ttl)}</b>`:''}<div>${p.p.map(esc).join('<br>')}</div>${p.rule?`<div><b>القاعدة:</b> ${esc(p.rule)}</div>`:''}<div class="c">${p.c.map(c=>esc(c.raw)).join('<br>')}</div>${NOTE[p.id]?`<div class="n">ملاحظتي: ${esc(NOTE[p.id])}</div>`:''}</div>`).join('')}
    <script>setTimeout(()=>print(),600)<\/script></body></html>`);w.document.close();}
 // ---------- MORE / REPORTS / ABOUT
-function viewMore(){$('v-more').innerHTML=`<h2>المزيد</h2><div class="grid g3">
-  <button class="tile" data-a2="settings"><span class="ic">${svg('gear')}</span><b>الإعدادات</b><span class="n">الخط والحجم والمظهر، واسمك وصورتك، والقفل</span></button>
-  <button class="tile" data-go="#/index/topics"><span class="ic">${svg('book')}</span><b>الفهرس</b><span class="n">الموضوعات والقوانين والكتب</span></button>
-  <button class="tile" data-go="#/laws"><span class="ic">${svg('scroll')}</span><b>التشريعات</b><span class="n">نصوص القوانين مادةً مادة، وكل مادة مع مبادئها</span></button>
-  <button class="tile" data-go="#/report"><span class="ic">${svg('report')}</span><b>تقارير الاستخراج</b><span class="n">طريقة العمل والفحوص وما يحتاج مراجعة</span></button>
-  <button class="tile" data-go="#/about"><span class="ic">${svg('info')}</span><b>عن المكتبة</b><span class="n">المصادر وقواعد النزاهة والروابط</span></button>
-  <button class="tile" data-a2="offline"><span class="ic">${svg('download')}</span><b>العمل دون اتصال</b><span class="n">نزّل المكتبة كاملة مع صور الصفحات</span></button>
-  <button class="tile" data-a2="rate"><span class="ic">${svg('star')}</span><b>ملاحظاتك واقتراحاتك</b><span class="n">قيّم الأقسام وأرسل رأيك عبر واتساب أو البريد</span></button>
-  <button class="tile" data-a2="install"><span class="ic">${svg('open')}</span><b>ثبّت التطبيق</b><span class="n">أضفه إلى الشاشة الرئيسية أو سطح المكتب</span></button>
+function viewMore(){const inst=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
+  const T=(attr,ic,b,n)=>`<button class="tile" ${attr}><span class="ic">${svg(ic)}</span><b>${b}</b><span class="n">${n}</span></button>`;
+  $('v-more').innerHTML=`<h2>المزيد</h2><div class="grid g3">
+  ${T('data-go="#/index/topics"','book','الفهرس','الموضوعات والقوانين والكتب')}
+  ${T('data-a2="settings"','gear','الإعدادات','الخط والحجم والمظهر، واسمك وصورتك، والقفل')}
+  ${T('data-a2="sync"','link','المزامنة بين أجهزتك','انقل محفوظاتك وملاحظاتك بين الهاتف والحاسوب')}
+  ${T('data-a2="offline"','download','العمل دون اتصال','نزّل صور صفحات المصادر كلها إلى الجهاز')}
+  ${T('data-a2="guide"','page','الدليل المصوّر','شرح كل قسم بالصور، خطوة خطوة')}
+  ${inst?'':T('data-a2="install"','open','ثبّت التطبيق','أضفه إلى الشاشة الرئيسية أو سطح المكتب')}
+ </div><h2>عن المكتبة</h2><div class="grid g3">
+  ${T('data-a2="rate"','star','ملاحظاتك واقتراحاتك','قيّم الأقسام وأرسل رأيك عبر واتساب أو البريد')}
+  ${T('data-go="#/about"','info','عن المكتبة','المصادر وقواعد النزاهة والروابط')}
+  ${T('data-go="#/report"','report','تقارير الاستخراج','طريقة العمل والفحوص وما يحتاج مراجعة')}
  </div>`;}
 let repDone=false;
 async function viewReport(){const el=$('v-report');if(repDone)return;repDone=true;el.innerHTML='<div class="empty">جارٍ التحميل…</div>';
@@ -997,15 +1001,15 @@ function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,
   if(h.startsWith('p/')){viewItem(h.slice(2));show('item','');}
   else if(h.startsWith('r/')){viewRuling(h.slice(2));show('item','');}
   else if(h==='search'){syncInputs();runSearch();show('search','search');}
-  else if(h.startsWith('index')){const [,sub,...rest]=h.split('/');viewIndex(sub||idxTab,rest.join('/'));show('index','index');}
+  else if(h.startsWith('index')){const [,sub,...rest]=h.split('/');viewIndex(sub||idxTab,rest.join('/'));show('index',innerWidth>=1000?'index':'more');}
   else if(h==='saved'){viewSaved();show('saved','saved');}
   else if(h==='more'){viewMore();show('more','more');}
   else if(h==='report'){viewReport();show('report',innerWidth>=1000?'report':'more');}
   else if(h==='about'){viewAbout();show('about',innerWidth>=1000?'about':'more');}
-  else if(h==='laws'){viewLaws();show('laws',innerWidth>=1000?'laws':'more');}
-  else if(h.startsWith('law/')){viewLaw(h.slice(4));show('item',innerWidth>=1000?'laws':'more');}
-  else if(h.startsWith('a/')){viewArt(h.slice(2));show('item',innerWidth>=1000?'laws':'more');}
-  else if(h.startsWith('m/')){const [lid,k]=h.slice(2).split('/');viewMemo(lid,k);show('item',innerWidth>=1000?'laws':'more');}
+  else if(h==='laws'){viewLaws();show('laws','laws');}
+  else if(h.startsWith('law/')){viewLaw(h.slice(4));show('item','laws');}
+  else if(h.startsWith('a/')){viewArt(h.slice(2));show('item','laws');}
+  else if(h.startsWith('m/')){const [lid,k]=h.slice(2).split('/');viewMemo(lid,k);show('item','laws');}
   else{viewHome();show('home','home');}
   window.scrollTo({top:0});}
 let navs=0;window.addEventListener('hashchange',()=>{navs++;route();});
@@ -1017,7 +1021,7 @@ document.addEventListener('click',e=>{const t=e.target;
   if(t.closest('[data-close]')){closeDlg();return;}
   const act=t.closest('[data-a]');if(act){const p=BYID[act.closest('[data-id]').dataset.id],a=act.dataset.a;
     if(a==='copy')clip(quoteText(p),()=>toast('نُسخ النص مع الإسناد والمصدر'));if(a==='share')shareDlg(p);if(a==='fav')favDlg(p);if(a==='note')noteDlg(p);if(a==='speak')speak(p);if(a==='src')openSrc(p);return;}
-  const a2=t.closest('[data-a2]');if(a2){const k=a2.dataset.a2;if(k==='settings')settingsDlg();if(k==='rate')feedbackScreen();if(k==='offline')offlineDlg();if(k==='install')installDlg();if(k==='printsaved')printSaved();
+  const a2=t.closest('[data-a2]');if(a2){const k=a2.dataset.a2;if(k==='settings')settingsDlg();if(k==='sync')settingsDlg(true);if(k==='guide')openGuide('');if(k==='rate')feedbackScreen();if(k==='offline')offlineDlg();if(k==='install')installDlg();if(k==='printsaved')printSaved();
     if(k==='copysaved'){const ps=Object.entries(FAV).filter(([id,v])=>BYID[id]&&(!savedFold||v.f===savedFold)).map(x=>quoteText(BYID[x[0]]));clip(ps.join('\n\n———\n\n'),()=>toast(`نُسخ ${ps.length} مبدأ`));}
     if(k==='clrhist'){HIST=[];LS.set('hist',HIST);viewSaved();}return;}
   const st=t.closest('[data-st]');if(st){savedTab=st.dataset.st;viewSaved();return;}
