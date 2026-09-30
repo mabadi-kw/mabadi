@@ -9,7 +9,7 @@ const nf=n=>Number(n).toLocaleString('en-US');
 function toast(t){const e=$('toast');e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,2000);}
 // ---------- local storage (per device)
 const LS={get(k,d){try{const v=localStorage.getItem('mabadi:'+k);return v?JSON.parse(v):d}catch(_){return d}},set(k,v){try{localStorage.setItem('mabadi:'+k,JSON.stringify(v))}catch(_){toast('تعذّر الحفظ في هذا المتصفح')}}};
-const DEF={font:'naskh',fs:1,lh:1.95,theme:'auto',name:'',photo:'',pin:'',lockMin:5};
+const DEF={font:'naskh',fs:1,lh:1.95,theme:'auto',name:'',photo:'',pin:'',lockMin:5,rate:1,voice:''};
 let S=Object.assign({},DEF,LS.get('settings',{}));
 let FAV=LS.get('favs',{}), FOLD=LS.get('folders',['عام']), NOTE=LS.get('notes',{}), HIST=LS.get('hist',[]), QH=LS.get('qhist',[]);
 // أوقات التعديل وعلامات الحذف — للمزامنة بين الأجهزة (الأحدث يعلو، والمحذوف لا يعود). السجل والإعدادات لا تُزامَن.
@@ -139,7 +139,7 @@ function artQuote(a){const L=a.law;return `${a.label} — ${L.title}:\n${a.paras
 function pgCaption(M,g){const pr=M.printed&&M.printed[g-1];return pr?`الصفحة ${pr} من الطبعة`:`الصفحة ${g} من ملف المصدر`;}
 function lawPageHTML(col,M,g,reg){const gp=M.gp||20,gc=gp/10,b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
   const box=reg?`<div class="hlbox" style="left:${(reg.bbox[0]-6)/M.pw*100}%;top:${(reg.bbox[1]-4)/M.ph*100}%;width:${(reg.bbox[2]-reg.bbox[0]+12)/M.pw*100}%;height:${(reg.bbox[3]-reg.bbox[1]+8)/M.ph*100}%"></div>`:'';
-  return `<figure class="pg"><div class="pgimg" role="img" aria-label="${pgCaption(M,g)}" style="aspect-ratio:${M.cell[0]}/${M.cell[1]};background-image:url(pages/${col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>${pgCaption(M,g)}</figcaption></figure>`;}
+  const src=`pages/${col}/g${String(b).padStart(3,'0')}.webp`;return `<figure class="pg"><div class="pgimg" role="img" data-src="${src}" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="${pgCaption(M,g)}" style="aspect-ratio:${M.cell[0]}/${M.cell[1]};background-image:url(pages/${col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>${pgCaption(M,g)}</figcaption></figure>`;}
 function lawPagesHTML(a){const L=a.law;return a.pages.map(g=>lawPageHTML(L.pages_col,L.page_meta,g,(a.rg||[]).find(r=>r.page===g))).join('');}
 const LOADMSG='<div class="empty">جارٍ تحميل النص…</div>';
 function viewLaws(){const el=$('v-laws');document.title='التشريعات — مبادئ التمييز';
@@ -169,7 +169,7 @@ function viewLaw(id){const el=$('v-item');el.innerHTML=LOADMSG;
   const body=span(0,first,[])+(tree.length?span(first,A.length,tree):'');
   const iss=A.filter(a=>a.issue),ix=LAWBYID[id]||{};
   el.innerHTML=`<div class="crumbs no-print"><button data-go="#/laws">التشريعات</button>›<span>${esc(L.short)}</span></div>
-   <div class="vh"><h2>${esc(L.title)}</h2>${lcount[L.key]?`<button class="btn" data-go="#/index/law/${encodeURIComponent(L.key)}">مبادئه (${nf(lcount[L.key])})</button>`:''}</div>
+   <div class="vh"><h2>${esc(L.title)}</h2><button class="btn" data-print>${svg('print')}طباعة</button>${lcount[L.key]?`<button class="btn" data-go="#/index/law/${encodeURIComponent(L.key)}">مبادئه (${nf(lcount[L.key])})</button>`:''}</div>
    <div class="card rhead"><div class="kv"><span><b>النوع</b>${esc(L.type)}</span>${L.issued?`<span><b>صدر</b>${esc(L.issued.split('-').reverse().join('/'))}${L.issued_hijri?' ('+esc(L.issued_hijri)+')':''}</span>`:''}<span><b>المواد</b>${nf(A.filter(a=>!a.issue).length)}</span>${ix.memo?`<span><b>المذكرة</b><button class="linkbtn" data-go="#/m/${L.id}">افتحها</button></span>`:''}</div></div>
    <div class="verban">${svg('info')}<span><b>${esc(L.text_version)}.</b> المصدر: ${esc(L.source.kind)}${L.source.edition?'، '+esc(L.source.edition):''}. ${esc(L.source.note||'')}</span></div>
    ${L.notes&&L.notes.length?`<div class="card lnotes"><b>حواشي الطبعة</b>${L.notes.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}
@@ -193,14 +193,14 @@ function viewArt(id){const el=$('v-item');el.innerHTML=LOADMSG;const lid=lawOfAr
    <article class="card artcard"><div class="ltxt">${a.paras.length?a.paras.map(x=>`<p>${esc(x)}</p>`).join(''):'<p class="muted">لا يوجد نص لهذه المادة في الطبعة، وقد تبيّن الحاشية سبب ذلك.</p>'}</div>
     ${a.notes&&a.notes.length?`<div class="lnotes"><b>حاشية الطبعة</b>${a.notes.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}
     <div class="verban small">${svg('info')}<span>${esc(L.text_version)}.</span></div>
-    <div class="acts no-print"><button class="btn" id="acp">${svg('copy')}نسخ</button><button class="btn" id="ash">${svg('share')}مشاركة</button><button class="btn" id="alk">${svg('link')}الرابط</button></div></article>
+    <div class="acts no-print"><button class="btn" id="acp">${svg('copy')}نسخ</button><button class="btn" id="ash">${svg('share')}مشاركة</button><button class="btn" id="alk">${svg('link')}الرابط</button>${'speechSynthesis' in window&&a.paras.length?`<button class="btn" id="asp">${svg('speak')}استماع</button>`:''}</div></article>
    <div class="card inline-src"><h3 style="margin-top:0">صفحة المصدر</h3>${lawPagesHTML(a)}</div>
    <div class="pn no-print">${pv?`<button class="btn" data-go="#/a/${pv.id}">${svg('back')}<span>${esc(pv.label)}</span></button>`:'<span></span>'}${nx?`<button class="btn" data-go="#/a/${nx.id}"><span>${esc(nx.label)}</span><svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)"><path d="${IC.back}"/></svg></button>`:''}</div>
    <div id="amemo"></div>
    ${a.issue?'':`<h2>مبادئ تذكر هذه المادة (${ps.length})</h2>${ps.length?`<div class="list">${ps.slice(0,40).map(p=>card(p,null)).join('')}</div>${ps.length>40?`<button class="btn" data-f2="1">عرض الكل (${ps.length})</button>`:''}`:'<p class="muted">لا توجد في المكتبة مبادئ تحيل إلى هذه المادة بعد.</p>'}`}`;
   const url=location.href.split('#')[0]+'#/a/'+a.id;
   $('acp').onclick=()=>clip(artQuote(a),()=>toast('نُسخ نص المادة'));
-  $('alk').onclick=()=>clip(url,()=>toast('نُسخ الرابط'));
+  $('alk').onclick=()=>clip(url,()=>toast('نُسخ الرابط'));if($('asp'))$('asp').onclick=()=>speakArt(a);
   $('ash').onclick=()=>shareAny(`${a.label} — ${L.title}`,artQuote(a),url,'مشاركة المادة','يُرسل نص المادة مع رابطها في المكتبة.');
   const f2=el.querySelector('[data-f2]');if(f2)f2.onclick=()=>{Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:L.key,art:String(a.n),rv:false,sec:''});go('#/search');};
   if(LAWBYID[L.id]&&LAWBYID[L.id].memo&&!a.issue&&a.n)loadMemo(L.id).then(M=>{const ks=(M.mentions[a.n]||[]);if(!ks.length||!$('amemo'))return;
@@ -213,7 +213,7 @@ function viewMemo(lid,k){const el=$('v-item');el.innerHTML=LOADMSG;k=k==null?nul
    const draw=()=>{$('mbody').innerHTML=(lo>0?`<button class="btn" id="mprev">عرض ما قبله</button>`:'')+`<div class="ltxt memo">${M.paras.slice(lo,hi).map((p,j)=>para(p,lo+j)).join('')}</div>`+(hi<M.paras.length?`<button class="btn" id="mnext">عرض المزيد</button>`:'');
      if($('mprev'))$('mprev').onclick=()=>{lo=Math.max(0,lo-W);draw();};if($('mnext'))$('mnext').onclick=()=>{hi=Math.min(M.paras.length,hi+W);draw();};};
    el.innerHTML=`<div class="crumbs no-print"><button data-go="#/laws">التشريعات</button>›<button data-go="#/law/${L.id}">${esc(L.short)}</button>›<span>المذكرة</span></div>
-    <div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>${esc(M.title)}</h2></div>
+    <div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>${esc(M.title)}</h2><button class="btn" data-print>${svg('print')}طباعة</button></div>
     <div class="verban small">${svg('info')}<span>${esc(M.note)}</span></div><div id="mbody"></div>`;
    draw();el.onclick=e=>{const b=e.target.closest('[data-mpg]');if(!b)return;const g=+b.dataset.mpg;side(pgCaption(M.page_meta,g),lawPageHTML(M.pages_col,M.page_meta,g,null));};
    if(k!=null)setTimeout(()=>{const t=$('mp'+k);if(t)t.scrollIntoView({block:'center'});},60);
@@ -313,15 +313,98 @@ function noteDlg(p){
   $('ns').onclick=()=>{const v=$('nt').value.trim();if(v){NOTE[p.id]=v;NOTET[p.id]=Date.now();delete DEL.notes[p.id];}else{delete NOTE[p.id];delete NOTET[p.id];DEL.notes[p.id]=Date.now();}saveUser();refreshCard(p.id);closeDlg();toast('حُفظت الملاحظة');};
   if($('nd'))$('nd').onclick=()=>{delete NOTE[p.id];delete NOTET[p.id];DEL.notes[p.id]=Date.now();saveUser();refreshCard(p.id);closeDlg();};
 }
+// ---------- الطباعة: تُطبع المادة المطلوبة وحدها (لا صفحة التطبيق)، في طبقة طباعة داخل الصفحة نفسها بخطوطها
+const prDate=()=>new Date().toLocaleDateString('ar-KW',{year:'numeric',month:'long',day:'numeric'});
+// تحوّل صور الصفحات (خلايا من شبكة) إلى صور مقصوصة، لأن المتصفح لا يطبع خلفيات CSS افتراضيًا
+async function prCutPages(root){await Promise.all([...root.querySelectorAll('.pgimg[data-gc]')].map(async d=>{try{
+  const gc=+d.dataset.gc,cx=+d.dataset.cx,ry=+d.dataset.ry,im=await new Promise((ok,no)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=no;i.src=d.dataset.src;});
+  const w=Math.round(im.naturalWidth/gc),h=Math.round(im.naturalHeight/10),c=document.createElement('canvas');c.width=w;c.height=h;
+  const x=c.getContext('2d');x.fillStyle='#fff';x.fillRect(0,0,w,h);x.drawImage(im,cx*w,ry*h,w,h,0,0,w,h);
+  const img=document.createElement('img');img.className='pgcut';img.alt='';img.src=c.toDataURL('image/jpeg',.9);d.style.backgroundImage='none';d.prepend(img);}catch(_){}}));}
+async function printHTML(title,html,sub=''){let r=$('printroot');if(!r){r=document.createElement('div');r.id='printroot';document.body.appendChild(r);}
+  r.innerHTML=`<header class="prh"><span>مبادئ التمييز</span><span>${esc(prDate())}</span></header><h1>${esc(title)}</h1>${sub?`<div class="prsub">${esc(sub)}</div>`:''}${html}
+   <footer class="prf">طُبع من «مبادئ التمييز» — النصوص منقولة حرفيًا من مصادرها. راجع المصدر الرسمي قبل الاعتماد.</footer>`;
+  r.querySelectorAll('details').forEach(d=>d.remove());
+  await prCutPages(r);if(document.fonts&&document.fonts.ready)await document.fonts.ready;
+  const t0=document.title;document.title=title;document.body.classList.add('printing');
+  const done=()=>{document.body.classList.remove('printing');document.title=t0;r.innerHTML='';window.removeEventListener('afterprint',done);};
+  window.addEventListener('afterprint',done);setTimeout(()=>{window.print();if(/iP(hone|ad)/.test(navigator.userAgent))setTimeout(done,1500);},80);}
+const prPara=t=>`<p>${esc(t)}</p>`;
+function prPrinciple(p,withPg){const C=COLS[p.col];
+  return `<section class="prblock"><div class="prmeta">${esc(C.title)} — المبدأ ${p.n} — ص ${printed(p).join('–')}</div>${p.ttl?`<h2>${esc(p.ttl)}</h2>`:''}
+   ${blocks(p).map(b=>b[0]==='t'?prPara(b[1]):`<p class="prcit">${esc(b[1].raw)}</p>`).join('')}${p.rule?`<p><b>القاعدة:</b> ${esc(p.rule)}</p>`:''}
+   ${p.fn.length?`<div class="prfn">${p.fn.map(prPara).join('')}</div>`:''}${NOTE[p.id]?`<div class="prnote"><b>ملاحظتي:</b> ${esc(NOTE[p.id])}</div>`:''}
+   ${withPg?`<div class="prpages">${pagesHTML(p)}</div>`:''}</section>`;}
+function prArticle(a,withText,withPg){const L=a.law;
+  return `<section class="prblock">${withText?`<h2>${esc(a.label)}</h2>${a.paras.length?a.paras.map(prPara).join(''):'<p>(لا يوجد نص لهذه المادة في الطبعة)</p>'}
+   ${a.notes&&a.notes.length?`<div class="prfn"><b>حاشية الطبعة:</b>${a.notes.map(prPara).join('')}</div>`:''}`:''}
+   ${withPg?`<div class="prpages">${lawPagesHTML(a)}</div>`:''}</section>`;}
+// حوار خيارات الطباعة بحسب الصفحة المفتوحة
+function printDlg(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));let T='',O=[];
+  if(h.startsWith('p/')){const p=BYID[h.slice(2)];if(!p)return window.print();T=`${COLS[p.col].title} — المبدأ ${p.n}`;
+    O=[['المبدأ فقط','النص والإسناد والمصدر',()=>printHTML(T,prPrinciple(p,false))],
+       ['المبدأ مع صورة صفحته','للمطابقة بالمصدر',()=>printHTML(T,prPrinciple(p,true))],
+       ['صورة الصفحة فقط','كما في الكتاب',()=>printHTML(T,`<div class="prpages">${pagesHTML(p)}</div>`,`ص ${printed(p).join('–')}`)]];}
+  else if(h.startsWith('r/')){const key=h.slice(2),ids=(RUL[key]||[]).filter(i=>BYID[i]),[ap,ses]=key.split('@');T=`الطعن ${ap.replace(/\+/g,' ، ')}`;
+    const sub=`جلسة ${ses?ses.split('-').reverse().join('/'):''} — ${ids.length} مبدأ`;
+    O=[['مبادئ الحكم','نصوصها وإسنادها',()=>printHTML(T,ids.map(i=>prPrinciple(BYID[i],false)).join(''),sub)],
+       ['مع صور صفحاتها','للمطابقة بالمصدر',()=>printHTML(T,ids.map(i=>prPrinciple(BYID[i],true)).join(''),sub)]];}
+  else if(h.startsWith('a/')){const a=ARTBYID[h.slice(2)];if(!a)return window.print();const L=a.law;T=`${a.label} — ${L.title}`;const sub=L.text_version;
+    O=[['نص المادة','مع حاشية الطبعة',()=>printHTML(T,prArticle(a,true,false),sub)],
+       ['المادة مع صورة صفحتها','للمطابقة بالطبعة',()=>printHTML(T,prArticle(a,true,true),sub)],
+       ['صورة الصفحة فقط','كما في الطبعة',()=>printHTML(T,prArticle(a,false,true),sub)]];
+    const ps=a.issue?[]:artPR(a);if(ps.length)O.push([`المادة ومبادئها (${ps.length})`,'نص المادة ثم المبادئ التي تذكرها',()=>printHTML(T,prArticle(a,true,false)+`<h2 class="prsec">مبادئ تذكر هذه المادة</h2>`+ps.map(p=>prPrinciple(p,false)).join(''),sub)]);}
+  else if(h.startsWith('law/')){const L=LAWDATA[h.slice(4)];if(!L)return;T=L.title;
+    const full=()=>{let last='',out='';L.articles.forEach(a=>{const tr=(a.trail||[]).join(' › ');if(tr&&tr!==last){out+=`<h2 class="prsec">${esc(tr)}</h2>`;last=tr;}
+      out+=`<section class="prart"><h3>${esc(a.label)}</h3>${a.paras.length?a.paras.map(prPara).join(''):'<p>(لا نص في الطبعة)</p>'}${a.notes&&a.notes.length?`<div class="prfn">${a.notes.map(prPara).join('')}</div>`:''}</section>`;});
+      return (L.preamble&&L.preamble.length?`<div class="prpre">${[].concat(L.preamble).map(prPara).join('')}</div>`:'')+out;};
+    O=[['نص القانون كاملًا',`${L.articles.length} مادة، مع حواشي الطبعة`,()=>printHTML(T,full(),L.text_version)]];}
+  else if(h.startsWith('m/')){const lid=h.slice(2).split('/')[0],M=MEMO[lid+'-M'];if(!M)return;T=M.title;
+    const np=new Set(M.paras.map(x=>x.pg)).size;O=[['المذكرة كاملة',`نصها كما في الطبعة — ${np} صفحة في الأصل${np>60?'، فالطباعة طويلة':''}`,()=>printHTML(T,M.paras.map(p=>p.h?`<h2 class="prsec">${esc(p.t)}</h2>`:prPara(p.t)).join(''),M.note)]];}
+  else return window.print();
+  if(O.length===1&&!h.startsWith('m/'))return O[0][2]();
+  const d=dlg(`${svg('print')} طباعة`,`<div class="set"><p class="hint" style="margin:0">${esc(T)}</p><div class="prchoices">${O.map((o,i)=>`<button class="btn" data-pr="${i}"><b>${esc(o[0])}</b><small>${esc(o[1])}</small></button>`).join('')}</div></div>`);
+  d.addEventListener('click',e=>{const b=e.target.closest('[data-pr]');if(!b)return;closeDlg();O[+b.dataset.pr][2]();});}
+// ---------- الاستماع: أفضل صوت عربي في الجهاز، وقراءة جملة جملة مع شريط تحكم، وتهيئة النص القانوني للنطق
+const AR_MON=['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+function ttsNorm(s){return String(s).replace(/ـ/g,'').replace(/[٠-٩]/g,d=>d.charCodeAt(0)-1632).replace(/[۰-۹]/g,d=>d.charCodeAt(0)-1776).replace(/(^|[\s(،«])م\s*\.?\s*(\d)/g,'$1المادة $2').replace(/(^|[\s(،«])ق\s*\.?\s*(\d)/g,'$1القانون $2').replace(/(^|[\s(،«])ص\s*\.?\s*(\d)/g,'$1صفحة $2')
+  .replace(/(\d{1,2})\s*\/\s*(\d{1,2})\s*\/\s*((?:19|20)\d{2})/g,(m,d,mo,y)=>+mo>=1&&+mo<=12?`${+d} ${AR_MON[+mo-1]} ${y}`:m)
+  .replace(/(رقم\s*)?(\d+)\s*\/\s*((?:19|20)\d{2})/g,(m,r,n,y)=>`رقم ${n} لسنة ${y}`)
+  .replace(/(^|\s)ج\s*\.?\s*ع(\s|$)/g,'$1الجمعية العامة$2')
+  .replace(/[()\[\]«»"]/g,'، ').replace(/\s[-–—]\s|^\s*[-–—]\s*/gm,'، ').replace(/…|\.{3}/g,'. ').replace(/،(\s*،)+/g,'،').replace(/\s+/g,' ').trim();}
+function ttsChunks(text){const out=[];String(text).split(/\n+|(?<=[.!؟:؛])\s+/).map(x=>x.replace(/^[\s،,.؛:]+/,'').trim()).filter(Boolean).forEach(s=>{
+  while(s.length>230){let k=s.lastIndexOf('،',230);if(k<80)k=s.lastIndexOf(' ',230);if(k<40)k=230;out.push(s.slice(0,k+1).trim());s=s.slice(k+1).trim();}if(s)out.push(s);});
+  const m=[];out.forEach(s=>{if(m.length&&m[m.length-1].length+s.length<120)m[m.length-1]+=' '+s;else m.push(s);});return m;}
+const ttsArVoices=()=>('speechSynthesis' in window?speechSynthesis.getVoices():[]).filter(v=>/^ar/i.test(v.lang));
+function ttsScore(v){let s=v.localService?20:0;if(/premium|enhanced|natural|neural|محس/i.test(v.name))s+=8;if(/Majed|Maged|Tarik|Hamed|Naayf|Salma|Zariyah|Hoda|Laila|Mariam|Amira|Shakir|Fahed|Fatima/i.test(v.name))s+=2;if(/ar[-_](KW|SA|AE)/i.test(v.lang))s+=1;return s;}
+function ttsVoice(){const L=ttsArVoices();return L.find(v=>v.voiceURI===S.voice)||L.sort((a,b)=>ttsScore(b)-ttsScore(a))[0]||null;}
+if('speechSynthesis' in window)speechSynthesis.addEventListener?.('voiceschanged',()=>{if($('vsel'))ttsVoiceUI();});
+const TTS={q:[],i:0,id:null,el:null,paused:false,title:''};
+function ttsStop(){if('speechSynthesis' in window)speechSynthesis.cancel();TTS.q=[];TTS.id=null;TTS.paused=false;TTS.el?.classList.remove('speaking');TTS.el=null;$('ttsbar')?.remove();speakingId=null;}
+function ttsNext(){const ss=speechSynthesis;if(TTS.i>=TTS.q.length){ttsStop();return;}
+  const u=new SpeechSynthesisUtterance(TTS.q[TTS.i]),v=ttsVoice();u.lang=v?v.lang:'ar-SA';if(v)u.voice=v;u.rate=S.rate||1;u.pitch=1;
+  const my=TTS.id;u.onend=()=>{if(TTS.id!==my||TTS.paused)return;TTS.i++;ttsNext();};u.onerror=e=>{if(TTS.id!==my)return;if(e.error==='interrupted'||e.error==='canceled')return;TTS.i++;ttsNext();};
+  ss.speak(u);ttsBar();}
+function ttsBar(){let b=$('ttsbar');if(!TTS.id)return;if(!b){b=document.createElement('div');b.id='ttsbar';b.className='ttsbar no-print';b.setAttribute('role','region');b.setAttribute('aria-label','الاستماع');document.body.appendChild(b);
+    b.onclick=e=>{const k=e.target.closest('[data-tt]')?.dataset.tt;if(!k)return;const ss=speechSynthesis;
+      if(k==='stop')ttsStop();
+      if(k==='pause'){if(TTS.paused){TTS.paused=false;ss.cancel();ttsNext();}else{TTS.paused=true;ss.cancel();ttsBar();}}
+      if(k==='back'){TTS.i=Math.max(0,TTS.i-1);TTS.paused=false;ss.cancel();setTimeout(ttsNext,60);}
+      if(k==='fwd'){TTS.i=Math.min(TTS.q.length-1,TTS.i+1);TTS.paused=false;ss.cancel();setTimeout(ttsNext,60);}
+      if(k==='rate'){const R=[.8,.9,1,1.15,1.3],c=R.indexOf(S.rate||1);S.rate=R[(c+1)%R.length];saveS();TTS.paused=false;ss.cancel();setTimeout(ttsNext,60);}};}
+  b.innerHTML=`<div class="tti"><b>${esc(TTS.title)}</b><span>${TTS.i+1} / ${TTS.q.length}</span></div>
+   <div class="ttc"><button class="btn icon" data-tt="back" aria-label="الجملة السابقة">${svg('back')}</button><button class="btn icon primary" data-tt="pause" aria-label="${TTS.paused?'متابعة':'إيقاف مؤقت'}">${TTS.paused?'▶':'❚❚'}</button><button class="btn icon" data-tt="fwd" aria-label="الجملة التالية"><svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)"><path d="${IC.back}"/></svg></button>
+   <button class="btn" data-tt="rate" aria-label="السرعة"><span dir="ltr">${S.rate||1}×</span></button><button class="btn icon" data-tt="stop" aria-label="إيقاف">■</button></div>`;}
+function ttsSpeak(id,title,text,el){if(!('speechSynthesis' in window)){toast('الاستماع غير متاح في هذا المتصفح');return;}
+  if(TTS.id===id){ttsStop();return;}ttsStop();if(!ttsArVoices().length)toast('لا يوجد صوت عربي في هذا الجهاز — انظر «الاستماع» في الإعدادات');
+  TTS.q=ttsChunks(ttsNorm(text));TTS.i=0;TTS.id=id;TTS.title=title;TTS.el=el;speakingId=id;el?.classList.add('speaking');ttsNext();}
 let speakingId=null;
-function speak(p,btn){
-  const ss=window.speechSynthesis;
-  if(speakingId===p.id){ss.cancel();speakingId=null;document.querySelectorAll('.speaking').forEach(x=>x.classList.remove('speaking'));return;}
-  ss.cancel();const u=new SpeechSynthesisUtterance((p.ttl?p.ttl+'. ':'')+p.p.join(' ').replace(/[ً-ْ]/g,''));u.lang='ar-SA';u.rate=.95;
-  const v=ss.getVoices().find(v=>/^ar/i.test(v.lang));if(v)u.voice=v;else toast('قد لا يتوفر صوت عربي في هذا الجهاز');
-  const a=document.querySelector(`article.pr[data-id="${p.id}"]`);a?.classList.add('speaking');speakingId=p.id;
-  u.onend=u.onerror=()=>{a?.classList.remove('speaking');speakingId=null;};ss.speak(u);
-}
+function speak(p){const txt=[p.ttl,...blocks(p).map(b=>b[0]==='t'?b[1]:b[1].raw)].filter(Boolean).join('\n');
+  ttsSpeak(p.id,`${COLS[p.col].name} · ${p.n}`,txt,document.querySelector(`article.pr[data-id="${p.id}"]`));}
+function speakArt(a){ttsSpeak(a.id,`${a.label} — ${a.law.short}`,[a.label+'.',...a.paras].join('\n'),document.querySelector('.artcard'));}
+function ttsVoiceUI(){const s=$('vsel');if(!s)return;const L=ttsArVoices().sort((a,b)=>ttsScore(b)-ttsScore(a)),cur=ttsVoice();
+  s.innerHTML=L.length?L.map(v=>`<option value="${esc(v.voiceURI)}"${cur&&cur.voiceURI===v.voiceURI?' selected':''}>${esc(v.name)} (${esc(v.lang)})${v.localService?'':' ☁'}</option>`).join(''):'<option value="">لا يوجد صوت عربي في هذا الجهاز</option>';
+  $('vnone').hidden=!!L.length;}
 // ---------- source pages
 const PT={};
 async function pageLines(col,g){const b=Math.floor((g-1)/1000),k=col+'/'+b;if(!PT[k])PT[k]=fetch(`pagetext/${col}/t${String(b).padStart(3,'0')}.json`).then(r=>r.ok?r.json():{}).catch(()=>({}));return (await PT[k])[g]||[];}
@@ -329,7 +412,7 @@ function pagesHTML(p){const C=COLS[p.col],PW=C.pw||595.276,PH=C.ph||822.047,cr=C
   return p.pg.map(g=>{const reg=p.rg.find(r=>r.page===g);
     const box=reg?`<div class="hlbox" style="left:${((reg.bbox[0]-6)/PW-cr[0])/cw*100}%;top:${((reg.bbox[1]-4)/PH-cr[1])/chh*100}%;width:${(reg.bbox[2]-reg.bbox[0]+12)/PW/cw*100}%;height:${(reg.bbox[3]-reg.bbox[1]+8)/PH/chh*100}%"></div>`:'';
     const gp=C.gp||20,gc=gp/10,b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
-    return `<figure class="pg"><div class="pgimg" role="img" aria-label="صورة الصفحة ${g+C.off}" style="aspect-ratio:${cell[0]}/${cell[1]};background-image:url(pages/${p.col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>الصفحة ${g+C.off} من الكتاب</figcaption></figure><details class="pgtxt" data-id="${p.id}" data-g="${g}"><summary>نص الصفحة المستخرج</summary><div class="ptx">…</div></details>`;}).join('');}
+    return `<figure class="pg"><div class="pgimg" role="img" data-src="pages/${p.col}/g${String(b).padStart(3,'0')}.webp" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="صورة الصفحة ${g+C.off}" style="aspect-ratio:${cell[0]}/${cell[1]};background-image:url(pages/${p.col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>الصفحة ${g+C.off} من الكتاب</figcaption></figure><details class="pgtxt" data-id="${p.id}" data-g="${g}"><summary>نص الصفحة المستخرج</summary><div class="ptx">…</div></details>`;}).join('');}
 function wirePages(root){root.querySelectorAll('details.pgtxt').forEach(d=>d.addEventListener('toggle',async()=>{if(!d.open||d.dataset.ok)return;d.dataset.ok=1;
   const p=BYID[d.dataset.id],g=+d.dataset.g,reg=p.rg.find(r=>r.page===g),ls=await pageLines(p.col,g);
   d.querySelector('.ptx').innerHTML=ls.map(([t,top,size,bb])=>`<div class="ln${reg&&top>=reg.bbox[1]-1&&top<=reg.bbox[3]?' hit':''}${bb||size>=18?' h':''}${size<=12?' small':''}">${esc(t)}</div>`).join('')||'—';}));}
@@ -519,11 +602,17 @@ function settingsDlg(toSync){
     <div class="rowi"><span>تباعد الأسطر</span><input type="range" id="lh" min="1.6" max="2.4" step=".05" value="${S.lh}"></div>
     <div class="preview">عقد العمل. الخصيصتان الأساسيتان له التبعية والأجر.</div><span class="hint">عنوان «مبادئ التمييز» ثابت ولا يتغير بتغيير الخط.</span></section>
    <section><h4>المظهر</h4><div class="seg">${[['auto','تلقائي'],['light','فاتح'],['dark','داكن']].map(([k,l])=>`<button data-theme="${k}" aria-pressed="${S.theme===k}">${l}</button>`).join('')}</div></section>
+   <section><h4>الاستماع</h4>${'speechSynthesis' in window?`<div class="rowi"><span>الصوت</span><select id="vsel" style="flex:1 1 200px;min-width:0"></select></div>
+    <div class="rowi"><span>السرعة</span><input type="range" id="vrate" min=".7" max="1.4" step=".05" value="${S.rate||1}"><b id="vratev" dir="ltr">${S.rate||1}×</b><button class="btn" id="vtest">${svg('speak')}تجربة</button></div>
+    <span class="hint">جودة الصوت من أصوات جهازك. الأصوات المعلَّمة ☁ يقرؤها المتصفح عبر الإنترنت، والبقية تعمل في الجهاز. لصوت أوضح: على الآيفون الإعدادات ← تسهيلات الاستخدام ← المحتوى المنطوق ← الأصوات ← العربية ← نزّل «ماجد (محسّن)». وعلى ويندوز: الإعدادات ← الوقت واللغة ← الكلام ← أضف صوتًا عربيًا.</span>
+    <span class="hint" id="vnone" hidden>لا يوجد صوت عربي في هذا الجهاز بعد؛ أضفه من إعدادات النظام كما في الأعلى.</span>`:'<span class="hint">الاستماع غير متاح في هذا المتصفح.</span>'}</section>
    <section><h4>الدليل والفيديو</h4><div id="gvid"></div><div class="rowi"><a class="btn primary" href="${GUIDE_PDF}" target="_blank" rel="noopener">${svg('open')}عرض الدليل</a><span class="hint">دليل مصوّر بفصل لكل قسم. وفي أعلى كل قسم رابط «الدليل» يفتح فصله مباشرة.</span></div></section>
    <section><h4>رأيك</h4><div class="rowi"><button class="btn primary" data-a2="rate">${svg('star')}ملاحظاتك واقتراحاتك</button><span class="hint">تقييم لكل قسم، يُحفظ في جهازك وترسله أنت.</span></div></section>
    <section id="syncsec"><h4>المزامنة بين أجهزتك</h4><div id="syncbox"></div></section>
    <section><h4>بياناتي</h4><div class="rowi"><button class="btn" id="bk">${svg('download')}نسخة احتياطية</button><label class="btn" style="cursor:pointer">استعادة<input type="file" accept="application/json" id="rs" hidden></label></div>
     <span class="hint">نسخة غير مشفّرة: المحفوظات والمجلدات والملاحظات والإعدادات والسجل في ملف واحد، للاحتفاظ به أو نقله يدويًا.</span></section></div>`);
+  ttsVoiceUI();if($('vsel')){$('vsel').onchange=()=>{S.voice=$('vsel').value;upd();};$('vrate').oninput=()=>{S.rate=+$('vrate').value;$('vratev').textContent=S.rate+'×';upd();};
+   $('vtest').onclick=()=>ttsSpeak('test','تجربة الصوت','المادة 41 من القانون رقم 6/2010: يستحق العامل مكافأة نهاية الخدمة. (الطعن 730/2012 عمالي جلسة 21/1/2014)',null);}
   syncUI();if(toSync===true)setTimeout(()=>{const x=$('syncsec');if(x)x.scrollIntoView({block:'start'});},60);
   fetch('docs/intro.jpg',{method:'HEAD'}).then(r=>{if(!r.ok||!$('gvid'))return;$('gvid').innerHTML=`<button class="vposter" id="gvp" aria-label="تشغيل الفيديو التعريفي"><img src="docs/intro.jpg" alt=""><span class="play">${svg('open')}تشغيل الفيديو التعريفي</span></button>`;
     $('gvp').onclick=()=>{$('gvid').innerHTML='<video src="docs/intro.mp4" controls autoplay playsinline preload="none" poster="docs/intro.jpg" style="width:100%;border-radius:12px"></video>';};}).catch(()=>{});
@@ -714,7 +803,7 @@ function feedbackScreen(){closeDlg();let st=fbLoad();const save=()=>LS.set('fb2'
 const NAVMAP={laws:'#/laws',home:'#/',search:'#/search',index:'#/index/topics',saved:'#/saved',more:'#/more',report:'#/report',about:'#/about'};
 function show(v,nav){['home','search','index','saved','more','item','report','about','laws'].forEach(x=>$('v-'+x).hidden=x!==v);guideLink(v);
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',b.dataset.nav===nav));}
-function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));closeDlg();if(speakingId){speechSynthesis.cancel();speakingId=null;}
+function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));closeDlg();if(TTS.id)ttsStop();
   document.title='مبادئ التمييز';
   if(h.startsWith('p/')){viewItem(h.slice(2));show('item','');}
   else if(h.startsWith('r/')){viewRuling(h.slice(2));show('item','');}
@@ -738,7 +827,7 @@ document.addEventListener('click',e=>{const t=e.target;
   if(t.closest('#me')){settingsDlg();return;}
   if(t.closest('[data-close]')){closeDlg();return;}
   const act=t.closest('[data-a]');if(act){const p=BYID[act.closest('[data-id]').dataset.id],a=act.dataset.a;
-    if(a==='copy')clip(quoteText(p),()=>toast('نُسخ النص مع الإسناد والمصدر'));if(a==='share')shareDlg(p);if(a==='fav')favDlg(p);if(a==='note')noteDlg(p);if(a==='speak')speak(p,act);if(a==='src')openSrc(p);return;}
+    if(a==='copy')clip(quoteText(p),()=>toast('نُسخ النص مع الإسناد والمصدر'));if(a==='share')shareDlg(p);if(a==='fav')favDlg(p);if(a==='note')noteDlg(p);if(a==='speak')speak(p);if(a==='src')openSrc(p);return;}
   const a2=t.closest('[data-a2]');if(a2){const k=a2.dataset.a2;if(k==='settings')settingsDlg();if(k==='rate')feedbackScreen();if(k==='offline')offlineDlg();if(k==='install')installDlg();if(k==='printsaved')printSaved();
     if(k==='copysaved'){const ps=Object.entries(FAV).filter(([id,v])=>BYID[id]&&(!savedFold||v.f===savedFold)).map(x=>quoteText(BYID[x[0]]));clip(ps.join('\n\n———\n\n'),()=>toast(`نُسخ ${ps.length} مبدأ`));}
     if(k==='clrhist'){HIST=[];LS.set('hist',HIST);viewSaved();}return;}
@@ -748,7 +837,7 @@ document.addEventListener('click',e=>{const t=e.target;
   const mic=t.closest('[data-mic]');if(mic){listen(mic.dataset.mic,mic);return;}
   const gb=t.closest('[data-go]');if(gb){go(gb.dataset.go);return;}
   if(t.closest('[data-back]')){if(navs>0)history.back();else go('#/');return;}
-  if(t.closest('[data-print]')){window.print();return;}
+  if(t.closest('[data-print]')){printDlg();return;}
   const fb=t.closest('[data-f]');if(fb){setFilter(fb.dataset.f,fb.dataset.v);return;}
   const qb=t.closest('[data-q]');if(qb){doSearch(qb.dataset.q);return;}
   const cl=t.closest('[data-clr]');if(cl){F[cl.dataset.clr]=cl.dataset.clr==='rv'?false:'';syncInputs();runSearch();return;}
