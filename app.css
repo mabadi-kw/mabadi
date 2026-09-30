@@ -298,3 +298,13 @@ svg.weave{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
 .navcard[aria-current="true"] small{color:#c9d4e6}
 .navcard[aria-current="true"] .ic{background:rgba(255,255,255,.1);color:var(--gold)}
 .sidenav .navcard{padding:12px 14px}.sidenav .navcard .ic{width:40px;height:40px;border-radius:12px}
+
+/* التقييم */
+.rate textarea,.rate input[type=text]{font:inherit;padding:10px 12px;border:1px solid var(--rule);border-radius:12px;background:var(--bg);color:var(--ink);width:100%}
+.stars{display:flex;gap:6px}
+.stars button{width:48px;height:48px;border-radius:12px;border:1px solid var(--rule);background:var(--bg);color:var(--muted);cursor:pointer;display:grid;place-items:center}
+.stars button svg{width:26px;height:26px}
+.stars button.on{color:var(--gold);border-color:var(--gold);background:var(--gold-soft)}
+.stars button.on svg{fill:var(--gold)}
+.privacy{display:flex;gap:10px;align-items:flex-start;background:var(--blue-soft);border-radius:12px;padding:10px 12px;font-size:.85rem;line-height:1.7}
+.privacy svg{flex:none;margin-top:3px;color:var(--blue)}

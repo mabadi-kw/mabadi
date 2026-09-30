@@ -13,6 +13,8 @@ const DEF={font:'naskh',fs:1,lh:1.95,theme:'auto',name:'',photo:'',pin:'',lockMi
 let S=Object.assign({},DEF,LS.get('settings',{}));
 let FAV=LS.get('favs',{}), FOLD=LS.get('folders',['عام']), NOTE=LS.get('notes',{}), HIST=LS.get('hist',[]), QH=LS.get('qhist',[]);
 const saveS=()=>LS.set('settings',S);
+// نموذج التقييم: يُملأ عند إنشاء نموذج Google الخاص بالمكتبة
+const FB={url:'',f:{section:'',rating:'',note:'',contact:'',meta:''}};
 // ---------- icons
 const IC={
  gavel:'M14 3l7 7-3 3-7-7zM11 6l-7 7 3 3 7-7M3 21h10', briefcase:'M3 8h18v11H3zM8 8V5h8v3M3 13h18',
@@ -111,7 +113,8 @@ const main=$('main');
 const SNAV=[['home','home','الرئيسية','مبدأ اليوم وما فتحته مؤخرًا'],['search','search','البحث',`في ${nf(PR.length)} مبدأً`],['index','book','الفهرس','الموضوعات والقوانين والكتب'],['saved','star','المحفوظات','مجلداتك وملاحظاتك'],['report','report','التقارير','طريقة الاستخراج والتحقق'],['about','info','عن المكتبة','المصادر وقواعد النزاهة']];
 IC.home='M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z';
 main.innerHTML=`<div class="shell"><aside class="sidenav" aria-label="الأقسام">${SNAV.map(([k,i,t,d])=>`<button class="navcard" data-nav="${k}"><span class="ic">${svg(i)}</span><span><b>${t}</b><small>${d}</small></span></button>`).join('')}
- <button class="navcard" data-a2="settings"><span class="ic">${svg('gear')}</span><span><b>الإعدادات</b><small>الخط والمظهر والقفل</small></span></button></aside>
+ <button class="navcard" data-a2="settings"><span class="ic">${svg('gear')}</span><span><b>الإعدادات</b><small>الخط والمظهر والقفل</small></span></button>
+ ${FB.url?`<button class="navcard" data-a2="rate"><span class="ic">${svg('star')}</span><span><b>قيّم التطبيق</b><small>رأيك يصلنا مباشرة</small></span></button>`:''}</aside>
  <div class="views">${['home','search','index','saved','more','item','report','about'].map(v=>`<section id="v-${v}" hidden></section>`).join('')}</div></div>`;
 // ---------- search engine
 const F={q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:''};
@@ -364,6 +367,7 @@ function viewMore(){$('v-more').innerHTML=`<h2>المزيد</h2><div class="grid
   <button class="tile" data-go="#/report"><span class="ic">${svg('report')}</span><b>تقارير الاستخراج</b><span class="n">طريقة العمل والفحوص وما يحتاج مراجعة</span></button>
   <button class="tile" data-go="#/about"><span class="ic">${svg('info')}</span><b>عن المكتبة</b><span class="n">المصادر وقواعد النزاهة والروابط</span></button>
   <button class="tile" data-a2="offline"><span class="ic">${svg('download')}</span><b>العمل دون اتصال</b><span class="n">نزّل المكتبة كاملة مع صور الصفحات</span></button>
+  ${FB.url?`<button class="tile" data-a2="rate"><span class="ic">${svg('star')}</span><b>قيّم التطبيق</b><span class="n">تقييمك وملاحظاتك تصل إلى صاحب المكتبة وحده</span></button>`:''}
   <button class="tile" data-a2="install"><span class="ic">${svg('open')}</span><b>ثبّت التطبيق</b><span class="n">أضفه إلى الشاشة الرئيسية أو سطح المكتب</span></button>
  </div>`;}
 let repDone=false;
@@ -387,7 +391,7 @@ function viewAbout(){$('v-about').innerHTML=`<div class="vh"><button class="btn"
   <p>هذه المكتبة ليست جهة رسمية ولا تصدر عن محكمة التمييز أو وزارة العدل.</p>
   <h3>المصادر</h3></div><div class="grid g2">${ORDER.map(k=>`<div class="card" style="padding:10px 14px;display:flex;gap:10px;align-items:baseline"><span>${esc(COLS[k].title)}</span><span class="muted" style="margin-inline-start:auto">${nf(COLS[k].n)}</span></div>`).join('')}</div>
   <div class="prose"><h3>روابط ثابتة</h3><ul><li>لكل مبدأ رابط ثابت بمعرّفه: <code>#/p/V09L-0001</code></li><li>ولكل حكم رابط يجمع ما ورد عنه: <code>#/r/69/1977@1979-03-12</code></li></ul>
-  <h3>للمطوّرين</h3><p>النصوص متاحة في ملفات JSON لكل دائرة، مع ملف إصدارات: <a href="packs/manifest.json">packs/manifest.json</a>.</p></div>`;}
+</div>`;}
 // ---------- SETTINGS
 function settingsDlg(){
   const d=dlg(`${svg('gear')} الإعدادات`,`<div class="set">
@@ -402,6 +406,7 @@ function settingsDlg(){
     <div class="rowi"><span>تباعد الأسطر</span><input type="range" id="lh" min="1.6" max="2.4" step=".05" value="${S.lh}"></div>
     <div class="preview">عقد العمل. الخصيصتان الأساسيتان له التبعية والأجر.</div><span class="hint">عنوان «مبادئ التمييز» ثابت ولا يتغير بتغيير الخط.</span></section>
    <section><h4>المظهر</h4><div class="seg">${[['auto','تلقائي'],['light','فاتح'],['dark','داكن']].map(([k,l])=>`<button data-theme="${k}" aria-pressed="${S.theme===k}">${l}</button>`).join('')}</div></section>
+   ${FB.url?`<section><h4>رأيك</h4><div class="rowi"><button class="btn primary" data-a2="rate">${svg('star')}قيّم التطبيق</button><span class="hint">دقيقة واحدة، ودون أي بيانات شخصية.</span></div></section>`:''}
    <section><h4>بياناتي</h4><div class="rowi"><button class="btn" id="bk">${svg('download')}نسخة احتياطية</button><label class="btn" style="cursor:pointer">استعادة<input type="file" accept="application/json" id="rs" hidden></label></div>
     <span class="hint">المحفوظات والمجلدات والملاحظات والإعدادات في ملف واحد، تنقله إلى جهاز آخر.</span></section></div>`);
   const upd=()=>{saveS();applyLook();};
@@ -431,6 +436,32 @@ function offlineDlg(){dlg(`${svg('download')} العمل دون اتصال`,`<di
 let deferredInstall=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;});
 function installDlg(){if(deferredInstall){deferredInstall.prompt();deferredInstall=null;return;}
   dlg('ثبّت التطبيق',`<div class="prose"><ul><li><b>آيفون وآيباد (Safari):</b> زر المشاركة ← «إضافة إلى الشاشة الرئيسية».</li><li><b>أندرويد (Chrome):</b> القائمة ⋮ ← «تثبيت التطبيق».</li><li><b>الحاسوب (Chrome أو Edge):</b> أيقونة التثبيت في شريط العنوان.</li></ul></div>`);}
+// ---------- التقييم والملاحظات (نموذج Google خاص بصاحب المكتبة)
+function curSection(){const h=(location.hash||'').replace(/^#\/?/,'');if(h.startsWith('p/')||h.startsWith('r/'))return 'صفحة المبدأ';if(h.startsWith('search'))return 'البحث';if(h.startsWith('index'))return 'الفهرس';if(h.startsWith('saved'))return 'المحفوظات';if(h.startsWith('report'))return 'التقارير';return 'عام';}
+const FBSEC=['عام','البحث','الفهرس','صفحة المبدأ','المحفوظات','الإعدادات والمظهر','التقارير'];
+function fbSend(rec){const body=new URLSearchParams();body.set(FB.f.section,rec.section);body.set(FB.f.rating,String(rec.rating));body.set(FB.f.note,rec.note||'');body.set(FB.f.contact,rec.contact||'');body.set(FB.f.meta,rec.meta);
+  return fetch(FB.url,{method:'POST',mode:'no-cors',body});}
+function fbFlush(){const q=LS.get('fbq',[]);if(!q.length||!navigator.onLine||!FB.url)return;const rest=[];
+  Promise.all(q.map(r=>fbSend(r).catch(()=>rest.push(r)))).then(()=>LS.set('fbq',rest));}
+addEventListener('online',fbFlush);
+function rateDlg(){
+  const st={section:curSection(),rating:0};
+  const d=dlg(`${svg('star')} قيّم التطبيق`,`<div class="set rate">
+   <section><h4>عن أي قسم؟</h4><div class="folders">${FBSEC.map(x=>`<button type="button" data-sec="${x}" aria-pressed="${x===st.section}">${x}</button>`).join('')}</div></section>
+   <section><h4>تقييمك</h4><div class="stars" role="radiogroup" aria-label="التقييم من 1 إلى 5">${[1,2,3,4,5].map(n=>`<button type="button" role="radio" aria-checked="false" data-r="${n}" aria-label="${n} من 5">${svg('star')}</button>`).join('')}</div><span class="hint" id="rlab">اختر من نجمة إلى خمس</span></section>
+   <section><h4>ملاحظتك (اختياري)</h4><textarea id="fbn" rows="4" maxlength="2000" placeholder="ما الذي أعجبك؟ وما الذي تقترح تحسينه؟"></textarea>
+    <input type="text" id="fbc" maxlength="120" placeholder="وسيلة تواصل إن أردت ردًا (اختياري)"></section>
+   <div class="privacy">${svg('lock')}<span><b>خصوصيتك محفوظة.</b> لا نجمع اسمك ولا بريدك ولا موقعك ولا أي معرّف لجهازك. يصل التقييم والملاحظة فقط إلى صاحب المكتبة، ولا يُنشر ولا يُشارك مع أحد. وسيلة التواصل اختيارية، ولا تُستعمل إلا للرد عليك.</span></div>
+   <button class="btn primary" id="fbs" disabled>إرسال</button></div>`);
+  const labs=['','ضعيف','مقبول','جيد','جيد جدًا','ممتاز'];
+  d.addEventListener('click',e=>{const sb=e.target.closest('[data-sec]');if(sb){st.section=sb.dataset.sec;d.querySelectorAll('[data-sec]').forEach(x=>x.setAttribute('aria-pressed',x===sb));}
+    const rb=e.target.closest('[data-r]');if(rb){st.rating=+rb.dataset.r;d.querySelectorAll('[data-r]').forEach(x=>{const on=+x.dataset.r<=st.rating;x.classList.toggle('on',on);x.setAttribute('aria-checked',+x.dataset.r===st.rating);});$('rlab').textContent=labs[st.rating];$('fbs').disabled=false;}});
+  $('fbs').onclick=async()=>{const rec={section:st.section,rating:st.rating,note:$('fbn').value.trim(),contact:$('fbc').value.trim(),
+      meta:`${innerWidth<761?'جوال':innerWidth<1000?'لوحي':'حاسوب'} · ${document.documentElement.dataset.theme||'تلقائي'} · ${new Date().toISOString().slice(0,10)}`};
+    $('fbs').disabled=true;
+    if(!navigator.onLine){const q=LS.get('fbq',[]);q.push(rec);LS.set('fbq',q);closeDlg();toast('حُفظ تقييمك، وسيُرسل عند عودة الاتصال');return;}
+    try{await fbSend(rec);closeDlg();toast('وصل تقييمك، شكرًا لك');}catch(_){const q=LS.get('fbq',[]);q.push(rec);LS.set('fbq',q);closeDlg();toast('حُفظ تقييمك، وسيُرسل لاحقًا');}};
+}
 // ---------- router
 const NAVMAP={home:'#/',search:'#/search',index:'#/index/topics',saved:'#/saved',more:'#/more',report:'#/report',about:'#/about'};
 function show(v,nav){['home','search','index','saved','more','item','report','about'].forEach(x=>$('v-'+x).hidden=x!==v);
@@ -456,7 +487,7 @@ document.addEventListener('click',e=>{const t=e.target;
   if(t.closest('[data-close]')){closeDlg();return;}
   const act=t.closest('[data-a]');if(act){const p=BYID[act.closest('[data-id]').dataset.id],a=act.dataset.a;
     if(a==='copy')clip(quoteText(p),()=>toast('نُسخ النص مع الإسناد والمصدر'));if(a==='share')shareDlg(p);if(a==='fav')favDlg(p);if(a==='note')noteDlg(p);if(a==='speak')speak(p,act);if(a==='src')openSrc(p);return;}
-  const a2=t.closest('[data-a2]');if(a2){const k=a2.dataset.a2;if(k==='settings')settingsDlg();if(k==='offline')offlineDlg();if(k==='install')installDlg();if(k==='printsaved')printSaved();
+  const a2=t.closest('[data-a2]');if(a2){const k=a2.dataset.a2;if(k==='settings')settingsDlg();if(k==='rate')rateDlg();if(k==='offline')offlineDlg();if(k==='install')installDlg();if(k==='printsaved')printSaved();
     if(k==='copysaved'){const ps=Object.entries(FAV).filter(([id,v])=>BYID[id]&&(!savedFold||v.f===savedFold)).map(x=>quoteText(BYID[x[0]]));clip(ps.join('\n\n———\n\n'),()=>toast(`نُسخ ${ps.length} مبدأ`));}
     if(k==='clrhist'){HIST=[];LS.set('hist',HIST);viewSaved();}return;}
   const st=t.closest('[data-st]');if(st){savedTab=st.dataset.st;viewSaved();return;}
@@ -470,7 +501,7 @@ document.addEventListener('click',e=>{const t=e.target;
   const cl=t.closest('[data-clr]');if(cl){F[cl.dataset.clr]=cl.dataset.clr==='rv'?false:'';syncInputs();runSearch();return;}
 });
 if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').catch(()=>{});
-buildSearch();route();if(!location.hash||location.hash==='#/')playWeave();else wovenOnce=true;
+buildSearch();route();fbFlush();if(!location.hash||location.hash==='#/')playWeave();else wovenOnce=true;
 document.body.insertAdjacentHTML('beforeend',`<button class="totop" id="totop" hidden aria-label="العودة إلى الأعلى">${svg('back').replace('<svg','<svg style="transform:rotate(-90deg)"')}</button>`);
 $('totop').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 addEventListener('scroll',()=>{$('totop').hidden=scrollY<900;},{passive:true});
