@@ -7,7 +7,7 @@
     "guide": "node build-guide.mjs",
     "guide:fix": "node build-guide.mjs --fix",
     "video": "node build-video.mjs",
-    "test": "node test-docs.mjs && node test-print.mjs"
+    "test": "node test-docs.mjs && node test-print.mjs && node test-laws.mjs"
   },
   "devDependencies": {
     "playwright": "^1.48.0",

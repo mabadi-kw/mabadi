@@ -118,6 +118,10 @@ const printed=p=>p.pg.map(g=>g+COLS[p.col].off);
 // ---------- legislation
 const LAWIX=[],LAWBYKEY={},LAWBYID={},ARTBYID={},ARTMAP={},LAWDATA={},MEMO={};
 try{const LI=await fetch('data/laws/index.json').then(r=>r.json());LI.laws.forEach(x=>{LAWIX.push(x);LAWBYKEY[x.key]=x;LAWBYID[x.id]=x;});}catch(_){}
+// سجل التعديلات والإلغاءات اللاحقة (من الجريدة الرسمية) على القوانين والمواد الموجودة في المكتبة
+let AMEND={laws:{},arts:{},added:{}};try{AMEND=await fetch('data/laws/amend.json').then(r=>r.ok?r.json():AMEND);}catch(_){}
+const AMBY={};Object.entries(AMEND.arts||{}).forEach(([k,v])=>v.forEach(e=>{const [lid,n]=k.split('#');(AMBY[e.by_art]=AMBY[e.by_art]||[]).push({...e,lid,n});}));
+Object.entries(AMEND.added||{}).forEach(([key,v])=>v.forEach(e=>{const x=LAWBYKEY[key];(AMBY[e.by_art]=AMBY[e.by_art]||[]).push({...e,lid:x&&x.id,n:e.n,key});}));
 PR.forEach(p=>p.lw.forEach(([l,as])=>{if(!LAWBYKEY[l])return;new Set(as.map(a=>parseInt(west(a).split('/')[0]))).forEach(n=>{if(!n)return;const k=l+'#'+n;(ARTMAP[k]=ARTMAP[k]||[]).push(p.id);});}));
 const pad4=n=>String(n).padStart(4,'0');
 function normToc(L){if(!L.toc||!L.toc.length||L.toc[0].level!=null)return;const out=[];const idxOf=n=>L.articles.findIndex(a=>a.n===n);
@@ -137,32 +141,46 @@ function artHits(){const ts=terms(F.q);if(!ts.length||F.col||F.tp||F.ch||F.rv||F
 const artPR=a=>a.issue?[]:(ARTMAP[a.law.key+'#'+a.n]||[]).map(i=>BYID[i]).filter(Boolean);
 const lawTitle=L=>L.number?`${L.type} رقم ${L.number} لسنة ${L.year}`:`${L.type}${L.year?' — '+L.year:''}`;
 function artQuote(a){const L=a.law;return `${a.label} — ${L.title}:\n${a.paras.join('\n')}\n— ${L.text_version}.`;}
-function pgCaption(M,g){const pr=M.printed&&M.printed[g-1];return pr?`الصفحة ${pr} من الطبعة`:`الصفحة ${g} من ملف المصدر`;}
+function pgCaption(M,g){const pr=M.printed&&M.printed[g-1];return pr?(M.issue?`الصفحة ${pr} من العدد ${M.issue} من «الكويت اليوم»`:`الصفحة ${pr} من الطبعة`):`الصفحة ${g} من ملف المصدر`;}
+const fdate=d=>d?d.split('-').reverse().join('/'):'';
+const lawLink=k=>{const x=LAWBYKEY[k];const [n,y]=k.split('/');return x?`<button class="linkbtn" data-go="#/law/${x.id}">${esc(x.short)} (${esc(n)}/${esc(y)})</button>`:`القانون رقم ${esc(n)} لسنة ${esc(y)} <small class="muted">(ليس في المكتبة بعد)</small>`;};
+// لافتات القانون: ملغى / معدّل بعد الطبعة / مواد مضافة / ما يعدّله أو يلغيه هذا المرسوم
+function amendBanner(L){const ix=LAWBYKEY[L.key]||{},ev=(AMEND.laws||{})[L.key]||[];let h='';
+  const rp=ev.find(e=>e.what==='إلغاء');
+  if(rp)h+=`<div class="aban rep">${svg('info')}<span><b>ملغى.</b> ألغاه ${lawLink(rp.by)}${rp.date?' الصادر في '+fdate(rp.date):''} (<button class="linkbtn" data-go="#/a/${rp.by_art}">مادة الإلغاء</button>). يبقى النص هنا للرجوع إليه في الوقائع السابقة على الإلغاء، وفي المبادئ الصادرة في ظله.</span></div>`;
+  const am=ev.filter(e=>e.what==='تعديل');
+  if(am.length)h+=`<div class="aban mod">${svg('info')}<span><b>صدرت بعد هذه النسخة تعديلات:</b> ${am.map(e=>lawLink(e.by)+(e.date?' — '+fdate(e.date):'')).join('، ')}. المواد المعدّلة معلَّمة في القائمة، وفي كل منها نص التعديل. النص المعروض نص النسخة الأصلية.</span></div>`;
+  const ad=(AMEND.added||{})[L.key]||[];
+  if(ad.length)h+=`<div class="aban mod">${svg('info')}<span><b>مواد أضيفت لاحقًا:</b> ${ad.map(e=>`<button class="linkbtn" data-go="#/a/${e.by_art}">المادة ${esc(e.n)}</button> (${esc(e.by)})`).join('، ')}.</span></div>`;
+  if(ix.repeals&&ix.repeals.length)h+=`<div class="aban new">${svg('info')}<span><b>يلغي:</b> ${ix.repeals.map(lawLink).join('، ')}.</span></div>`;
+  if(ix.amends&&ix.amends.length)h+=`<div class="aban new">${svg('info')}<span><b>يعدّل:</b> ${ix.amends.map(lawLink).join('، ')}.</span></div>`;
+  return h;}
+const artEv=(L,a)=>a.issue||a.bis?[]:((AMEND.arts||{})[L.id+'#'+a.n]||[]);
 function lawPageHTML(col,M,g,reg){const gp=M.gp||20,gc=gp/10,b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
   const box=reg?`<div class="hlbox" style="left:${(reg.bbox[0]-6)/M.pw*100}%;top:${(reg.bbox[1]-4)/M.ph*100}%;width:${(reg.bbox[2]-reg.bbox[0]+12)/M.pw*100}%;height:${(reg.bbox[3]-reg.bbox[1]+8)/M.ph*100}%"></div>`:'';
   const src=`pages/${col}/g${String(b).padStart(3,'0')}.webp`;return `<figure class="pg"><div class="pgimg" role="img" data-src="${src}" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="${pgCaption(M,g)}" style="aspect-ratio:${M.cell[0]}/${M.cell[1]};background-image:url(pages/${col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>${pgCaption(M,g)}</figcaption></figure>`;}
 function lawPagesHTML(a){const L=a.law;return a.pages.map(g=>lawPageHTML(L.pages_col,L.page_meta,g,(a.rg||[]).find(r=>r.page===g))).join('');}
 const LOADMSG='<div class="empty">جارٍ تحميل النص…</div>';
 function viewLaws(){const el=$('v-laws');document.title='التشريعات — مبادئ التمييز';
-  const L=[...LAWIX].sort((a,b)=>(lcount[b.key]||0)-(lcount[a.key]||0));
+  const L=[...LAWIX].sort((a,b)=>(lcount[b.key]||0)-(lcount[a.key]||0)||((b.src==='gazette')-(a.src==='gazette'))||(b.year||0)-(a.year||0));
   el.innerHTML=`<div class="vh"><h2>التشريعات</h2><span class="muted">${nf(LAWIX.length)} وثيقة</span></div><p class="muted">نصوص القوانين مادةً مادة، وكل مادة موصولة بمبادئ التمييز التي تذكرها وبصورة صفحتها في المصدر. يُذكر مع كل قانون مصدر نصه وتاريخ النسخة.</p>
    <div class="ltabs" id="lwt"></div><input class="flt" id="lwf" type="search" placeholder="ابحث بالاسم أو الرقم…"><div class="quick" id="lwc"></div><div class="grid g3" id="lwg"></div>
-   <div class="card note"><b>عن النسخ</b><p class="muted" style="margin:.3em 0 0">أغلب النصوص من «مجموعة التشريعات الكويتية» الصادرة عن وزارة العدل (الطبعة الأولى، فبراير 2011)، وتشمل التعديلات حتى تاريخها كما تذكرها حواشي الطبعة. ما صدر بعد ذلك لا يظهر في النص، فارجع إلى الجريدة الرسمية قبل الاعتماد عليه.</p></div>`;
-  const tile=x=>`<button class="tile card lawtile" data-go="#/law/${x.id}"><span class="ic">${svg('scroll')}</span><b>${esc(x.short)}</b><small>${esc(lawTitle(x))} · ${x.articles?nf(x.articles)+' مادة':'بلا مواد مرقمة'}${lcount[x.key]?` · ${nf(lcount[x.key])} مبدأ`:''}${x.memo?' · مع المذكرة':''}</small><small class="ver">${esc(x.ver||x.text_version)}</small></button>`;
+   <div class="card note"><b>عن النسخ</b><p class="muted" style="margin:.3em 0 0">أغلب النصوص من «مجموعة التشريعات الكويتية» الصادرة عن وزارة العدل (الطبعة الأولى، فبراير 2011)، وتشمل التعديلات حتى تاريخها كما تذكرها حواشي الطبعة. وما صدر بعدها مما أُضيف من الجريدة الرسمية («صدر حديثًا») يظهر وثيقةً مستقلة، ويُعلَّم على القانون الأصلي ومواده («معدّل» أو «ملغى») مع نص التعديل، دون دمجه في النص الأصلي. التعديلات التي لم تُضف بعد لا تظهر، فارجع إلى الجريدة الرسمية قبل الاعتماد.</p></div>`;
+  const tile=x=>`<button class="tile card lawtile" data-go="#/law/${x.id}"><span class="ic">${svg('scroll')}</span><b>${esc(x.short)}${x.status==='ملغى'?' <span class="abadge rep">ملغى</span>':x.status==='معدّل'?' <span class="abadge">معدّل</span>':''}${x.src==='gazette'?' <span class="abadge new">جديد</span>':''}</b><small>${esc(lawTitle(x))} · ${x.articles?nf(x.articles)+' مادة':'بلا مواد مرقمة'}${lcount[x.key]?` · ${nf(lcount[x.key])} مبدأ`:''}${x.memo?' · مع المذكرة':''}</small><small class="ver">${esc(x.ver||x.text_version)}</small></button>`;
   let cat='law',g='';const G=()=>[...new Set(L.filter(x=>(x.cat||'law')===cat).map(x=>x.group).filter(Boolean))];
   const nL=L.filter(x=>(x.cat||'law')==='law').length,nR=L.length-nL;
   $('lwt').innerHTML=`<button class="tab" data-lc="law">القوانين والمراسيم بقوانين <b>${nf(nL)}</b></button><button class="tab" data-lc="reg">المراسيم واللوائح والقرارات <b>${nf(nR)}</b></button>`;
   const tabs=()=>$('lwt').querySelectorAll('[data-lc]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lc===cat));tabs();
   $('lwt').onclick=e=>{const b=e.target.closest('[data-lc]');if(!b)return;cat=b.dataset.lc;g='';tabs();chips();draw(norm(west($('lwf').value).trim()));};
-  const draw=q=>$('lwg').innerHTML=L.filter(x=>(x.cat||'law')===cat&&(!g||x.group===g)&&(!q||norm(x.short+' '+x.title+' '+x.key).includes(q)||west(x.key).includes(q))).map(tile).join('')||'<div class="empty">لا نتائج.</div>';
-  const chips=()=>$('lwc').innerHTML=[['','الكل'],...G().map(x=>[x,x])].map(([k,t])=>`<button class="chip${g===k?' on':''}" data-lg="${esc(k)}">${esc(t)}</button>`).join('');
+  const draw=q=>$('lwg').innerHTML=L.filter(x=>(x.cat||'law')===cat&&(!g||(g==='__new'?x.src==='gazette':x.group===g))&&(!q||norm(x.short+' '+x.title+' '+x.key).includes(q)||west(x.key).includes(q))).map(tile).join('')||'<div class="empty">لا نتائج.</div>';
+  const chips=()=>$('lwc').innerHTML=[['','الكل'],...(L.some(x=>x.src==='gazette'&&(x.cat||'law')===cat)?[['__new','صدر حديثًا (2025–2026)']]:[]),...G().map(x=>[x,x])].map(([k,t])=>`<button class="chip${g===k?' on':''}" data-lg="${esc(k)}">${esc(t)}</button>`).join('');
   chips();draw('');$('lwf').oninput=()=>draw(norm(west($('lwf').value).trim()));
   $('lwc').onclick=e=>{const b=e.target.closest('[data-lg]');if(!b)return;g=b.dataset.lg;chips();draw(norm(west($('lwf').value).trim()));};}
 function lawTree(L){const tree=[],st=[];(L.toc||[]).filter(t=>t.i0>=0).forEach(t0=>{const t={...t0,kids:[]};while(st.length&&st[st.length-1].level>=t.level)st.pop();(st.length?st[st.length-1].kids:tree).push(t);st.push(t);});return tree;}
 function viewLaw(id){const el=$('v-item');el.innerHTML=LOADMSG;
   loadLaw(id).then(L=>{
   document.title=L.short+' — مبادئ التمييز';
-  const row=a=>{const n=a.issue?0:(ARTMAP[L.key+'#'+a.n]||[]).length,t=a.paras.join(' ');return `<button class="arow" data-go="#/a/${a.id}"><b>${esc(a.label)}${a.rep||!a.paras.length?' <em class="muted">— لا نص في الطبعة</em>':''}${n?`<span class="n" title="مبادئ تذكر المادة">${n}</span>`:''}</b>${t?`<span>${esc(t.slice(0,160))}${t.length>160?'…':''}</span>`:''}</button>`;};
+  const row=a=>{const n=a.issue?0:(ARTMAP[L.key+'#'+a.n]||[]).length,t=a.paras.join(' '),ev=artEv(L,a);return `<button class="arow" data-go="#/a/${a.id}"><b>${esc(a.label)}${ev.length?`<span class="abadge ${ev.some(e=>e.how==='إلغاء')?'rep':''}">${ev.some(e=>e.how==='إلغاء')?'ملغاة':'معدّلة'}</span>`:''}${a.rep||!a.paras.length?' <em class="muted">— لا نص في الطبعة</em>':''}${n?`<span class="n" title="مبادئ تذكر المادة">${n}</span>`:''}</b>${t?`<span>${esc(t.slice(0,160))}${t.length>160?'…':''}</span>`:''}</button>`;};
   const A=L.articles,tree=lawTree(L);
   const span=(i0,i1,kids)=>{let h='',i=i0;const ks=[...kids].sort((a,b)=>a.i0-b.i0);while(i<i1){const k=ks.find(x=>x.i0===i);if(k&&k.i1>i){h+=node(k);i=k.i1;}else{if(!A[i].issue)h+=row(A[i]);i++;}}return h;};
   const node=t=>`<details class="lsec"><summary>${esc(t.title)}<small>${t.frm===t.to?'المادة '+t.frm:'المواد '+t.frm+'–'+t.to}</small></summary>${t.kids.length?`<div>${span(t.i0,t.i1,t.kids)}</div>`:`<div class="rows">${span(t.i0,t.i1,[])}</div>`}</details>`;
@@ -172,8 +190,8 @@ function viewLaw(id){const el=$('v-item');el.innerHTML=LOADMSG;
   el.innerHTML=`<div class="crumbs no-print"><button data-go="#/laws">التشريعات</button>›<span>${esc(L.short)}</span></div>
    <div class="vh"><h2>${esc(L.title)}</h2><button class="btn" data-print>${svg('print')}طباعة</button>${lcount[L.key]?`<button class="btn" data-go="#/index/law/${encodeURIComponent(L.key)}">مبادئه (${nf(lcount[L.key])})</button>`:''}</div>
    <div class="card rhead"><div class="kv"><span><b>النوع</b>${esc(L.type)}</span>${L.issued?`<span><b>صدر</b>${esc(L.issued.split('-').reverse().join('/'))}${L.issued_hijri?' ('+esc(L.issued_hijri)+')':''}</span>`:''}<span><b>المواد</b>${nf(A.filter(a=>!a.issue).length)}</span>${ix.memo?`<span><b>المذكرة</b><button class="linkbtn" data-go="#/m/${L.id}">افتحها</button></span>`:''}</div></div>
-   <div class="verban">${svg('info')}<span><b>${esc(L.text_version)}.</b> المصدر: ${esc(L.source.kind)}${L.source.edition?'، '+esc(L.source.edition):''}. ${esc(L.source.note||'')}</span></div>
-   ${L.notes&&L.notes.length?`<div class="card lnotes"><b>حواشي الطبعة</b>${L.notes.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}
+   ${amendBanner(L)}<div class="verban">${svg('info')}<span><b>${esc(L.text_version)}.</b> المصدر: ${esc(L.source.kind)}${L.source.edition?'، '+esc(L.source.edition):''}. ${esc(L.source.note||'')}</span></div>
+   ${L.notes&&L.notes.length?`<div class="card lnotes"><b>${L.source&&/الجريدة/.test(L.source.kind)?'ملاحظات النشر':'حواشي الطبعة'}</b>${L.notes.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}
    <input class="flt" id="lq" type="search" placeholder="ابحث في مواد هذا القانون أو اكتب رقم مادة…"><div id="lres"></div>
    <div id="ltoc">${L.preamble&&L.preamble.length?`<details class="lsec"><summary>${iss.length?'مرسوم الإصدار ومواده':'الديباجة'}</summary><div class="ltxt">${(L.title_lines||[]).map(x=>`<p class="tl">${esc(x)}</p>`).join('')}${L.preamble.map(x=>`<p>${esc(x)}</p>`).join('')}</div>${iss.length?`<div class="rows">${iss.map(row).join('')}</div>`:''}${L.signature&&L.signature.length?`<div class="ltxt sig">${L.signature.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}</details>`:''}
    ${body}
@@ -195,13 +213,20 @@ function viewArt(id){const el=$('v-item');el.innerHTML=LOADMSG;const lid=lawOfAr
     ${a.notes&&a.notes.length?`<div class="lnotes"><b>حاشية الطبعة</b>${a.notes.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}
     <div class="verban small">${svg('info')}<span>${esc(L.text_version)}.</span></div>
     <div class="acts no-print"><button class="btn" id="acp">${svg('copy')}نسخ</button><button class="btn" id="ash">${svg('share')}مشاركة</button><button class="btn" id="alk">${svg('link')}الرابط</button>${'speechSynthesis' in window&&a.paras.length?`<button class="btn" id="asp">${svg('speak')}استماع</button>`:''}</div></article>
+   <div id="aev"></div>
    <div class="card inline-src"><h3 style="margin-top:0">صفحة المصدر</h3>${lawPagesHTML(a)}</div>
    <div class="pn no-print">${pv?`<button class="btn" data-go="#/a/${pv.id}">${svg('back')}<span>${esc(pv.label)}</span></button>`:'<span></span>'}${nx?`<button class="btn" data-go="#/a/${nx.id}"><span>${esc(nx.label)}</span><svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)"><path d="${IC.back}"/></svg></button>`:''}</div>
    <div id="amemo"></div>
    ${a.issue?'':`<h2>مبادئ تذكر هذه المادة (${ps.length})</h2>${ps.length?`<div class="list">${ps.slice(0,40).map(p=>card(p,null)).join('')}</div>${ps.length>40?`<button class="btn" data-f2="1">عرض الكل (${ps.length})</button>`:''}`:'<p class="muted">لا توجد في المكتبة مبادئ تحيل إلى هذه المادة بعد.</p>'}`}`;
   const url=location.href.split('#')[0]+'#/a/'+a.id;
   $('acp').onclick=()=>clip(artQuote(a),()=>toast('نُسخ نص المادة'));
-  $('alk').onclick=()=>clip(url,()=>toast('نُسخ الرابط'));if($('asp'))$('asp').onclick=()=>speakArt(a);
+  $('alk').onclick=()=>clip(url,()=>toast('نُسخ الرابط'));
+  // تعديلات لاحقة على هذه المادة، أو ما تعدّله هذه المادة في قوانين أخرى
+  const ev=artEv(L,a),rv=AMBY[a.id]||[];
+  if(ev.length||rv.length){const box=$('aev');
+    box.innerHTML=(ev.length?`<div class="card amendbox"><h3>${ev.some(e=>e.how==='إلغاء')?'أُلغيت هذه المادة':'عُدّلت هذه المادة بعد هذه النسخة'}</h3>${ev.map((e,i)=>`<div class="aitem"><p><span class="abadge ${e.how==='إلغاء'?'rep':''}">${esc(e.how)}${e.part?' — '+esc(e.part):''}</span> بـ${lawLink(e.by)}${e.date?' الصادر في '+fdate(e.date):''} — <button class="linkbtn" data-go="#/a/${e.by_art}">مادة التعديل</button></p><div class="ltxt atext" id="aet${i}"><p class="muted">جارٍ تحميل نص التعديل…</p></div></div>`).join('')}<p class="hint">نص التعديل منقول كما نُشر في الجريدة الرسمية، ولم يُدمج في نص المادة أعلاه.</p></div>`:'')
+     +(rv.length?`<div class="card amendbox new"><h3>ما تعدّله هذه المادة</h3>${rv.map(e=>{const bx=LAWBYID[e.lid];const tgt=e.how==='إضافة'?`إضافة المادة ${esc(e.n)}`:`المادة ${esc(e.n)}`;return `<p><span class="abadge">${esc(e.how)}${e.part?' — '+esc(e.part):''}</span> ${bx&&e.how!=='إضافة'?`<button class="linkbtn" data-go="#/a/${e.lid}-A${pad4(e.n)}">${tgt}</button>`:tgt} من ${bx?`<button class="linkbtn" data-go="#/law/${bx.id}">${esc(bx.short)}</button>`:'القانون الأصلي'}</p>`;}).join('')}</div>`:'');
+    ev.forEach((e,i)=>loadLaw(e.by_id).then(()=>{const t=ARTBYID[e.by_art],d=$('aet'+i);if(d)d.innerHTML=t?`<p class="tl">${esc(t.label)} — ${esc(t.law.short)}</p>`+t.paras.map(x=>`<p>${esc(x)}</p>`).join(''):'<p class="muted">تعذّر تحميل نص التعديل.</p>';}).catch(()=>{}));}if($('asp'))$('asp').onclick=()=>speakArt(a);
   $('ash').onclick=()=>shareAny(`${a.label} — ${L.title}`,artQuote(a),url,'مشاركة المادة','يُرسل نص المادة مع رابطها في المكتبة.');
   const f2=el.querySelector('[data-f2]');if(f2)f2.onclick=()=>{Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:L.key,art:String(a.n),rv:false,sec:''});go('#/search');};
   if(LAWBYID[L.id]&&LAWBYID[L.id].memo&&!a.issue&&a.n)loadMemo(L.id).then(M=>{const ks=(M.mentions[a.n]||[]);if(!ks.length||!$('amemo'))return;
@@ -437,7 +462,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202609302007';
+const APP_BUILD='202609302212';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
