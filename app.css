@@ -141,6 +141,7 @@ details.rule summary{cursor:pointer;font-size:.85rem;color:var(--blue)}
 .meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
 .relw{font-size:.75rem;color:var(--muted);display:inline-flex;gap:4px;align-items:center;flex-wrap:wrap}
 .relw .chip{background:var(--gold-soft);color:var(--gold)}
+.relw.other .chip{background:transparent;border:1px solid var(--gold-soft);color:var(--muted)}
 .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px;padding-top:10px;border-top:1px solid var(--rule)}
 .acts .btn{font-size:.8rem;padding:5px 10px}
 .acts .sp{flex:1}
