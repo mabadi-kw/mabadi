@@ -24,7 +24,7 @@ const cit=c=>{if(!open){out.push('<ul class="cits">');open=true;}out.push(`<li>$
 p.p.forEach((x,k)=>{if(open){out.push('</ul>');open=false;}out.push(`<p>${esc(x)}</p>`);while(ci<p.c.length&&pos[ci]===k+1)cit(p.c[ci++]);});
 while(ci<p.c.length)cit(p.c[ci++]); if(open)out.push('</ul>');
 if(!p.c.length)out.push('<ul class="cits"><li>لا يوجد إسناد في المصدر</li></ul>');
-$('card').innerHTML=`<article class="pr">
+$('card').innerHTML=`<article class="pr card">
   <div class="num">${p.n}${p.np!==p.n?`<small>طُبع ${p.np}</small>`:''}<div class="idchip">${p.id}</div></div>
   <div class="body"><div class="crumb"><span>${esc(C.name)}</span>${p.sec.map(x=>`<span>${esc(x)}</span>`).join('')}</div>
   ${p.ttl?`<div class="ttl">${esc(p.ttl)}</div>`:''}<div class="text">${out.join('')}</div>

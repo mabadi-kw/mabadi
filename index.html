@@ -5,252 +5,46 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>مبادئ التمييز</title>
 <meta name="description" content="مكتبة مبادئ محكمة التمييز الكويتية: بحث في نصوص المبادئ حرفيًا كما في مصادرها، مع صورة الصفحة الأصلية، ويعمل دون اتصال.">
-<meta name="theme-color" content="#0f5c52">
+<meta name="theme-color" content="#0b2545">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مبادئ التمييز">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Reem+Kufi:wght@500;700&display=swap">
-<style>
-/* Layout: a reading desk — a narrow sticky search rail on top, principles set as numbered law-report entries in one comfortable column; source page opens as a side sheet. */
-:root{
-  --paper:#f6f7f5; --sheet:#ffffff; --ink:#1b2422; --muted:#5d6b67; --rule:#dde3e0;
-  --seal:#0f5c52; --seal-soft:#e3efec; --flag:#9a5b0c; --flag-soft:#fbf0de; --mark:#fff0b3; --ok:#23704a;
-  --f-text:"Noto Naskh Arabic","Traditional Arabic","Times New Roman",serif;
-  --f-ui:"IBM Plex Sans Arabic","Segoe UI",Tahoma,sans-serif;
-  --f-disp:"Reem Kufi","IBM Plex Sans Arabic",sans-serif;
-  color-scheme:light;
-}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#111615; --sheet:#182020; --ink:#e4ebe8; --muted:#95a5a0; --rule:#2a3533;
-  --seal:#5cc2b0; --seal-soft:#173430; --flag:#e3a653; --flag-soft:#33270f; --mark:#5a4b10; --ok:#6fcf97; color-scheme:dark}}
-:root[data-theme="dark"]{
-  --paper:#111615; --sheet:#182020; --ink:#e4ebe8; --muted:#95a5a0; --rule:#2a3533;
-  --seal:#5cc2b0; --seal-soft:#173430; --flag:#e3a653; --flag-soft:#33270f; --mark:#5a4b10; --ok:#6fcf97; color-scheme:dark}
-*{box-sizing:border-box}
-body{background:var(--paper);color:var(--ink);font-family:var(--f-ui);font-size:15px;line-height:1.6}
-.wrap{direction:rtl;max-width:980px;margin:0 auto;padding-inline:16px;padding-block:20px 60px}
-header.top{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px;border-bottom:2px solid var(--ink);padding-bottom:12px}
-h1 a{color:inherit;text-decoration:none}
-h1{font-family:var(--f-disp);font-weight:700;font-size:1.9rem;margin:0;line-height:1.2;text-wrap:balance}
-.sub{color:var(--muted);font-size:.85rem;margin-top:2px}
-nav.tabs{display:flex;gap:4px;flex-wrap:wrap}
-nav.tabs button{font:inherit;font-size:.9rem;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);padding:6px 14px;border-radius:999px;cursor:pointer}
-nav.tabs button[aria-selected="true"]{background:var(--seal);border-color:var(--seal);color:var(--sheet)}
-button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--seal);outline-offset:2px}
-.searchbar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--paper);padding-block:12px;border-bottom:1px solid var(--rule);display:grid;gap:8px}
-.q{display:flex;gap:8px}
-.q input{flex:1;min-width:0;font:inherit;font-size:1.05rem;padding:10px 14px;border:1.5px solid var(--rule);border-radius:10px;background:var(--sheet);color:var(--ink)}
-.filters{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.85rem}
-.filters select{font:inherit;padding:5px 8px;border:1px solid var(--rule);border-radius:8px;background:var(--sheet);color:var(--ink);max-width:min(100%,280px);min-width:0}
-.filters label{display:flex;gap:5px;align-items:center;color:var(--muted);min-width:0;max-width:100%}
-.count{margin-inline-start:auto;color:var(--muted);font-variant-numeric:tabular-nums}
-.hint{font-size:.78rem;color:var(--muted)}
-.list{display:grid;gap:14px;margin-top:16px}
-article.pr{scroll-margin-top:190px;background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:16px 18px;display:grid;grid-template-columns:auto 1fr;gap:4px 16px}
-.num small{display:block;font-family:var(--f-ui);font-size:.65rem;color:var(--flag)}
-.ttl{font-family:var(--f-disp);font-weight:500;font-size:1.02rem;margin:4px 0 2px;color:var(--seal)}
-details.rule{margin-top:8px;border-top:1px dashed var(--rule);padding-top:6px}
-details.rule summary{cursor:pointer;font-size:.85rem;color:var(--seal)}
-details.rule .text{font-size:1.02rem}
-.chip.rel{border:0;cursor:pointer;font:inherit;font-size:.75rem;background:var(--flag-soft);color:var(--flag)}
-.relw{font-size:.75rem;color:var(--muted);display:inline-flex;gap:4px;align-items:center;flex-wrap:wrap}
-.chip.col{background:var(--ink);color:var(--sheet)}
-button.chip{border:0;font:inherit;font-size:.75rem;cursor:pointer}
-.chip.tp{background:var(--seal-soft);color:var(--seal)}
-.chip.tp.auto{background:transparent;box-shadow:inset 0 0 0 1px var(--seal)}
-.chip.tp.low{box-shadow:inset 0 0 0 1px var(--flag);color:var(--flag)}
-.chip.lw{background:var(--paper);color:var(--ink);box-shadow:inset 0 0 0 1px var(--rule)}
-.chip.lw.sus{box-shadow:inset 0 0 0 1px var(--flag)}
-.filters input.art{width:5.5em;font:inherit;padding:5px 8px;border:1px solid var(--rule);border-radius:8px;background:var(--sheet);color:var(--ink)}
-.active-f{display:flex;flex-wrap:wrap;gap:6px}
-.active-f button{font:inherit;font-size:.78rem;border:0;border-radius:999px;padding:2px 10px;background:var(--seal);color:var(--sheet);cursor:pointer}
-.idx{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
-.idx .box{background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:6px 14px 12px}
-.idx details{border-bottom:1px solid var(--rule);padding:6px 0}
-.idx details:last-child{border-bottom:0}
-.idx summary{cursor:pointer;font-family:var(--f-disp);font-weight:500;display:flex;gap:8px;align-items:baseline}
-.idx summary .n,.idx .row .n{margin-inline-start:auto;color:var(--muted);font-family:var(--f-ui);font-size:.8rem;font-variant-numeric:tabular-nums}
-.idx .row{display:flex;gap:8px;align-items:baseline;width:100%;text-align:start;font:inherit;font-size:.9rem;background:none;border:0;color:var(--ink);padding:5px 6px;border-radius:6px;cursor:pointer}
-.idx .row:hover{background:var(--seal-soft);color:var(--seal)}
-.idx .arts{display:flex;flex-wrap:wrap;gap:4px;padding:4px 0 6px}
-.idx .arts button{font:inherit;font-size:.74rem;border:1px solid var(--rule);background:var(--paper);color:var(--ink);border-radius:6px;padding:1px 7px;cursor:pointer;font-variant-numeric:tabular-nums}
-.idx .arts button:hover{border-color:var(--seal);color:var(--seal)}
-.legend{font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:10px 0}
-h3{font-family:var(--f-disp);font-weight:500;font-size:1.05rem;margin:20px 0 8px}
-.rh{font-size:1.45rem;border-bottom:1px solid var(--rule);padding-bottom:6px}
-hr.sep{border:0;border-top:2px solid var(--ink);margin:40px 0 10px}
-.num{font-family:var(--f-disp);font-size:1.5rem;color:var(--seal);line-height:1.2;min-width:2.4ch;text-align:center;font-variant-numeric:tabular-nums}
-.body{min-width:0}
-.crumb{font-size:.78rem;color:var(--muted);display:flex;flex-wrap:wrap;gap:4px}
-.crumb span+span::before{content:"‹";margin-inline:4px}
-.text{font-family:var(--f-text);font-size:1.12rem;line-height:1.95;margin:6px 0 0}
-.text p{margin:0 0 6px}
-.text .cits{margin:2px 0 10px}
-.cits{margin:10px 0 0;padding:0;list-style:none;display:grid;gap:3px}
-.cits li{font-size:.88rem;color:var(--muted);font-variant-numeric:tabular-nums}
-.fn,.sa{font-size:.82rem;color:var(--muted);border-top:1px dashed var(--rule);margin-top:8px;padding-top:6px}
-.meta{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;align-items:center}
-.chip{font-size:.75rem;padding:2px 9px;border-radius:999px;background:var(--seal-soft);color:var(--seal)}
-.chip.flag{background:var(--flag-soft);color:var(--flag)}
-.actions{margin-inline-start:auto;display:flex;gap:6px}
-.btn{font:inherit;font-size:.8rem;border:1px solid var(--rule);background:transparent;color:var(--ink);padding:4px 10px;border-radius:8px;cursor:pointer}
-.btn:hover{border-color:var(--seal);color:var(--seal)}
-.review{grid-column:1/-1;background:var(--flag-soft);color:var(--flag);border-radius:8px;padding:6px 10px;font-size:.82rem}
-mark{background:var(--mark);color:inherit;border-radius:2px}
-.empty{padding:40px 0;text-align:center;color:var(--muted)}
-.more{display:flex;justify-content:center;margin-top:14px}
-/* source sheet */
-.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.35);z-index:20}
-.sheet{position:fixed;top:0;bottom:0;inset-inline-start:0;width:min(640px,100%);background:var(--sheet);z-index:21;direction:rtl;display:flex;flex-direction:column;border-inline-end:1px solid var(--rule);padding-top:env(safe-area-inset-top,0px)}
-.sheet-h{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:12px 16px;border-bottom:1px solid var(--rule)}
-.sheet-h b{font-family:var(--f-disp)}
-.sheet-b{overflow:auto;padding:12px 14px;font-family:var(--f-text);font-size:.98rem;line-height:1.85}
-.sheet-b .ln{padding:0 6px;border-radius:4px}
-.sheet-b .ln.hit{background:var(--seal-soft)}
-.sheet-b .ln.h{font-family:var(--f-disp);text-align:center;margin:6px 0}
-.sheet-b .ln.small{font-size:.85rem;color:var(--muted)}
-.pg{margin:0 0 10px}.pgimg{position:relative;border:1px solid var(--rule);background:#fff no-repeat;overflow:hidden}.pgimg img{display:block;width:100%;height:auto}.hlbox{position:absolute;border:2px solid var(--seal);background:rgba(15,92,82,.08);border-radius:4px;pointer-events:none}figcaption{font-family:var(--f-ui);font-size:.75rem;color:var(--muted);text-align:center;margin-top:4px}.pgtxt{margin:6px 0 18px;font-size:.9rem}.pgtxt summary{font-family:var(--f-ui);font-size:.8rem;color:var(--seal);cursor:pointer}
-.note{font-family:var(--f-ui);font-size:.78rem;color:var(--flag);background:var(--flag-soft);padding:8px 10px;border-radius:8px;margin-bottom:12px}
-/* report */
-section.panel{margin-top:18px}
-h2{font-family:var(--f-disp);font-weight:500;font-size:1.3rem;margin:26px 0 10px}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
-.stat{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:12px 14px}
-.stat b{display:block;font-family:var(--f-disp);font-size:1.6rem;color:var(--seal);font-variant-numeric:tabular-nums;line-height:1.3}
-.stat span{font-size:.8rem;color:var(--muted)}
-.tbl{overflow-x:auto;background:var(--sheet);border:1px solid var(--rule);border-radius:10px}
-table{border-collapse:collapse;width:100%;font-size:.87rem}
-th,td{text-align:right;padding:8px 12px;border-bottom:1px solid var(--rule);vertical-align:top}
-th{font-weight:600;color:var(--muted);font-size:.78rem;letter-spacing:.02em}
-tr:last-child td{border-bottom:0}
-td.okc{color:var(--ok);white-space:nowrap}
-td.flc{color:var(--flag);white-space:nowrap}
-.prose{max-width:68ch;color:var(--ink)}
-.prose li{margin-bottom:4px}
-.sample-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
-.sample-row label{font-size:.8rem;display:flex;gap:4px;align-items:center;border:1px solid var(--rule);border-radius:999px;padding:2px 10px;cursor:pointer}
-@media (max-width:760px){.idx{grid-template-columns:1fr}}
-@media (max-width:560px){article.pr{grid-template-columns:1fr}.num{text-align:start}h1{font-size:1.5rem}}
-@media print{.searchbar,nav.tabs,.actions,.more{display:none}article.pr{break-inside:avoid;border:0;border-bottom:1px solid #999}}
-@media (prefers-reduced-motion:reduce){*{transition:none!important}}
-
-/* additions for the standalone app */
-body{margin:0}
-[hidden]{display:none!important}
-.brand{display:flex;align-items:center;gap:10px}
-.brand img{width:40px;height:40px;border-radius:10px}
-.brand a{color:inherit;text-decoration:none}
-.netstat{font-size:.75rem;color:var(--muted);display:inline-flex;align-items:center;gap:5px}
-.netstat i{width:7px;height:7px;border-radius:50%;background:var(--ok);display:inline-block}
-.netstat.off i{background:var(--flag)}
-.idchip{font-family:var(--f-ui);font-size:.7rem;color:var(--muted);direction:ltr;unicode-bidi:isolate;text-align:center;margin-top:4px;word-break:break-all}
-.cits li .rk{font:inherit;font-size:.72rem;border:0;background:var(--seal-soft);color:var(--seal);border-radius:999px;padding:0 8px;margin-inline-start:6px;cursor:pointer;vertical-align:1px}
-.cits li .rk:hover{background:var(--seal);color:var(--sheet)}
-.view-h{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:18px 0 12px}
-.view-h h2{margin:0;flex:1;min-width:12ch}
-.back{font:inherit;font-size:.85rem;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);padding:5px 12px;border-radius:999px;cursor:pointer}
-.back:hover{border-color:var(--seal);color:var(--seal)}
-.inline-src{background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:12px 14px;margin-top:14px}
-.inline-src h3{margin-top:0}
-.rhead{background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:grid;gap:6px}
-.rhead .kv{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:.9rem}
-.rhead .kv b{color:var(--muted);font-weight:500;margin-inline-end:6px}
-.toast{position:fixed;bottom:calc(16px + env(safe-area-inset-bottom,0px));inset-inline:0;margin:auto;width:max-content;max-width:calc(100% - 32px);background:var(--ink);color:var(--paper);padding:8px 16px;border-radius:999px;font-size:.85rem;z-index:40;direction:rtl}
-.off-box{background:var(--sheet);border:1px solid var(--rule);border-radius:12px;padding:14px 16px;display:grid;gap:10px;margin-top:12px}
-.bar{height:8px;background:var(--rule);border-radius:999px;overflow:hidden}
-.bar i{display:block;height:100%;width:0;background:var(--seal);transition:width .3s}
-.prose a{color:var(--seal)}
-.src-list{display:grid;gap:6px;padding:0;list-style:none}
-.src-list li{background:var(--sheet);border:1px solid var(--rule);border-radius:10px;padding:8px 12px;display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
-.src-list li .n{margin-inline-start:auto;color:var(--muted);font-variant-numeric:tabular-nums;font-size:.85rem}
-code{font-size:.85em;direction:ltr;unicode-bidi:isolate;background:var(--seal-soft);padding:0 5px;border-radius:4px}
-@media print{header.top,.view-h .back,.actions,.inline-src details,.toast,.netstat{display:none!important}.inline-src{border:0}}
-.searchbar{grid-template-columns:minmax(0,1fr)}
-.filters label{flex:0 1 auto}
-.filters select{max-width:min(100%,260px)}
-@media (max-width:560px){.filters label{flex:1 1 45%}.filters select{flex:1;max-width:none;width:100%}.brand img{width:34px;height:34px}}
-
-</style>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@700&family=IBM+Plex+Sans+Arabic:wght@400;500;600&family=Noto+Naskh+Arabic:wght@400;600&display=swap">
+<link id="xfont" rel="stylesheet" href="data:text/css,">
+<link rel="stylesheet" href="app.css">
+<script>try{const s=JSON.parse(localStorage.getItem('mabadi:settings')||'{}');if(s.theme&&s.theme!=='auto')document.documentElement.dataset.theme=s.theme;}catch(_){}</script>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <div class="brand"><img src="icons/icon.svg" alt="" width="40" height="40"><div>
-      <h1><a href="#/">مبادئ التمييز</a></h1>
-      <div class="sub" id="sub">مكتبة مبادئ محكمة التمييز الكويتية</div></div>
-    </div>
-    <nav class="tabs" role="tablist">
-      <button role="tab" data-tab="search" aria-selected="true">البحث</button>
-      <button role="tab" data-tab="index" aria-selected="false">الفهرس</button>
-      <button role="tab" data-tab="report" aria-selected="false">التقارير</button>
-      <button role="tab" data-tab="about" aria-selected="false">عن المكتبة</button>
-      <span class="netstat" id="net"><i></i> متصل</span>
+<header class="appbar">
+  <div class="in">
+    <a class="logo" href="#/"><img src="icons/icon.svg" alt="" width="40" height="40"><div><b>مبادئ التمييز</b><small id="sub">مكتبة مبادئ محكمة التمييز الكويتية</small></div></a>
+    <nav class="topnav" id="topnav">
+      <button data-nav="home">الرئيسية</button>
+      <button data-nav="search">البحث</button>
+      <button data-nav="index">الفهرس</button>
+      <button data-nav="saved">المحفوظات</button>
+      <button data-nav="more">المزيد</button>
     </nav>
-  </header>
+    <button class="me" id="me" aria-label="الإعدادات"><span id="mename">الإعدادات</span><i class="avatar" id="meav"></i></button>
+  </div>
+</header>
 
-  <section id="tab-search">
-    <div class="searchbar">
-      <div class="q"><input id="q" type="search" placeholder="ابحث في نص المبدأ أو الإسناد: مكافأة نهاية الخدمة، ‎423/2003، «الفصل التعسفي»" autocomplete="off" aria-label="البحث"></div>
-      <div class="filters">
-        <label for="fcol">المجموعة<select id="fcol"><option value="">الكل</option></select></label>
-        <label for="ftp">الموضوع<select id="ftp"><option value="">الكل</option></select></label>
-        <label for="fch">الدائرة<select id="fch"><option value="">الكل</option></select></label>
-        <label for="flw">القانون<select id="flw"><option value="">الكل</option></select></label>
-        <label for="fart">المادة<input id="fart" class="art" inputmode="numeric" placeholder="مثل 51" autocomplete="off"></label>
-        <label for="frv"><input id="frv" type="checkbox"> يحتاج مراجعة فقط</label>
-        <span class="count" id="count"></span>
-      </div>
-      <div class="hint">البحث يتجاهل التشكيل والهمزات والتاء المربوطة. ضع العبارة بين علامتي تنصيص للبحث عنها متصلة.</div>
-    </div>
-    <div class="list" id="list"><div class="empty" id="loading">جارٍ تحميل المكتبة…</div></div>
-    <div class="more"><button class="btn" id="more" hidden>عرض المزيد</button></div>
-  </section>
+<main id="main"><div class="empty" id="loading">جارٍ تحميل المكتبة…</div></main>
 
-  <section id="tab-item" class="panel" hidden></section>
-  <section id="tab-index" class="panel" hidden></section>
-  <section id="tab-report" class="panel" hidden><div class="empty">جارٍ تحميل التقارير…</div></section>
-  <section id="tab-about" class="panel" hidden>
-    <div class="prose">
-      <h2>عن المكتبة</h2>
-      <p>«مبادئ التمييز» مبادرة شخصية مجانية غير تجارية، تجمع مبادئ محكمة التمييز الكويتية من مجموعاتها الرسمية وإصدارات مكتبها الفني في مكان واحد، ليسهل البحث فيها ونسخها وطباعتها، ولو دون اتصال.</p>
-      <h3>قواعد النزاهة</h3>
-      <ul>
-        <li>نص كل مبدأ منقول <b>حرفيًا</b> كما ورد في مصدره. لا يُعاد صياغته ولا يُختصر ولا يُصحَّح إملائيًا، والخطأ المطبعي في الأصل يبقى كما هو.</li>
-        <li>لا يُخترع مبدأ ولا يُخمَّن حرف. ما شُكّ في قراءته يُعلَّم «يحتاج مراجعة» مع سببه.</li>
-        <li>رقم الطعن وتاريخ الجلسة يُفحصان آليًا ويُقارنان بين المصادر، وكل تعارض يُعلَّم ولا يُحسم بالتخمين.</li>
-        <li>كل مبدأ مربوط بصورة صفحته في المصدر. عند أي شك، <b>المرجع هو النص المطبوع في المصدر</b>.</li>
-        <li>التصنيف بالموضوع والقانون وصف مساعد للتصفح، وليس جزءًا من النص.</li>
-      </ul>
-      <p>هذه المكتبة ليست جهة رسمية ولا تصدر عن محكمة التمييز أو وزارة العدل.</p>
-      <h3>المصادر</h3>
-    </div>
-    <ul class="src-list" id="srcs"></ul>
-    <div class="prose">
-      <h3>روابط ثابتة</h3>
-      <ul>
-        <li>لكل مبدأ رابط ثابت بمعرّفه: <code>#/p/V09L-0001</code></li>
-        <li>ولكل حكم رابط يجمع كل ما ورد عنه في المصادر: <code>#/r/69/1977@1979-03-12</code></li>
-      </ul>
-      <h3>العمل دون اتصال</h3>
-      <p>بعد أول زيارة تُحفظ نصوص المكتبة في الجهاز، وتعمل دون اتصال. أما صور الصفحات فتُحفظ عند فتحها، ويمكنك تنزيلها كلها مرة واحدة من هنا (نحو 190 ميغابايت).</p>
-    </div>
-    <div class="off-box"><div><button class="btn" id="dl">تنزيل المكتبة كاملة للعمل دون اتصال</button></div><div class="bar"><i id="dlbar"></i></div><div class="hint" id="dlst"></div></div>
-    <div class="prose">
-      <h3>البيانات للمطوّرين</h3>
-      <p>نصوص المكتبة متاحة أيضًا في ملفات JSON لكل دائرة، مع ملف إصدارات: <a href="packs/manifest.json">packs/manifest.json</a>.</p>
-    </div>
-  </section>
-</div>
+<nav class="botnav" id="botnav">
+  <button data-nav="home"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>الرئيسية</button>
+  <button data-nav="search"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>البحث</button>
+  <button data-nav="index"><svg class="i" viewBox="0 0 24 24"><path d="M4 5h6v6H4zM14 5h6v6h-6zM4 15h6v4H4zM14 15h6v4h-6z"/></svg>الفهرس</button>
+  <button data-nav="saved"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>المحفوظات</button>
+  <button data-nav="more"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>المزيد</button>
+</nav>
 
-<div id="sheetwrap" hidden>
-  <div class="sheet-bg" id="sheetbg"></div>
-  <aside class="sheet" role="dialog" aria-label="صفحة المصدر">
-    <div class="sheet-h"><b id="sheett"></b><button class="btn" id="sheetx">إغلاق</button></div>
-    <div class="sheet-b" id="sheetb"></div>
-  </aside>
-</div>
+<div id="layer"></div>
 <div class="toast" id="toast" hidden role="status"></div>
 <script src="app.js"></script>
 </body>
