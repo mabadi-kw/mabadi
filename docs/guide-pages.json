@@ -1,0 +1,15 @@
+{
+ "home": 3,
+ "search": 4,
+ "filters": 5,
+ "item": 6,
+ "source": 8,
+ "ruling": 9,
+ "index": 10,
+ "laws": 12,
+ "saved": 14,
+ "offline": 15,
+ "settings": 16,
+ "feedback": 18,
+ "about": 19
+}

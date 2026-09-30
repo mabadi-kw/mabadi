@@ -512,9 +512,12 @@ function settingsDlg(){
     <div class="rowi"><span>تباعد الأسطر</span><input type="range" id="lh" min="1.6" max="2.4" step=".05" value="${S.lh}"></div>
     <div class="preview">عقد العمل. الخصيصتان الأساسيتان له التبعية والأجر.</div><span class="hint">عنوان «مبادئ التمييز» ثابت ولا يتغير بتغيير الخط.</span></section>
    <section><h4>المظهر</h4><div class="seg">${[['auto','تلقائي'],['light','فاتح'],['dark','داكن']].map(([k,l])=>`<button data-theme="${k}" aria-pressed="${S.theme===k}">${l}</button>`).join('')}</div></section>
+   <section><h4>الدليل والفيديو</h4><div id="gvid"></div><div class="rowi"><a class="btn primary" href="${GUIDE_PDF}" target="_blank" rel="noopener">${svg('open')}عرض الدليل</a><span class="hint">دليل مصوّر بفصل لكل قسم. وفي أعلى كل قسم رابط «الدليل» يفتح فصله مباشرة.</span></div></section>
    <section><h4>رأيك</h4><div class="rowi"><button class="btn primary" data-a2="rate">${svg('star')}ملاحظاتك واقتراحاتك</button><span class="hint">تقييم لكل قسم، يُحفظ في جهازك وترسله أنت.</span></div></section>
    <section><h4>بياناتي</h4><div class="rowi"><button class="btn" id="bk">${svg('download')}نسخة احتياطية</button><label class="btn" style="cursor:pointer">استعادة<input type="file" accept="application/json" id="rs" hidden></label></div>
     <span class="hint">المحفوظات والمجلدات والملاحظات والإعدادات في ملف واحد، تنقله إلى جهاز آخر.</span></section></div>`);
+  fetch('docs/intro.jpg',{method:'HEAD'}).then(r=>{if(!r.ok||!$('gvid'))return;$('gvid').innerHTML=`<button class="vposter" id="gvp" aria-label="تشغيل الفيديو التعريفي"><img src="docs/intro.jpg" alt=""><span class="play">${svg('open')}تشغيل الفيديو التعريفي</span></button>`;
+    $('gvp').onclick=()=>{$('gvid').innerHTML='<video src="docs/intro.mp4" controls autoplay playsinline preload="none" poster="docs/intro.jpg" style="width:100%;border-radius:12px"></video>';};}).catch(()=>{});
   const upd=()=>{saveS();applyLook();};
   $('sname').oninput=()=>{S.name=$('sname').value.trim();upd();};
   $('avf').onchange=e=>{const f=e.target.files[0];if(!f)return;const img=new Image();img.onload=()=>{const c=document.createElement('canvas'),z=192,m=Math.min(img.width,img.height);c.width=c.height=z;c.getContext('2d').drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,z,z);S.photo=c.toDataURL('image/jpeg',.82);upd();settingsDlg();};img.src=URL.createObjectURL(f);};
@@ -532,7 +535,7 @@ function settingsDlg(){
     saveS();LS.set('favs',FAV);LS.set('folders',FOLD);LS.set('notes',NOTE);LS.set('hist',HIST);applyLook();toast('استُعيدت بياناتك');closeDlg();route();}catch(_){toast('الملف غير صالح');}};
 }
 // ---------- offline
-function offlineDlg(){dlg(`${svg('download')} العمل دون اتصال`,`<div class="set"><p style="margin:0">بعد أول زيارة تُحفظ نصوص المكتبة في الجهاز. صور الصفحات تُحفظ عند فتحها، ويمكنك تنزيلها كلها الآن (نحو 190 ميغابايت).</p>
+function offlineDlg(){dlg(`${svg('download')} العمل دون اتصال`,`<div class="set"><p style="margin:0">بعد أول زيارة تُحفظ نصوص المكتبة في الجهاز. صور الصفحات تُحفظ عند فتحها، ويمكنك تنزيلها كلها الآن (نحو 380 ميغابايت).</p>
   <button class="btn primary" id="dl">تنزيل المكتبة كاملة</button><div class="bar-p"><i id="dlbar"></i></div><div class="hint" id="dlst"></div></div>`);
   $('dl').onclick=async()=>{if(!('caches' in window)){$('dlst').textContent='هذا المتصفح لا يدعم التخزين دون اتصال.';return;}$('dl').disabled=true;
    try{const Fs=await fetch('files.json',{cache:'no-store'}).then(r=>r.json());const cF=await caches.open('mabadi-files'),cD=await caches.open('mabadi-data');const tot=Fs.files.length;let n=0,by=0;const q=[...Fs.files];
@@ -543,6 +546,16 @@ let deferredInstall=null;window.addEventListener('beforeinstallprompt',e=>{e.pre
 function installDlg(){if(deferredInstall){deferredInstall.prompt();deferredInstall=null;return;}
   dlg('ثبّت التطبيق',`<div class="prose"><ul><li><b>آيفون وآيباد (Safari):</b> زر المشاركة ← «إضافة إلى الشاشة الرئيسية».</li><li><b>أندرويد (Chrome):</b> القائمة ⋮ ← «تثبيت التطبيق».</li><li><b>الحاسوب (Chrome أو Edge):</b> أيقونة التثبيت في شريط العنوان.</li></ul></div>`);}
 // ---------- التقييم والملاحظات (نموذج Google خاص بصاحب المكتبة)
+// ---------- guide: جدول القسم ← صفحة الدليل (يتحقق منه ويحدّثه tools/guide/build-guide.mjs)
+const GUIDE={home:3,search:4,filters:5,item:6,source:8,ruling:9,index:10,laws:12,saved:14,offline:15,settings:16,feedback:18,about:19};
+const GUIDE_PDF='docs/guide.pdf';
+function guideKey(v){const h=(location.hash||'').replace(/^#\/?/,'');
+  if(v==='item')return h.startsWith('r/')?'ruling':(h.startsWith('law/')||h.startsWith('a/')||h.startsWith('m/'))?'laws':'item';
+  return {home:'home',search:'search',index:'index',saved:'saved',report:'about',about:'about',laws:'laws',more:'settings'}[v];}
+function guideLink(v){const el=$('v-'+v);if(!el)return;const k=guideKey(v),pg=GUIDE[k];let a=el.querySelector(':scope > .guidelnk');
+  if(!pg){if(a)a.remove();return;}
+  if(!a){a=document.createElement('a');a.className='guidelnk no-print';a.target='_blank';a.rel='noopener';el.prepend(a);}
+  a.href=`${GUIDE_PDF}#page=${pg}`;a.innerHTML=`${svg('info')}الدليل`;a.title='افتح فصل هذا القسم في دليل الاستخدام';}
 // ---------- feedback (local only; nothing is sent by the app)
 const FB_PHONE='';   // رقم واتساب اختياري بصيغة دولية دون + (مثال 965XXXXXXXX)، يبقى فارغًا في المستودع العام
 const FB_EMAIL='';   // بريد اختياري، يبقى فارغًا في المستودع العام
@@ -611,7 +624,7 @@ function feedbackScreen(){closeDlg();let st=fbLoad();const save=()=>LS.set('fb2'
 }
 // ---------- router
 const NAVMAP={laws:'#/laws',home:'#/',search:'#/search',index:'#/index/topics',saved:'#/saved',more:'#/more',report:'#/report',about:'#/about'};
-function show(v,nav){['home','search','index','saved','more','item','report','about','laws'].forEach(x=>$('v-'+x).hidden=x!==v);
+function show(v,nav){['home','search','index','saved','more','item','report','about','laws'].forEach(x=>$('v-'+x).hidden=x!==v);guideLink(v);
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',b.dataset.nav===nav));}
 function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));closeDlg();if(speakingId){speechSynthesis.cancel();speakingId=null;}
   document.title='مبادئ التمييز';
