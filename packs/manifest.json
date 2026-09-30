@@ -1,0 +1,159 @@
+{
+ "format": "mabadi-manifest",
+ "producer": "مكتبة مبادئ التمييز",
+ "schema_version": "1.5",
+ "updated": "2026-09-30",
+ "site": "https://mabadi-kw.github.io/mabadi/",
+ "links": {
+  "principle": "https://mabadi-kw.github.io/mabadi/#/p/{id}",
+  "ruling": "https://mabadi-kw.github.io/mabadi/#/r/{ruling_key}",
+  "embed": "https://mabadi-kw.github.io/mabadi/embed.html#{id}"
+ },
+ "packs": [
+  {
+   "file": "mabadi-pack_administrative_v1.5.json",
+   "pack": "إداري",
+   "schema_version": "1.5",
+   "generated": "2026-09-30",
+   "bytes": 7015166,
+   "sha256": "f9687cb056580dfccbf38169f0a3142ec8c595c6267030b2018a6b06dd42130d",
+   "counts": {
+    "items": 2270,
+    "rulings": 581,
+    "needs_review": 41
+   }
+  },
+  {
+   "file": "mabadi-pack_civil_v1.5.json",
+   "pack": "مدني",
+   "schema_version": "1.5",
+   "generated": "2026-09-30",
+   "bytes": 13334066,
+   "sha256": "d5165e87226b489e53b7c9ae2980d657704f10d667d1f435a05f196ccaa33e8d",
+   "counts": {
+    "items": 5135,
+    "rulings": 1679,
+    "needs_review": 101
+   }
+  },
+  {
+   "file": "mabadi-pack_commercial_v1.5_part1of3.json",
+   "pack": "تجاري",
+   "schema_version": "1.5",
+   "generated": "2026-09-30",
+   "bytes": 12348377,
+   "sha256": "377adb1ca2847224ae4f9169b1014dd30787def5619dd16a747deee8c5570677",
+   "counts": {
+    "items": 5210,
+    "rulings": 3000,
+    "needs_review": 66
+   },
+   "part": {
+    "n": 1,
+    "of": 3,
+    "items_total": 15628
+   }
+  },
+  {
+   "file": "mabadi-pack_commercial_v1.5_part2of3.json",
+   "pack": "تجاري",
+   "schema_version": "1.5",
+   "generated": "2026-09-30",
+   "bytes": 11238793,
+   "sha256": "7d4248dac364735603f0b0d4b7dfa8bb84cb7a2d1ef9897ad97555c0f12e4f8a",
+   "counts": {
+    "items": 5210,
+    "rulings": 2910,
+    "needs_review": 61
+   },
+   "part": {
+    "n": 2,
+    "of": 3,
+    "items_total": 15628
+   }
+  },
+  {
+   "file": "mabadi-pack_commercial_v1.5_part3of3.json",
+   "pack": "تجاري",
+   "schema_version": "1.5",
+   "generated": "2026-09-30",
+   "bytes": 11676007,
+   "sha256": "6eac202d9b0f68464dafb0b5cad2510e02476446343d3cd5085a800216d843ac",
+   "counts": {
+    "items": 5208,
+    "rulings": 2434,
+    "needs_review": 113
+   },
+   "part": {
+    "n": 3,
+    "of": 3,
+    "items_total": 15628
+   }
+  },
+  {
+   "file": "mabadi-pack_criminal_v1.5.json",
+   "pack": "جزائي",
+   "schema_version": "1.5",
+   "generated": "2026-09-30",
+   "bytes": 8641218,
+   "sha256": "7bb7667eb0050dfed8bd9035d3a2118aefff21163f37b13b886d5c39de342006",
+   "counts": {
+    "items": 3853,
+    "rulings": 2231,
+    "needs_review": 79
+   }
+  },
+  {
+   "file": "mabadi-pack_example.json",
+   "pack": "مثال",
+   "schema_version": "1.5",
+   "generated": "2026-09-30",
+   "bytes": 31078,
+   "sha256": "a7eb8afcee107679e7f0c0be8ab528d9c4d7f2a1123071be93a54aa9456b1695",
+   "counts": {
+    "items": 3,
+    "rulings": 4,
+    "needs_review": 0
+   }
+  },
+  {
+   "file": "mabadi-pack_judiciary_v1.5.json",
+   "pack": "طلبات رجال القضاء",
+   "schema_version": "1.5",
+   "generated": "2026-09-30",
+   "bytes": 420963,
+   "sha256": "39b15c68555bc2d120827ba3b018c93910190149e9af8bff739f18b5d32002ca",
+   "counts": {
+    "items": 55,
+    "rulings": 20,
+    "needs_review": 3
+   }
+  },
+  {
+   "file": "mabadi-pack_labour_v1.5.json",
+   "pack": "عمالي",
+   "schema_version": "1.5",
+   "generated": "2026-09-30",
+   "bytes": 11469918,
+   "sha256": "3a570b647909a8edbfb2e80858d8536b06f6e4079b88e170b53d27728ae58ce1",
+   "counts": {
+    "items": 3187,
+    "rulings": 1300,
+    "needs_review": 93
+   }
+  },
+  {
+   "file": "mabadi-pack_personal-status_v1.5.json",
+   "pack": "أحوال شخصية",
+   "schema_version": "1.5",
+   "generated": "2026-09-30",
+   "bytes": 6198298,
+   "sha256": "dad8b38ff49118f23a445ce86038d87588f506119693cb648818d761fd7fdcf3",
+   "counts": {
+    "items": 2783,
+    "rulings": 1217,
+    "needs_review": 46
+   }
+  }
+ ]
+}
