@@ -650,7 +650,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610011203';
+const APP_BUILD='202610011454';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1080,8 +1080,9 @@ function syncAskPass(why){return new Promise(res=>{let done=false;const fin=v=>{
    <div class="rowi"><button class="btn primary" id="spok">فتح</button><button class="btn" id="spno">إلغاء</button></div></div>`);
   const iv=setInterval(()=>{if(!document.body.contains(d))fin(null);},400);
   $('spok').onclick=()=>fin($('spw').value||null);$('spno').onclick=()=>fin(null);$('spw').onkeydown=e=>{if(e.key==='Enter')fin($('spw').value||null);};setTimeout(()=>$('spw')&&$('spw').focus(),50);});}
-function syncPickFile(){return new Promise(res=>{const i=document.createElement('input');i.type='file';i.accept='.amali';i.hidden=true;document.body.appendChild(i);
-  const end=v=>{i.remove();res(v);};i.onchange=()=>end(i.files[0]||null);i.addEventListener('cancel',()=>end(null));i.click();});}
+// الآيفون والآيباد لا يستبدلان الملف بل يضيفان «1» و«2»… إلى اسمه؛ لذلك يقبل الجلب عدة ملفات معًا وتُدمج بالأقدم فالأحدث، فلا يحتاج المستخدم إلى تغيير الأسماء
+function syncPickFile(){return new Promise(res=>{const i=document.createElement('input');i.type='file';i.accept='.amali';i.multiple=true;i.hidden=true;document.body.appendChild(i);
+  const end=v=>{i.remove();res(v);};i.onchange=()=>{const fs=[...i.files].sort((a,b)=>a.lastModified-b.lastModified);end(fs.length>1?fs:(fs[0]||null));};i.addEventListener('cancel',()=>end(null));i.click();});}
 let syncReopen=false,syncChg=false;
 const SYNC=window.AmaliSync?AmaliSync.create({inner:'mabadi-data',fileName:SYNC_FILE,idbName:'mabadi_sync',metaKey:SYNC_META,
   getPayload:syncPayload,
@@ -1105,7 +1106,7 @@ function syncUI(){const box=$('syncbox');if(!box)return;
    ${dir?`<div class="rowi"><button class="btn" id="slink">${svg('link')}${st.dir?'تغيير مجلد المزامنة':'ربط مجلد المزامنة'}</button>${st.dir?`<span class="hint">المجلد: «${esc(st.dir.name)}»</span>`:''}</div>
      <div class="rowi"><button class="btn primary" id="snow">${svg('download')}مزامنة الآن${dirty?' <i class="dirty" title="تغييرات لم تُحفظ"></i>':''}</button><button class="btn" id="spull">جلب فقط</button><button class="btn" id="spush">حفظ فقط</button></div>`
     :`<div class="rowi"><button class="btn primary" id="spull">${svg('download')}${IS_IOS?'① قبل العمل: جلب من ملف':'جلب من ملف'}</button><button class="btn${dirty?' primary':''}" id="spush">${svg('share')}${IS_IOS?'② بعد العمل: حفظ في ملف':'حفظ في ملف'}${dirty?' <i class="dirty"></i>':''}</button></div>
-     <span class="hint">${IS_IOS?'عند الحفظ اختر «حفظ في الملفات» ثم مجلد المزامنة في iCloud Drive أو OneDrive أو Google Drive، واستبدل الملف القديم.':'ربط المجلد متاح على الحاسوب في متصفح Chrome أو Edge. هنا: اجلب الملف قبل العمل، واحفظه بعده في مجلد المزامنة.'}</span>`}
+     <span class="hint">${IS_IOS?'عند الحفظ اختر «حفظ في الملفات» ثم مجلد المزامنة في iCloud Drive أو OneDrive أو Google Drive، وإن لم يسمح iOS بالاستبدال وأضاف رقمًا إلى الاسم (mabadi-data 1…) فلا بأس: عند «جلب» اختر الملفات كلها معًا فتُدمج بالأحدث، ثم احفظ ملفًا واحدًا واحذف القديمة متى شئت.':'ربط المجلد متاح على الحاسوب في متصفح Chrome أو Edge. هنا: اجلب الملف قبل العمل، واحفظه بعده في مجلد المزامنة.'}</span>`}
    <div class="syncstat">آخر جلب: ${ago(m.pulled)} · آخر حفظ: ${ago(m.pushed)}${dirty?' · <b>تغييرات لم تُحفظ</b>':''}</div></div>
    <details class="syncadv"><summary>خيارات أخرى</summary><div class="rowi"><button class="btn" id="srep">استبدال بيانات هذا الجهاز من ملف…</button>${pr?`<button class="btn" id="sundo">التراجع عن آخر استبدال (${ago(pr.at)})</button>`:''}</div>
     <label class="rowi"><input type="checkbox" id="snudge"${S.nudge!==false?' checked':''}> ذكّرني بالنسخ الاحتياطي إن مرّ أسبوع دون مزامنة أو نسخة</label></details>`;

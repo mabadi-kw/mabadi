@@ -151,6 +151,7 @@
         try { if (!h) h = (await window.showOpenFilePicker({ types: [{ description: 'بيانات مشفّرة', accept: { 'application/octet-stream': ['.amali'] } }] }))[0];
           if (await perm(h)) return await applyText(await (await h.getFile()).text(), h); } catch (e) { if (e && e.name === 'AbortError') return false; } }
       var f = o.pickFileFallback ? await o.pickFileFallback() : null;     // iOS: <input type=file accept=".amali">
+      if (Array.isArray(f)) { var okAny = false; for (var fi = 0; fi < f.length; fi++) { if (await applyText(await f[fi].text())) okAny = true; } if (okAny && f.length > 1) note('دُمجت ' + f.length + ' ملفات — احفظ الآن ملفًا واحدًا', 'ok'); return okAny; }   // «مبادئ التمييز»: عدة ملفات معًا (نسخ iOS المرقّمة)
       return f ? await applyText(await f.text()) : false;
     }
     async function pickReplace() { S.mode = 'replace'; var ok = false; try { ok = await pull(); } finally { S.mode = ''; } return ok; }
