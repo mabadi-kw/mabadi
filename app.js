@@ -22,7 +22,7 @@ function saveUser(){LS.set('favs',FAV);LS.set('folders',FOLD);LS.set('notes',NOT
 const saveS=()=>LS.set('settings',S);
 // نموذج التقييم: يُملأ عند إنشاء نموذج Google الخاص بالمكتبة
 // ---------- icons
-const IC={dots:'M5 12h.01M12 12h.01M19 12h.01',
+const IC={dots:'M5 12h.01M12 12h.01M19 12h.01', check:'M5 12l5 5L20 7', grip:'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01',
  gavel:'M14 3l7 7-3 3-7-7zM11 6l-7 7 3 3 7-7M3 21h10', briefcase:'M3 8h18v11H3zM8 8V5h8v3M3 13h18',
  scroll:'M6 3h11a3 3 0 0 1 0 6H6zM6 3a3 3 0 0 0 0 6v9a3 3 0 0 0 3 3h9V9', contract:'M6 3h8l4 4v14H6zM9 11h6M9 15h4',
  building:'M4 21V5l8-2v18M12 8l8 2v11M2 21h20M8 9h.01M8 13h.01M8 17h.01M16 13h.01M16 17h.01', house:'M3 11l9-7 9 7M5 10v10h14V10M10 20v-5h4v5',
@@ -316,7 +316,7 @@ function viewMemo(lid,k){const el=$('v-item');el.innerHTML=LOADMSG;k=k==null?nul
   }).catch(()=>{el.innerHTML='<div class="empty">تعذّر تحميل المذكرة.</div>';});}
 // ---------- views scaffold
 const main=$('main');
-const SNAV=[['home','home','الرئيسية','مبدأ اليوم وما فتحته مؤخرًا'],['search','search','البحث',`في ${nf(PR.length)} مبدأً`],['laws','scroll','التشريعات','نصوص القوانين مادةً مادة'],['index','book','الفهرس','الموضوعات والقوانين والكتب'],['saved','star','المحفوظات','مجلداتك وملاحظاتك'],['about','info','عن المكتبة','المصادر وقواعد النزاهة'],['report','report','التقارير','طريقة الاستخراج والتحقق']];
+const SNAV=[['home','home','الرئيسية','مبدأ اليوم وما فتحته مؤخرًا'],['search','scale','المبادئ',`${nf(PR.length)} مبدأ · بحث وتصفح`],['laws','scroll','التشريعات','نصوص القوانين مادةً مادة'],['index','book','الفهرس','الموضوعات والقوانين والكتب'],['saved','star','المحفوظات','مجلداتك وملاحظاتك'],['about','info','عن المكتبة','المصادر وقواعد النزاهة'],['report','report','التقارير','طريقة الاستخراج والتحقق']];
 IC.home='M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z';
 main.innerHTML=`<div class="shell"><aside class="sidenav" aria-label="الأقسام">${SNAV.map(([k,i,t,d])=>`<button class="navcard" data-nav="${k}"><span class="ic">${svg(i)}</span><span><b>${t}</b><small>${d}</small></span></button>`).join('')}
  <button class="navcard" data-a2="settings"><span class="ic">${svg('gear')}</span><span><b>الإعدادات</b><small>الخط والمظهر والقفل</small></span></button>
@@ -640,14 +640,14 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
     <ol class="arr">${L.map((k,i)=>`<li><span class="an">${i+1}</span><b>${esc(name(k))}</b><span class="ab"><button class="btn icon" data-mv="top" data-k="${esc(k)}" aria-label="إلى الأول"${i?'':' disabled'}>⤒</button><button class="btn icon" data-mv="up" data-k="${esc(k)}" aria-label="أعلى"${i?'':' disabled'}>▲</button><button class="btn icon" data-mv="down" data-k="${esc(k)}" aria-label="أسفل"${i<L.length-1?'':' disabled'}>▼</button></span></li>`).join('')}</ol>
     <div class="rowi"><button class="btn primary" data-close>تم</button><button class="btn" id="ardef">الترتيب الأصلي</button></div></div>`);
     d.addEventListener('click',e=>{const b=e.target.closest('[data-mv]');if(!b)return;const L2=ordered(kind,base),i=L2.indexOf(b.dataset.k);L2.splice(i,1);
-      L2.splice(b.dataset.mv==='top'?0:b.dataset.mv==='up'?i-1:i+1,0,b.dataset.k);S.ord=Object.assign({},S.ord,{[kind]:L2});saveS();viewHome();draw();
+      L2.splice(b.dataset.mv==='top'?0:b.dataset.mv==='up'?i-1:i+1,0,b.dataset.k);S.ord=Object.assign({},S.ord,{[kind]:L2});saveS();viewHome();renderBrowse();draw();
       const nb=document.querySelector(`.arr [data-mv="${b.dataset.mv}"][data-k="${CSS.escape(b.dataset.k)}"]`);if(nb&&!nb.disabled)nb.focus();});
-    $('ardef').onclick=()=>{const o=Object.assign({},S.ord);delete o[kind];S.ord=o;saveS();viewHome();draw();};};
+    $('ardef').onclick=()=>{const o=Object.assign({},S.ord);delete o[kind];S.ord=o;saveS();viewHome();renderBrowse();draw();};};
   draw();}
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610010725';
+const APP_BUILD='202610010826';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -694,31 +694,38 @@ function introShow(force){if(!force&&(LS.get('intro',0)||window.self!==window.to
 // ---------- HOME
 function dailyPick(){const pool=PR.filter(p=>!p.rv.length&&p.c.length);const d=new Date();const k=d.getFullYear()*372+d.getMonth()*31+d.getDate();return pool[(k*2654435761>>>0)%pool.length];}
 function mini(p){return `<button class="mini card" data-go="#/p/${p.id}"><span class="s">${esc(COLS[p.col].name)} · ${p.n}</span><span class="t">${esc(p.ttl||p.p[0])}</span></button>`;}
+// الرئيسية: تحية في سطر، ثم «بوابتا المكتبة» (المبادئ والتشريعات) يجمعهما خيط الذهب، ثم ما يعين القاضي على المتابعة
+function todayLine(){try{return new Date().toLocaleDateString('ar-KW-u-nu-latn',{weekday:'long',day:'numeric',month:'long',year:'numeric'});}catch(_){return '';}}
+function famChip(f){return `<button class="fchip" data-go="#/index/fam/${encodeURIComponent(f)}"><span class="ic">${svg(FAMIC[famLetter[f]]||'scale')}</span><b>${esc(f)}</b><small>${nf(famcount[f]||0)}</small></button>`;}
 function viewHome(){
   const el=$('v-home'),dp=dailyPick(),hr=new Date().getHours();
   const greet=(hr<12?'صباح الخير':'مساء الخير')+(S.name?'، '+esc(S.name):'');
-  const tops=['L06','L08','P12','P01'].filter(t=>TL[t]);
   const recent=HIST.map(i=>BYID[i]).filter(Boolean).slice(0,10);
-  el.innerHTML=`<div class="hero"><h1>${greet}</h1><p>ابحث في ${nf(PR.length)} مبدأ من مبادئ محكمة التمييز، حرفيًا كما في مصادرها.</p>
-   <form class="sbox" id="hsf">${svg('search')}<input id="hq" type="search" placeholder="كلمة، عبارة، رقم طعن أو مادة…" autocomplete="off" enterkeyhint="search">${micBtn('hq')}<button class="btn primary" type="submit">بحث</button></form>
-   <div class="quick">${(QH.length?QH.slice(0,4).map(q=>`<button class="chip" data-q="${esc(q)}">${svg('clock')}${esc(q)}</button>`):[]).join('')}${tops.map(t=>`<button class="chip" data-f="tp" data-v="${t}">${esc(TL[t][1])}</button>`).join('')}</div></div>
+  const arts=LAWIX.reduce((s,x)=>s+(x.articles||0),0),lastG=LAWIX.filter(x=>x.src==='gazette'&&x.issued).sort((a,b)=>b.issued.localeCompare(a.issued))[0];
+  const favN=Object.keys(FAV).filter(i=>BYID[i]).length;
+  el.innerHTML=`<div class="hero h2"><div class="hline"><h1>${greet}</h1><span class="today">${esc(todayLine())}</span></div>
+   <form class="sbox" id="hsf">${svg('search')}<input id="hq" type="search" placeholder="كلمة، عبارة، رقم طعن، أو «م 41 من 6/2010»" autocomplete="off" enterkeyhint="search">${micBtn('hq')}<button class="btn primary" type="submit">بحث</button></form></div>
+   <div class="gates" role="group" aria-label="أقسام المكتبة">
+    <button class="gate pr" data-go="#/search"><span class="gk">${svg('scale')}</span><span class="gnum">${nf(PR.length)}</span><span class="glab">مبدأ</span><b>المبادئ</b><small>${ORDER.length} مجموعة · ${nf(Object.keys(RUL).length)} حكمًا مفهرسًا</small><span class="garr">${svg('back')}</span></button>
+    <button class="gate lw" data-go="#/laws"><span class="gk">${svg('scroll')}</span><span class="gnum">${nf(LAWIX.length)}</span><span class="glab">تشريعًا</span><b>التشريعات</b><small>${nf(arts)} مادة${lastG?` · آخر ما نُشر: ${esc(lastG.short)}`:''}</small><span class="garr">${svg('back')}</span></button>
+   </div>
    <div>
    ${recent.length?`<div class="sech"><h2>تابع من حيث توقفت</h2><button class="lnk" data-hist>عرض السجل ‹</button></div><div class="hrow">${recent.map(mini).join('')}</div>`:''}
-   ${newLaws()}
+   <div class="sech"><h2>الموضوعات</h2><span class="sechb"><button class="lnk" data-arrmode="fams">${svg('filter')}ترتيب</button><button class="lnk" data-go="#/search">الكل ‹</button></span></div><div class="fstrip">${ordered('fams',FAMS).map(famChip).join('')}</div>
    <div class="sech"><h2>مبدأ اليوم</h2></div><div class="card daily"><div class="lbl">${svg('star')} ${esc(COLS[dp.col].title)} — ${dp.n}</div><div class="text">${esc(dp.p.join(' '))}</div><ul class="cits">${dp.c.map(c=>`<li>${esc(c.raw)}</li>`).join('')}</ul><button class="btn" data-go="#/p/${dp.id}">${svg('open')}فتح المبدأ</button></div>
-   <div class="sech"><h2>تصفح حسب الموضوع</h2><button class="btn sm" data-arrange="fams">${svg('filter')}ترتيب</button></div><div class="grid g3">${ordered('fams',FAMS).map(famTile).join('')}</div>
-   <div class="sech"><h2>الكتب والمجموعات</h2><button class="btn sm" data-arrange="cols">${svg('filter')}ترتيب</button></div><div class="grid g3">${ordered('cols',ORDER).map(bookTile).join('')}</div>
-   <div class="sech"><h2>المكتبة بالأرقام</h2></div><div class="stats"><div class="stat card"><b>${nf(PR.length)}</b><span>مبدأ</span></div><div class="stat card"><b>${nf(Object.keys(RUL).length)}</b><span>حكمًا مفهرسًا</span></div><div class="stat card"><b>${ORDER.length}</b><span>مجموعة</span></div><div class="stat card"><b>${LORD.length}</b><span>قانونًا مُحالًا إليه</span></div></div>
+   ${newLaws(3)}
+   <div class="numline"><span><b>${nf(PR.length)}</b>مبدأ</span><span><b>${ORDER.length}</b>مجموعة</span><span><b>${nf(LAWIX.length)}</b>تشريعًا</span><span><b>${nf(arts)}</b>مادة</span><span><b>${nf(LORD.length)}</b>قانونًا مُحالًا إليه</span>${favN?`<span><b>${nf(favN)}</b>في محفوظاتك</span>`:''}</div>
    </div>`;
-  weave(el.querySelector('.hero'),8);
+  weave(el.querySelector('.hero'),8);el.querySelectorAll('.gate').forEach(g=>weave(g,7));
   $('hsf').onsubmit=e=>{e.preventDefault();doSearch($('hq').value);};
 }
 // «صدر حديثًا»: آخر ما أضيف من الجريدة الرسمية ومن المساهمات، بالأحدث إصدارًا
-function newLaws(){const L=LAWIX.filter(x=>x.src==='gazette'||x.src==='amali').sort((a,b)=>(b.issued||String(b.year)).localeCompare(a.issued||String(a.year))).slice(0,5);if(!L.length)return '';
+function newLaws(n=5){const L=LAWIX.filter(x=>x.src==='gazette'||x.src==='amali').sort((a,b)=>(b.issued||String(b.year)).localeCompare(a.issued||String(a.year))).slice(0,n);if(!L.length)return '';
   return `<div class="sech"><h2>صدر حديثًا</h2><button class="lnk" data-go="#/laws">كل التشريعات ‹</button></div><div class="card newl">${L.map(x=>`<button class="nrow" data-go="#/law/${x.id}"><span class="ic">${svg('scroll')}</span><span class="t"><b>${esc(x.short)}</b><small>${esc(lawTitle(x))}${x.issued?' · '+esc(fdate(x.issued)):''}</small></span>${x.src==='amali'?'<span class="abadge">مساهمة</span>':'<span class="abadge new">جديد</span>'}</button>`).join('')}</div>`;}
 const maxFam=()=>Math.max(...Object.values(famcount));
-function famTile(f){return `<button class="tile" data-go="#/index/fam/${encodeURIComponent(f)}"><span class="ic">${svg(FAMIC[famLetter[f]]||'scale')}</span><b>${esc(f)}</b><span class="n">${nf(famcount[f]||0)} مبدأ · ${TORD.filter(t=>famOf(t)===f).length} موضوعًا</span><span class="meter"><i style="width:${(famcount[f]||0)/maxFam()*100}%"></i></span></button>`;}
-function bookTile(c){return `<button class="tile book" data-go="#/index/book/${c}"><span class="spine"></span><span><b>${esc(COLS[c].name)}</b><br><span class="n">${nf(COLS[c].n)} مبدأ</span></span></button>`;}
+const grip=g=>g?`<span class="grip" aria-hidden="true">${svg('grip')}</span>`:'';
+function famTile(f,g){return `<button class="tile" data-k="${esc(f)}" data-go="#/index/fam/${encodeURIComponent(f)}">${grip(g)}<span class="ic">${svg(FAMIC[famLetter[f]]||'scale')}</span><b>${esc(f)}</b><span class="n">${nf(famcount[f]||0)} مبدأ · ${TORD.filter(t=>famOf(t)===f).length} موضوعًا</span><span class="meter"><i style="width:${(famcount[f]||0)/maxFam()*100}%"></i></span></button>`;}
+function bookTile(c,g){return `<button class="tile book" data-k="${c}" data-go="#/index/book/${c}">${grip(g)}<span class="spine"></span><span><b>${esc(COLS[c].name)}</b><br><span class="n">${nf(COLS[c].n)} مبدأ</span></span></button>`;}
 function doSearch(q){q=(q||'').trim();Object.assign(F,{q,col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:'',ap:'',ay:''});SCOPE='p';if(q){QH=[q,...QH.filter(x=>x!==q)].slice(0,8);LS.set('qhist',QH);}go('#/search');}
 // ---------- voice search
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -745,6 +752,7 @@ function buildSearch(){
    </div>
    <div class="bar2"><div class="active-f" id="actf"></div><span class="count" id="count"></span></div>
    <div class="hint">البحث يتجاهل التشكيل والهمزات والتاء المربوطة. ضع العبارة بين علامتي تنصيص للبحث عنها متصلة. اضغط «/» للبحث من أي مكان.</div>
+   <div id="browse" hidden></div>
    <div class="list" id="list"></div><div class="more"><button class="btn" id="more" hidden>عرض المزيد</button></div>`;
   let t;$('sq').addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>{if(SCOPE==='l'){lawScope();return;}F.q=$('sq').value;runSearch();quickChips();},150)});
   $('ssf').onsubmit=e=>{e.preventDefault();const q=$('sq').value.trim();if(q){QH=[q,...QH.filter(x=>x!==q)].slice(0,8);LS.set('qhist',QH);}$('sq').blur();};
@@ -765,7 +773,7 @@ function quickChips(){const k=$('sqk');if(!k)return;if(($('sq').value||'').trim(
   k.innerHTML=rec+QSUG[SCOPE].map(q=>SCOPE==='l'?`<button class="chip" data-lq="${esc(q)}">${esc(q)}</button>`:`<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join('');}
 function setScope(sc){SCOPE=sc;document.querySelectorAll('#scope [data-scope]').forEach(b=>b.setAttribute('aria-selected',b.dataset.scope===sc));
   const L=sc==='l';$('sfp').hidden=L;$('sfl').hidden=!L;$('lres').hidden=!L;['list','actf','count'].forEach(i=>{const e=$(i);if(e)e.closest('.bar2')?e.closest('.bar2').hidden=L:e.hidden=L;});
-  $('list').hidden=L;$('ftog').hidden=L;if(L)$('fbox').hidden=true;document.querySelector('#v-search .more').hidden=L;
+  $('list').hidden=L;$('ftog').hidden=L;if(L)$('fbox').hidden=true;document.querySelector('#v-search .more').hidden=L;$('browse').hidden=L;
   $('sq').placeholder=L?'ابحث في نصوص المواد: مكافأة، تقادم، «الفصل التعسفي»، أو «م 41 من 6/2010»':'ابحث في نص المبدأ أو الإسناد: مكافأة نهاية الخدمة، 423/2003، «الفصل التعسفي»';
   quickChips();if(L)lawScope();else runSearch();}
 // نطاق التشريعات: رقم التشريع وسنته، والبحث في نصوص المواد كلها
@@ -789,10 +797,40 @@ function selFilter(inp){const sel=$(inp.dataset.for);FSORIG[sel.id]=sel.innerHTM
     const n=sel.querySelectorAll('option').length-1;inp.setAttribute('aria-label',`${n} نتيجة`);});}
 function fsReset(){document.querySelectorAll('.fsrch').forEach(i=>{if(i.value){i.value='';const sel=$(i.dataset.for);sel.innerHTML=FSORIG[sel.id];}});}
 function syncInputs(){fsReset();$('sq').value=F.q;$('fcol').value=F.col;$('ftp').value=F.tp;$('fch').value=F.ch;$('flw').value=F.lw;$('fart').value=F.art;$('frv').checked=F.rv;$('fap').value=F.ap;$('fay').value=F.ay;}
-function runSearch(){shown=30;cur=filterPR();renderList();
+// صفحة «المبادئ» بلا بحث ولا مرشح = تصفح: الموضوعات والكتب (مع وضع الترتيب)؛ ومع البحث = النتائج
+const idleF=()=>!F.q&&!F.col&&!F.tp&&!F.ch&&!F.lw&&!F.art&&!F.rv&&!F.sec&&!F.ap&&!F.ay;
+function runSearch(){shown=30;cur=filterPR();const idle=idleF()&&SCOPE==='p';
+  $('browse').hidden=!idle;$('list').hidden=idle;document.querySelector('#v-search>.hint').hidden=idle;if(idle){renderBrowse();$('more').hidden=true;}else renderList();
   const L={col:v=>COLS[v]?.name,tp:v=>TL[v]?.[1],ch:v=>v,lw:v=>LL[v]||v,art:v=>'المادة '+v,rv:()=>'يحتاج مراجعة',sec:v=>v.split('›').slice(-1)[0],ap:v=>'طعن رقم '+v,ay:v=>'سنة الطعن '+v};
   $('actf').innerHTML=Object.keys(L).filter(k=>F[k]).map(k=>`<button class="chip" data-clr="${k}">${esc(L[k](F[k]))}</button>`).join('');
-  $('count').textContent=`${nf(cur.length)} من ${nf(PR.length)}`;}
+  $('count').textContent=idle?`${nf(PR.length)} مبدأ في ${ORDER.length} مجموعة`:`${nf(cur.length)} من ${nf(PR.length)}`;}
+// ---------- التصفح ووضع الترتيب (سحب وإفلات من المقبض، والأسهم بديلًا)
+let ARR=null;   // نوع البطاقات الجاري ترتيبها: fams | cols | null
+function renderBrowse(){const b=$('browse');if(!b)return;
+  const sec=(kind,title,base,tile)=>{const on=ARR===kind;return `<div class="sech"><h2>${title}</h2><button class="btn sm${on?' gold':''}" data-arrmode="${kind}" aria-pressed="${on}">${on?svg('check')+'تم':svg('filter')+'ترتيب'}</button></div>
+    ${on?`<div class="arrhint"><p>${svg('grip')} اسحب البطاقة إلى مكانها. يُحفظ الترتيب في هذا الجهاز ويظهر في الرئيسية.</p><span><button class="lnk" data-arrange="${kind}">بالأسهم</button><button class="lnk" data-arrdef="${kind}">الترتيب الأصلي</button></span></div>`:''}
+    <div class="grid g3 sortable${on?' arranging':''}" id="bz-${kind}" data-kind="${kind}">${ordered(kind,base).map(k=>tile(k,true)).join('')}</div>`;};
+  b.innerHTML=sec('fams','تصفح حسب الموضوع',FAMS,famTile)+sec('cols','الكتب والمجموعات',ORDER,bookTile);
+  b.querySelectorAll('.sortable').forEach(sortable);}
+function arrMode(kind){ARR=ARR===kind?null:kind;if(ARR&&location.hash!=='#/search'){Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:'',ap:'',ay:''});SCOPE='p';go('#/search');}
+  renderBrowse();if(ARR){setTimeout(()=>{const g=$('bz-'+ARR),sb=document.querySelector('#v-search .searchbar');if(!g)return;const h=g.previousElementSibling.previousElementSibling||g;window.scrollTo({top:Math.max(0,h.getBoundingClientRect().top+scrollY-(sb?sb.offsetHeight:0)-8),behavior:'smooth'});},80);}}
+function sortable(grid){const kind=grid.dataset.kind;let drag=null;
+  grid.addEventListener('pointerdown',e=>{if(!grid.classList.contains('arranging'))return;const tile=e.target.closest('.tile');if(!tile||e.button)return;
+    e.preventDefault();const r=tile.getBoundingClientRect();drag={tile,ox:e.clientX-r.left,oy:e.clientY-r.top,id:e.pointerId,moved:false};
+    tile.setPointerCapture(e.pointerId);tile.classList.add('lift');grid.classList.add('dragging');if(navigator.vibrate)try{navigator.vibrate(6)}catch(_){}});
+  const place=(x,y)=>{const t=drag.tile;t.style.transform='';const r=t.getBoundingClientRect();t.style.transform=`translate(${x-drag.ox-r.left}px,${y-drag.oy-r.top}px) rotate(-1.2deg) scale(1.04)`;};
+  grid.addEventListener('pointermove',e=>{if(!drag||e.pointerId!==drag.id)return;drag.moved=true;
+    const kids=[...grid.children],G=grid.getBoundingClientRect();   // موضع البطاقة من التخطيط لا من التحويل الجاري، حتى لا تتأرجح المبادلة
+    const over=kids.find(k=>k!==drag.tile&&e.clientX>=G.left+k.offsetLeft&&e.clientX<=G.left+k.offsetLeft+k.offsetWidth&&e.clientY>=G.top+k.offsetTop&&e.clientY<=G.top+k.offsetTop+k.offsetHeight);
+    if(over){const rects=new Map(kids.map(k=>[k,k.getBoundingClientRect()]));
+      if(kids.indexOf(over)<kids.indexOf(drag.tile))grid.insertBefore(drag.tile,over);else grid.insertBefore(drag.tile,over.nextSibling);
+      [...grid.children].forEach(k=>{if(k===drag.tile)return;const a=rects.get(k),b=k.getBoundingClientRect(),dx=a.left-b.left,dy=a.top-b.top;if(!dx&&!dy)return;
+        k.style.transition='none';k.style.transform=`translate(${dx}px,${dy}px)`;requestAnimationFrame(()=>{k.style.transition='transform .22s cubic-bezier(.3,.7,.2,1)';k.style.transform='';});});}
+    place(e.clientX,e.clientY);
+    if(e.clientY<90)scrollBy(0,-10);else if(e.clientY>innerHeight-130)scrollBy(0,10);});
+  const end=e=>{if(!drag||e.pointerId!==drag.id)return;const t=drag.tile;t.style.transform='';t.classList.remove('lift');grid.classList.remove('dragging');
+    const order=[...grid.children].map(k=>k.dataset.k);if(drag.moved){S.ord=Object.assign({},S.ord,{[kind]:order});saveS();}drag=null;};
+  grid.addEventListener('pointerup',end);grid.addEventListener('pointercancel',end);}
 function renderList(){const re=hlRe(terms(F.q));const ah=artHits();$('list').innerHTML=(F.q?jumpHTML(smartJump(F.q)):'')+(ah.length?`<div class="arthits card"><h3>${svg('scroll')} في نصوص التشريعات (${ah.length>5?'أول 5 من '+ah.length:ah.length})</h3>${ah.slice(0,5).map(([L,a])=>`<button class="arow" data-go="#/a/${a.id}"><b>${esc(a.label)} · ${esc(L.short)}</b><span>${hl(a.paras.join(' ').slice(0,220),re)}${a.paras.join(' ').length>220?'…':''}</span></button>`).join('')}</div>`:'')+(cur.length?cur.slice(0,shown).map(p=>card(p,re)).join(''):'<div class="empty">لا توجد نتائج. جرّب كلمة أقصر أو أزل أحد المرشحات.</div>');$('more').hidden=cur.length<=shown;}
 function setFilter(k,v){Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:'',ap:'',ay:''});SCOPE='p';F[k]=v;go('#/search');}
 // ---------- INDEX
@@ -1054,7 +1092,7 @@ function installDlg(){if(deferredInstall){deferredInstall.prompt();deferredInsta
   dlg('ثبّت التطبيق',`<div class="prose"><ul><li><b>آيفون وآيباد (Safari):</b> زر المشاركة ← «إضافة إلى الشاشة الرئيسية».</li><li><b>أندرويد (Chrome):</b> القائمة ⋮ ← «تثبيت التطبيق».</li><li><b>الحاسوب (Chrome أو Edge):</b> أيقونة التثبيت في شريط العنوان.</li></ul></div>`);}
 // ---------- التقييم والملاحظات (نموذج Google خاص بصاحب المكتبة)
 // ---------- guide: جدول القسم ← صفحة الدليل (يتحقق منه ويحدّثه tools/guide/build-guide.mjs)
-const GUIDE={home:3,search:4,filters:5,item:6,source:8,ruling:9,index:10,laws:12,saved:14,offline:15,settings:16,feedback:18,about:19};
+const GUIDE={home:3,search:4,filters:6,item:7,source:9,ruling:10,index:11,laws:13,saved:15,offline:16,settings:17,feedback:19,about:20};
 const GUIDE_PDF='docs/guide.pdf',GUIDE_WEB='docs/guide/index.html';
 // الدليل داخل التطبيق: طبقة بشريط علوي فيه «إغلاق» وتنزيل PDF، فلا يُحبس المستخدم في ملف PDF داخل التطبيق المثبّت
 function openGuide(k){closeGuide(true);const w=document.createElement('div');w.className='gview';w.id='gview';w.setAttribute('role','dialog');w.setAttribute('aria-label','دليل الاستخدام');
@@ -1068,7 +1106,7 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape'&&$('gview'))history.
 function guideKey(v){const h=(location.hash||'').replace(/^#\/?/,'');
   if(v==='item')return h.startsWith('r/')?'ruling':(h.startsWith('law/')||h.startsWith('a/')||h.startsWith('m/'))?'laws':'item';
   return {home:'home',search:'search',index:'index',saved:'saved',report:'about',about:'about',laws:'laws',more:'settings'}[v];}
-function guideLink(v){const el=$('v-'+v);if(!el)return;const k=guideKey(v),pg=GUIDE[k];let a=el.querySelector(':scope > .guidelnk');
+function guideLink(v){const el=$('v-'+v);if(!el)return;const k=guideKey(v),pg=v==='home'?null:GUIDE[k];let a=el.querySelector(':scope > .guidelnk');   // الرئيسية بلا زر الدليل؛ هو في «المزيد»
   if(!pg){if(a)a.remove();return;}
   if(!a){a=document.createElement('a');a.className='guidelnk no-print';a.target='_blank';a.rel='noopener';el.prepend(a);a.addEventListener('click',e=>{e.preventDefault();openGuide(a.dataset.k);});}
   a.dataset.k=k;
@@ -1143,12 +1181,12 @@ function feedbackScreen(){closeDlg();let st=fbLoad();const save=()=>LS.set('fb2'
 const NAVMAP={laws:'#/laws',home:'#/',search:'#/search',index:'#/index/topics',saved:'#/saved',more:'#/more',report:'#/report',about:'#/about'};
 function show(v,nav){['home','search','index','saved','more','item','report','about','laws'].forEach(x=>$('v-'+x).hidden=x!==v);guideLink(v);
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',b.dataset.nav===nav));}
-function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));closeDlg();if(TTS.id)ttsStop();if($('hback'))$('hback').hidden=!h;
+function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));closeDlg();if(ARR&&h!=='search')ARR=null;if(TTS.id)ttsStop();if($('hback'))$('hback').hidden=!h;
   document.title='مبادئ التمييز';
   if(h.startsWith('p/')){viewItem(h.slice(2));show('item','');}
   else if(h.startsWith('r/')){viewRuling(h.slice(2));show('item','');}
   else if(h==='search'){syncInputs();setScope(SCOPE);show('search','search');}
-  else if(h.startsWith('index')){const [,sub,...rest]=h.split('/');viewIndex(sub||idxTab,rest.join('/'));show('index',innerWidth>=1000?'index':'more');}
+  else if(h.startsWith('index')){const [,sub,...rest]=h.split('/');viewIndex(sub||idxTab,rest.join('/'));show('index',innerWidth>=1000?'index':'search');}
   else if(h==='saved'){viewSaved();show('saved','saved');}
   else if(h==='more'){viewMore();show('more','more');}
   else if(h==='report'){viewReport();show('report',innerWidth>=1000?'report':'more');}
@@ -1184,6 +1222,9 @@ document.addEventListener('click',e=>{const t=e.target;
   const st=t.closest('[data-st]');if(st){savedTab=st.dataset.st;viewSaved();return;}
   const hf=t.closest('[data-hfav]');if(hf){if(BYID[hf.dataset.hfav])favDlg(BYID[hf.dataset.hfav]);return;}
   const ar=t.closest('[data-arrange]');if(ar){arrangeDlg(ar.dataset.arrange);return;}
+  const am=t.closest('[data-arrmode]');if(am){arrMode(am.dataset.arrmode);return;}
+  const ad=t.closest('[data-arrdef]');if(ad){const o=Object.assign({},S.ord);delete o[ad.dataset.arrdef];S.ord=o;saveS();renderBrowse();toast('عاد الترتيب الأصلي');return;}
+  if(t.closest('.arranging .tile'))return;   // في وضع الترتيب البطاقة تُسحب ولا تُفتح
   const sf=t.closest('[data-sf]');if(sf){savedFold=sf.dataset.sf;viewSaved();return;}
   const mic=t.closest('[data-mic]');if(mic){listen(mic.dataset.mic,mic);return;}
   const gb=t.closest('[data-go]');if(gb){go(gb.dataset.go);return;}

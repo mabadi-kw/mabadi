@@ -656,3 +656,51 @@ body::before{content:"";position:fixed;inset:0 0 auto 0;height:env(safe-area-ins
 @media (min-width:1000px){.pal{margin-inline-start:auto}}
 .sfields input{width:100%;min-width:0;box-sizing:border-box}
 .sfields label{min-width:0}
+
+/* ===== الرئيسية: تحية في سطر، وبوابتا المكتبة، وشريط الموضوعات، وسطر الأرقام ===== */
+.hero.h2{padding:16px 16px 16px}
+.hero .hline{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.hero.h2 h1{margin:0;font-size:1.2rem}
+.hero .today{font-size:.78rem;opacity:.72;font-variant-numeric:tabular-nums}
+.gates{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px;position:relative}
+.gates::before{content:"";position:absolute;inset-inline:8%;top:50%;height:2px;background:linear-gradient(90deg,transparent,var(--gold) 20%,var(--gold) 80%,transparent);opacity:.55;z-index:0}
+.gate{position:relative;overflow:hidden;z-index:1;display:grid;grid-template-columns:1fr auto;grid-template-areas:"k arr" "num num" "lab lab" "ttl ttl" "sub sub";align-content:start;gap:0;text-align:start;padding:14px 16px 30px;border-radius:20px;border:1px solid rgba(201,162,75,.35);color:#fff;cursor:pointer;font:inherit;background:linear-gradient(160deg,var(--navy2),var(--navy));box-shadow:var(--shadow);transition:transform .15s,box-shadow .15s}
+.gate.lw{background:linear-gradient(160deg,#1f3c3a,#0e2322)}
+.gate>*{position:relative}
+.gate .weave{top:auto;height:26px;bottom:0;opacity:.9}
+.gate .gk{grid-area:k;width:34px;height:34px;border-radius:11px;background:rgba(255,255,255,.1);color:var(--gold);display:grid;place-items:center;margin-bottom:8px}.gate .gk svg{width:19px;height:19px}
+.gate .garr{grid-area:arr;color:rgba(255,255,255,.55);transform:rotate(180deg);align-self:start}.gate .garr svg{width:20px;height:20px}
+.gate .gnum{grid-area:num;font-family:'Reem Kufi',var(--f-ui);font-weight:700;font-size:clamp(1.7rem,7vw,2.3rem);line-height:1.1;color:#fff;font-variant-numeric:tabular-nums;letter-spacing:.01em}
+.gate .glab{grid-area:lab;color:var(--gold);font-size:.82rem;font-weight:600;margin-top:2px}
+.gate b{grid-area:ttl;font-size:1.05rem;margin-top:8px}
+.gate small{grid-area:sub;color:rgba(255,255,255,.72);font-size:.74rem;line-height:1.6;margin-top:2px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.gate:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(11,31,59,.25)}.gate:active{transform:scale(.985)}
+@media (min-width:1000px){.gates{grid-template-columns:1fr 1fr;gap:16px}.gate{padding:18px 20px 34px}.gate .gnum{font-size:2.6rem}}
+@media (max-width:380px){.gate small{display:none}}
+.sechb{display:flex;align-items:center;gap:10px}
+.fstrip{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity;-webkit-overflow-scrolling:touch}
+.fstrip::-webkit-scrollbar{height:0}
+.fchip{flex:none;scroll-snap-align:start;display:flex;align-items:center;gap:7px;padding:6px 10px 6px 8px;border-radius:14px;border:1px solid var(--rule);background:var(--sheet);color:var(--ink);cursor:pointer;font:inherit;box-shadow:var(--shadow);transition:border-color .12s,transform .12s}
+.fchip:hover{border-color:var(--gold);transform:translateY(-1px)}
+.fchip .ic{width:30px;height:30px;border-radius:9px;background:var(--gold-soft);color:var(--gold);display:grid;place-items:center;flex:none}.fchip .ic svg{width:17px;height:17px}
+.fchip b{font-weight:600;font-size:.84rem;white-space:nowrap}.fchip small{color:var(--muted);font-size:.74rem;font-variant-numeric:tabular-nums;background:var(--bg2);border-radius:20px;padding:0 7px}
+.numline{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:22px;padding:12px 14px;border-radius:14px;border:1px dashed var(--gold);color:var(--muted);font-size:.78rem;justify-content:center}
+.numline span{display:inline-flex;align-items:baseline;gap:5px}.numline b{color:var(--blue);font-size:1.05rem;font-variant-numeric:tabular-nums}
+.lnk .i{width:14px;height:14px;vertical-align:-2px;margin-inline-end:3px}
+/* ===== وضع الترتيب: مقبض، ورفع، وتحريك الجيران ===== */
+.sortable{position:relative}.sortable .tile{position:relative}
+.tile .grip{display:none;position:absolute;inset-inline-end:8px;top:8px;width:34px;height:34px;border-radius:10px;background:var(--gold-soft);color:var(--gold);place-items:center;cursor:grab}
+.tile .grip svg{width:20px;height:20px;stroke-width:4;stroke-linecap:round}
+.arranging .tile{touch-action:none;user-select:none;-webkit-user-select:none;border-style:dashed;border-color:var(--gold);cursor:grab;transition:transform .22s cubic-bezier(.3,.7,.2,1),box-shadow .2s}
+.arranging .tile .grip{display:grid}
+.arranging .tile:hover{transform:none}
+.arranging .tile .meter,.arranging .book .spine{opacity:.55}
+.tile.lift{z-index:5;cursor:grabbing;border-style:solid;box-shadow:0 18px 40px rgba(11,31,59,.28),0 0 0 2px var(--gold);transition:none!important}
+.tile.lift .grip{background:var(--gold);color:var(--navy)}
+.dragging .tile:not(.lift){pointer-events:none}
+.arrhint{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:-4px 0 10px;padding:8px 12px;border-radius:12px;background:var(--gold-soft);font-size:.82rem;line-height:1.7}.arrhint p{margin:0;display:flex;align-items:center;gap:6px;flex:1;min-width:200px}.arrhint .i{width:18px;height:18px;color:var(--gold);flex:none;stroke-width:4;stroke-linecap:round}.arrhint span{display:flex;gap:12px}
+.btn.sm.gold{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:700}
+#browse .sech{margin-top:18px}
+
+#v-search .quick .chip{background:var(--blue-soft);color:var(--blue);border:0}
+#v-search>.hint[hidden]{display:none}

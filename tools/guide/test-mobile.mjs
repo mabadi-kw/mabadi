@@ -59,11 +59,18 @@ try{for(const [dn,opt] of Object.entries(DEVS)){const c=await context(b,opt,url)
     await p.evaluate(()=>localStorage.removeItem('mabadi:intro'));await p.reload();await p.waitForSelector('#intro');await p.screenshot({path:path.join(OUT,'intro-1.png')});
     await p.click('#itskip');ck('«تخطٍّ» يغلق الجولة',!(await p.$('#intro')));
     // ترتيب بطاقات الرئيسية
-    const first=()=>p.$eval('#v-home .grid.g3 .tile.book b',e=>e.textContent);const before=await first();
-    await p.click('[data-arrange="cols"]');await p.waitForSelector('.arr');const lastName=await p.$eval('.arr li:last-child b',e=>e.textContent);
-    await p.click('.arr li:last-child [data-mv="top"]');await p.waitForTimeout(200);await p.screenshot({path:path.join(OUT,'arrange.png')});await p.click('.dlg [data-close].btn.primary');
-    await p.reload();await p.waitForTimeout(4000);ck(`ترتيب الكتب: «${lastName}» صار الأول ويبقى بعد إعادة التحميل`,(await first())===lastName&&before!==lastName);
-    await p.click('[data-arrange="cols"]');await p.click('#ardef');await p.waitForTimeout(200);ck('«الترتيب الأصلي» يعيده',(await first())===before);
+    // ترتيب البطاقات في صفحة «المبادئ»: بالسحب، وبالأسهم بديلًا، ويُحفظ
+    await p.evaluate(()=>{location.hash='#/search';});await p.waitForTimeout(1200);
+    const first=()=>p.$eval('#bz-cols .tile.book b',e=>e.textContent);const before=await first();
+    await p.click('#browse [data-arrmode="cols"]');await p.waitForTimeout(900);ck('وضع الترتيب: مقابض ظاهرة وبطاقات متقطعة الإطار',await p.$eval('#bz-cols',g=>g.classList.contains('arranging')&&getComputedStyle(g.querySelector('.grip')).display!=='none'));
+    const tiles=await p.$$('#bz-cols .tile');const a=await tiles[1].boundingBox(),c0=await tiles[0].boundingBox();const second=await tiles[1].$eval('b',e=>e.textContent);
+    await p.mouse.move(a.x+40,a.y+30);await p.mouse.down();await p.mouse.move(a.x+40,a.y+10,{steps:4});await p.mouse.move(c0.x+40,c0.y+20,{steps:10});await p.waitForTimeout(250);await p.screenshot({path:path.join(OUT,'arrange.png')});await p.mouse.up();await p.waitForTimeout(300);
+    ck(`السحب والإفلات: «${second}» صار الأول`,(await first())===second&&second!==before);
+    await p.reload();await p.waitForTimeout(4000);await p.evaluate(()=>{location.hash='#/search';});await p.waitForTimeout(1200);ck('الترتيب يبقى بعد إعادة التحميل ويظهر في الرئيسية',(await first())===second);
+    await p.click('#browse [data-arrmode="cols"]');await p.waitForTimeout(600);await p.click('#browse [data-arrange="cols"]');await p.waitForSelector('.arr');const lastName=await p.$eval('.arr li:last-child b',e=>e.textContent);
+    await p.click('.arr li:last-child [data-mv="top"]');await p.waitForTimeout(200);await p.click('.dlg [data-close].btn.primary');await p.waitForTimeout(300);ck(`بالأسهم: «${lastName}» صار الأول`,(await first())===lastName);
+    await p.click('#browse [data-arrdef="cols"]');await p.waitForTimeout(300);ck('«الترتيب الأصلي» يعيده',(await first())===before);
+    await p.evaluate(()=>{location.hash='#/';});await p.waitForTimeout(900);
     await p.evaluate(()=>document.querySelector('[data-a2="settings"]').click());await p.waitForSelector('.verline');ck('رقم الإصدار ظاهر في الإعدادات',/الإصدار \d{4}\.\d{2}\.\d{2}/.test(await p.textContent('.verline')));
     await c.close();}
   // الآيباد: زر «طباعة» لا يتداخل مع رابط «الدليل»

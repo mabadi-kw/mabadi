@@ -1,15 +1,15 @@
 {
  "home": 3,
  "search": 4,
- "filters": 5,
- "item": 6,
- "source": 8,
- "ruling": 9,
- "index": 10,
- "laws": 12,
- "saved": 14,
- "offline": 15,
- "settings": 16,
- "feedback": 18,
- "about": 19
+ "filters": 6,
+ "item": 7,
+ "source": 9,
+ "ruling": 10,
+ "index": 11,
+ "laws": 13,
+ "saved": 15,
+ "offline": 16,
+ "settings": 17,
+ "feedback": 19,
+ "about": 20
 }
