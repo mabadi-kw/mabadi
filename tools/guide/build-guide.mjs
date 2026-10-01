@@ -86,7 +86,7 @@ function html(pages,web){const F=fontCSS(web?'fonts/':'../fonts/');
    .toc a{color:inherit;text-decoration:none;display:flex;align-items:baseline;gap:10px;width:100%}.toc li{padding:10px 0}
    .pair{flex-wrap:wrap}.dsk{flex:1 1 360px}.mob{width:150px}img{max-width:100%;height:auto}}`:''}
   </style></head><body>
-  <div class="cover">${saduSVG(182,265,2.4,'#3d4552')}<div class="fade"></div>
+  <div class="cover" id="top">${saduSVG(182,265,2.4,'#3d4552')}<div class="fade"></div>
    <svg width="90" height="90" viewBox="0 0 512 512" style="position:relative"><rect x="96" y="340" width="320" height="50" rx="8" fill="#b8923a"/><rect x="126" y="282" width="260" height="50" rx="8" fill="#c9a44b"/><path d="M156 224 H356 L336 264 H176 Z" fill="#e3c77f"/><polygon points="256,110 282,146 256,182 230,146" fill="#f2dc9e"/></svg>
    <h1>مبادئ التمييز</h1><div class="line"></div><p>دليل الاستخدام المصوّر</p></div>
   <div class="toc"><h2>المحتويات</h2><ol>${toc}</ol></div>

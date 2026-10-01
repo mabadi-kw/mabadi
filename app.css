@@ -84,8 +84,9 @@ h3{font-weight:600;font-size:1.05rem;margin:18px 0 8px}
 .sbox .btn:not(.primary){border:0;background:transparent}
 .sbox .btn.primary{padding:9px 18px;border-radius:10px}
 .quick{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
-.quick .chip{background:rgba(255,255,255,.14);color:#fff}
-.quick .chip:hover{background:rgba(255,255,255,.24)}
+.hero .quick .chip{background:rgba(255,255,255,.14);color:#fff}
+.hero .quick .chip:hover{background:rgba(255,255,255,.24)}
+.quick .chip{min-height:34px;padding:4px 12px;font-size:.82rem}
 .searchbar{position:sticky;top:0;z-index:12;background:var(--bg);padding:10px 0;margin-top:0;display:grid;gap:8px;grid-template-columns:minmax(0,1fr)}
 .bar2{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:.85rem}
 .count{color:var(--muted);font-variant-numeric:tabular-nums;margin-inline-start:auto}
@@ -702,5 +703,11 @@ body::before{content:"";position:fixed;inset:0 0 auto 0;height:env(safe-area-ins
 .btn.sm.gold{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:700}
 #browse .sech{margin-top:18px}
 
-#v-search .quick .chip{background:var(--blue-soft);color:var(--blue);border:0}
 #v-search>.hint[hidden]{display:none}
+/* المبادئ: تلميح الموضوعات في بطاقة الفرع، والتصفح حسب الدائرة */
+.tile .sub{font-size:.76rem;color:var(--muted);line-height:1.6;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.bseg{margin:14px 0 -6px;width:max-content}
+/* المراجعة البشرية */
+.rvitem{margin-bottom:18px;padding:0 0 10px;border-bottom:2px dashed var(--gold)}
+.rvwhy{display:flex;gap:6px;align-items:flex-start;font-size:.82rem;color:var(--flag);background:var(--flag-soft);border-radius:10px;padding:6px 10px;margin-bottom:8px;line-height:1.7}.rvwhy .i{width:16px;height:16px;flex:none;margin-top:3px}
+.rvdec{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.rvdec .btn.on{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:700}.rvdec .note{width:100%;grid-column:auto}
