@@ -168,6 +168,7 @@ def main():
             docs.append({'file': f, 'first': first, 'last': gpage, 'pw': pages[0]['pw'] if pages else 595.3, 'ph': pages[0]['ph'] if pages else 841.9})
             for it in its:
                 L = loc.get(it['id'])
+                it['rv'] = [r for r in it['rv'] if r != 'تعذّر تحديد موضع المبدأ في صورة الصفحة']
                 if not L:
                     unlocated += 1; it['rv'].append('تعذّر تحديد موضع المبدأ في صورة الصفحة'); continue
                 h0, h1, t0, t1 = L
