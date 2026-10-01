@@ -167,7 +167,9 @@ function loadMemo(lid){const mid=lid+'-M';if(MEMO[mid])return Promise.resolve(ME
 const lawOfArt=id=>id.replace(/-(A\d+(?:-\d+)?|I\d+)$/,'');
 function artOf(l,a){const L=LAWBYKEY[l];if(!L||a==null)return null;const n=parseInt(west(String(a)).split('/')[0]);if(!n)return null;const D=LAWDATA[L.id];if(D)return D.byN[n]||null;return {id:`${L.id}-A${pad4(n)}`};}
 function artHits(){const ts=terms(F.q);if(!ts.length||F.col||F.tp||F.ch||F.rv||F.sec)return [];const o=[];
-  LAWIX.forEach(x=>{const L=LAWDATA[x.id];if(!L||(F.lw&&F.lw!==L.key))return;L.articles.forEach(a=>{if(ts.every(t=>a.ns.includes(t)))o.push([L,a]);});});return o;}
+  const ph=norm(F.q.replace(/[«»"]/g,'').trim());
+  LAWIX.forEach(x=>{const L=LAWDATA[x.id];if(!L||(F.lw&&F.lw!==L.key))return;L.articles.forEach(a=>{if(ts.every(t=>a.ns.includes(t)))o.push([L,a,(ph&&a.ns.includes(ph)?1e6:0)+(lcount[L.key]||0)]);});});
+  return o.sort((a,b)=>b[2]-a[2]);}   // الصلة: العبارة متصلة أولًا، ثم القانون الأكثر إحالةً في المبادئ
 const artPR=a=>a.issue?[]:(ARTMAP[a.law.key+'#'+a.n]||[]).map(i=>BYID[i]).filter(Boolean);
 const lawTitle=L=>L.number?`${L.type} رقم ${L.number} لسنة ${L.year}`:`${L.type}${L.year?' — '+L.year:''}`;
 function artQuote(a){const L=a.law;return `${a.label} — ${L.title}:\n${a.paras.join('\n')}\n— ${L.text_version}.`;}
@@ -273,16 +275,19 @@ function viewArt(id){const el=$('v-item');el.innerHTML=LOADMSG;const lid=lawOfAr
   const trail=a.trail||[a.part,a.chapter,a.section].filter(Boolean);
   el.innerHTML=`<div class="crumbs no-print"><button data-go="#/laws">التشريعات</button>›<button data-go="#/law/${L.id}">${esc(L.short)}</button>${trail.length?'›<span>'+trail.map(esc).join(' › ')+'</span>':''}</div>
    <div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>${esc(a.label)}${a.issue?' (من مواد الإصدار)':''} — ${esc(L.short)}</h2><button class="btn" data-print>${svg('print')}طباعة</button></div>
-   <article class="card artcard"><div class="ltxt">${a.paras.length?a.paras.map(x=>`<p>${esc(x)}</p>`).join(''):'<p class="muted">لا يوجد نص لهذه المادة في الطبعة، وقد تبيّن الحاشية سبب ذلك.</p>'}</div>
+   ${!a.issue&&ps.length?`<div class="ajump no-print"><button class="lnk" data-jump="aprs">${svg('scale')}مبادئ تذكر هذه المادة (${ps.length}) ↓</button></div>`:''}
+   <article class="card artcard"><div class="ltxt${a.paras.length>4?' folded':''}">${a.paras.length?a.paras.map(x=>`<p>${esc(x)}</p>`).join(''):'<p class="muted">لا يوجد نص لهذه المادة في الطبعة، وقد تبيّن الحاشية سبب ذلك.</p>'}</div>${a.paras.length>4?`<button class="btn sm unfold no-print" data-unfoldtxt>${svg('dots')}بقية نص المادة (${a.paras.length-2} فقرات)</button>`:''}
     ${a.notes&&a.notes.length?`<div class="lnotes"><b>حاشية الطبعة</b>${a.notes.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}
     <div class="verban small">${svg('info')}<span>${esc(L.text_version)}.</span></div>
     <div class="acts no-print"><button class="btn" id="acp">${svg('copy')}نسخ</button><button class="btn" id="ash">${svg('share')}مشاركة</button><button class="btn" id="alk">${svg('link')}الرابط</button>${'speechSynthesis' in window&&a.paras.length?`<button class="btn" id="asp">${svg('speak')}استماع</button>`:''}</div></article>
    <div id="aev"></div>
-   <div class="card inline-src"><h3 style="margin-top:0">صفحة المصدر</h3>${lawPagesHTML(a)}</div>
+   <details class="card inline-src fold"><summary>${svg('page')} صفحة المصدر — اضغط للعرض</summary>${lawPagesHTML(a)}</details>
    <div class="pn no-print">${pv?`<button class="btn" data-go="#/a/${pv.id}">${svg('back')}<span>${esc(pv.label)}</span></button>`:'<span></span>'}${nx?`<button class="btn" data-go="#/a/${nx.id}"><span>${esc(nx.label)}</span><svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)"><path d="${IC.back}"/></svg></button>`:''}</div>
    <div id="amemo"></div>
-   ${a.issue?'':`<h2>مبادئ تذكر هذه المادة (${ps.length})</h2>${ps.length?`<div class="list">${ps.slice(0,40).map(p=>card(p,null)).join('')}</div>${ps.length>40?`<button class="btn" data-f2="1">عرض الكل (${ps.length})</button>`:''}`:'<p class="muted">لا توجد في المكتبة مبادئ تحيل إلى هذه المادة بعد.</p>'}`}`;
+   ${a.issue?'':`<h2 id="aprs">مبادئ تذكر هذه المادة (${ps.length})</h2>${ps.length?`<div class="list">${ps.slice(0,40).map(p=>card(p,null)).join('')}</div>${ps.length>40?`<button class="btn" data-f2="1">عرض الكل (${ps.length})</button>`:''}`:'<p class="muted">لا توجد في المكتبة مبادئ تحيل إلى هذه المادة بعد.</p>'}`}`;
   const url=location.href.split('#')[0]+'#/a/'+a.id;
+  const uf=el.querySelector('[data-unfoldtxt]');if(uf)uf.onclick=()=>{el.querySelector('.ltxt').classList.remove('folded');uf.remove();};
+  const jp=el.querySelector('[data-jump]');if(jp)jp.onclick=()=>{const h=$('aprs');if(h)window.scrollTo({top:h.getBoundingClientRect().top+scrollY-70,behavior:'smooth'});};
   $('acp').onclick=()=>clip(artQuote(a),()=>toast('نُسخ نص المادة'));
   $('alk').onclick=()=>clip(url,()=>toast('نُسخ الرابط'));
   // تعديلات لاحقة على هذه المادة، أو ما تعدّله هذه المادة في قوانين أخرى
@@ -650,7 +655,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610011454';
+const APP_BUILD='202610011550';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -841,7 +846,7 @@ function sortable(grid){const kind=grid.dataset.kind;let drag=null;
   const end=e=>{if(!drag||e.pointerId!==drag.id)return;const t=drag.tile;t.style.transform='';t.classList.remove('lift');grid.classList.remove('dragging');
     const order=[...grid.children].map(k=>k.dataset.k);if(drag.moved){S.ord=Object.assign({},S.ord,{[kind]:order});saveS();}drag=null;};
   grid.addEventListener('pointerup',end);grid.addEventListener('pointercancel',end);}
-function renderList(){const re=hlRe(terms(F.q));const ah=artHits();$('list').innerHTML=(F.q?jumpHTML(smartJump(F.q)):'')+(ah.length?`<div class="arthits card"><h3>${svg('scroll')} في نصوص التشريعات (${ah.length>5?'أول 5 من '+ah.length:ah.length})</h3>${ah.slice(0,5).map(([L,a])=>`<button class="arow" data-go="#/a/${a.id}"><b>${esc(a.label)} · ${esc(L.short)}</b><span>${hl(a.paras.join(' ').slice(0,220),re)}${a.paras.join(' ').length>220?'…':''}</span></button>`).join('')}</div>`:'')+(cur.length?cur.slice(0,shown).map(p=>card(p,re)).join(''):'<div class="empty">لا توجد نتائج. جرّب كلمة أقصر أو أزل أحد المرشحات.</div>');$('more').hidden=cur.length<=shown;}
+function renderList(){const re=hlRe(terms(F.q));const ah=artHits();$('list').innerHTML=(F.q?jumpHTML(smartJump(F.q)):'')+(ah.length?`<details class="arthits card fold"><summary>${svg('scroll')} في نصوص التشريعات: ${nf(ah.length)} ${ah.length===1?'مادة':ah.length<11?'مواد':'مادة'} <small>${esc(ah.slice(0,2).map(([L,a])=>a.label+' · '+L.short).join(' — '))}${ah.length>2?' …':''}</small></summary>${ah.slice(0,8).map(([L,a])=>`<button class="arow" data-go="#/a/${a.id}"><b>${esc(a.label)} · ${esc(L.short)}</b><span>${hl(a.paras.join(' ').slice(0,220),re)}${a.paras.join(' ').length>220?'…':''}</span></button>`).join('')}${ah.length>8?`<button class="btn sm" data-scope-l="1">كل المواد في نطاق «التشريعات» (${nf(ah.length)})</button>`:''}</details>`:'')+(cur.length?cur.slice(0,shown).map(p=>card(p,re)).join(''):'<div class="empty">لا توجد نتائج. جرّب كلمة أقصر أو أزل أحد المرشحات.</div>');$('more').hidden=cur.length<=shown;}
 function setFilter(k,v){Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:'',ap:'',ay:''});SCOPE='p';F[k]=v;go('#/search');}
 // ---------- INDEX
 let idxTab='topics';
@@ -1277,6 +1282,7 @@ document.addEventListener('click',e=>{const t=e.target;
   const hf=t.closest('[data-hfav]');if(hf){if(BYID[hf.dataset.hfav])favDlg(BYID[hf.dataset.hfav]);return;}
   const ar=t.closest('[data-arrange]');if(ar){arrangeDlg(ar.dataset.arrange);return;}
   const am=t.closest('[data-arrmode]');if(am){arrMode(am.dataset.arrmode);return;}
+  if(t.closest('[data-scope-l]')){setScope('l');$('sq').value=F.q;lawScope();window.scrollTo({top:0});return;}
   const bb=t.closest('[data-bby]');if(bb){LS.set('browseby',bb.dataset.bby);renderBrowse();return;}
   const ad=t.closest('[data-arrdef]');if(ad){const o=Object.assign({},S.ord);delete o[ad.dataset.arrdef];S.ord=o;saveS();renderBrowse();toast('عاد الترتيب الأصلي');return;}
   if(t.closest('.arranging .tile'))return;   // في وضع الترتيب البطاقة تُسحب ولا تُفتح
