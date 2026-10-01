@@ -144,7 +144,11 @@ const FAMS=[...new Set(TORD.map(famOf))];const famLetter={};TORD.forEach(t=>famL
 const LORD=Object.keys(lcount).sort((a,b)=>lcount[b]-lcount[a]);
 const CHS=[...new Set(PR.flatMap(p=>p.c.map(c=>c.ch)).filter(Boolean))];const chcount={};PR.forEach(p=>new Set(p.c.map(c=>c.ch).filter(Boolean)).forEach(c=>chcount[c]=(chcount[c]||0)+1));
 const CHIC={'تجاري':'building','مدني':'contract','جزائي':'gavel','عمالي':'briefcase','أحوال شخصية':'people','إداري':'landmark','طلبات رجال القضاء':'scale','تظلمات':'report'};
-const printed=p=>p.pg.map(g=>g+COLS[p.col].off);
+// رقم الصفحة المعروض: في الكتب رقم الصفحة المطبوع (الإزاحة off)؛ وفي مجموعات الملفات (المجلة) رقم الصفحة داخل ملف العدد
+const pageDoc=(col,g)=>(COLS[col].docs||[]).find(d=>g>=d.first&&g<=d.last);
+const pageNo=(col,g)=>{const d=pageDoc(col,g);return d?g-d.first+1:g+COLS[col].off;};
+const pageCap=(col,g)=>{const d=pageDoc(col,g);return d?`الصفحة ${g-d.first+1} من ملف ${d.label||''}`:`الصفحة ${g+COLS[col].off} من الكتاب`;};
+const printed=p=>p.pg.length?[...new Set([pageNo(p.col,p.pg[0]),pageNo(p.col,p.pg[p.pg.length-1])])]:[];
 // ---------- legislation
 const LAWIX=[],LAWBYKEY={},LAWBYID={},ARTBYID={},ARTMAP={},LAWDATA={},MEMO={};
 try{const LI=await fetch('data/laws/index.json').then(r=>r.json());LI.laws.forEach(x=>{LAWIX.push(x);LAWBYKEY[x.key]=x;LAWBYID[x.id]=x;});}catch(_){}
@@ -632,11 +636,15 @@ function ttsVoiceUI(){const s=$('vsel');if(!s)return;const L=ttsArVoices().sort(
 // ---------- source pages
 const PT={};
 async function pageLines(col,g){const b=Math.floor((g-1)/1000),k=col+'/'+b;if(!PT[k])PT[k]=fetch(`pagetext/${col}/t${String(b).padStart(3,'0')}.json`).then(r=>r.ok?r.json():{}).catch(()=>({}));return (await PT[k])[g]||[];}
-function pagesHTML(p){const C=COLS[p.col],PW=C.pw||595.276,PH=C.ph||822.047,cr=C.crop||[0,0,1,1],cell=C.cell||[684,1000],cw=cr[2]-cr[0],chh=cr[3]-cr[1];
-  return p.pg.map(g=>{const reg=p.rg.find(r=>r.page===g);
-    const box=reg?`<div class="hlbox" style="left:${((reg.bbox[0]-6)/PW-cr[0])/cw*100}%;top:${((reg.bbox[1]-4)/PH-cr[1])/chh*100}%;width:${(reg.bbox[2]-reg.bbox[0]+12)/PW/cw*100}%;height:${(reg.bbox[3]-reg.bbox[1]+8)/PH/chh*100}%"></div>`:'';
-    const gp=C.gp||20,gc=gp/10,b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
-    return `<figure class="pg"><div class="pgimg" role="img" data-src="pages/${p.col}/g${String(b).padStart(3,'0')}.webp" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="صورة الصفحة ${g+C.off}" style="aspect-ratio:${cell[0]}/${cell[1]};background-image:url(pages/${p.col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>الصفحة ${g+C.off} من الكتاب</figcaption></figure><details class="pgtxt" data-id="${p.id}" data-g="${g}"><summary>نص الصفحة المستخرج</summary><div class="ptx">…</div></details>`;}).join('');}
+function pageFig(p,g){const C=COLS[p.col],PW=C.pw||595.276,PH=C.ph||822.047,cr=C.crop||[0,0,1,1],cell=C.cell||[684,1000],cw=cr[2]-cr[0],chh=cr[3]-cr[1];
+  const reg=p.rg.find(r=>r.page===g);
+  const box=reg?`<div class="hlbox" style="left:${((reg.bbox[0]-6)/PW-cr[0])/cw*100}%;top:${((reg.bbox[1]-4)/PH-cr[1])/chh*100}%;width:${(reg.bbox[2]-reg.bbox[0]+12)/PW/cw*100}%;height:${(reg.bbox[3]-reg.bbox[1]+8)/PH/chh*100}%"></div>`:'';
+  const gp=C.gp||20,gc=gp/10,b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
+  return `<figure class="pg" data-g="${g}"><div class="pgimg" role="img" data-src="pages/${p.col}/g${String(b).padStart(3,'0')}.webp" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="صورة الصفحة ${pageNo(p.col,g)}" style="aspect-ratio:${cell[0]}/${cell[1]};background-image:url(pages/${p.col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>${pageCap(p.col,g)}</figcaption></figure><details class="pgtxt" data-id="${p.id}" data-g="${g}"><summary>نص الصفحة المستخرج</summary><div class="ptx">…</div></details>`;}
+// صفحات المبدأ متصلة من أولها إلى آخرها، وزرّان لعرض الصفحة السابقة والتالية (داخل حدود المجموعة أو الملف)
+function pagesHTML(p){if(!p.pg.length)return '';const g0=p.pg[0],g1=p.pg[p.pg.length-1],C=COLS[p.col],d=pageDoc(p.col,g0),lo=d?d.first:1,hi=d?d.last:(C.last||1e9);
+  const gs=[];for(let g=g0;g<=g1;g++)gs.push(g);
+  return `<div class="pgnav no-print" data-pgnav="prev" data-id="${p.id}" data-g="${g0}"${g0<=lo?' hidden':''}><button class="btn sm">${svg('back')}الصفحة السابقة</button></div><div class="pgs">${gs.map(g=>pageFig(p,g)).join('')}</div><div class="pgnav no-print" data-pgnav="next" data-id="${p.id}" data-g="${g1}"${g1>=hi?' hidden':''}><button class="btn sm">الصفحة التالية<svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)"><path d="${IC.back}"/></svg></button></div>`;}
 function wirePages(root){root.querySelectorAll('details.pgtxt').forEach(d=>d.addEventListener('toggle',async()=>{if(!d.open||d.dataset.ok)return;d.dataset.ok=1;
   const p=BYID[d.dataset.id],g=+d.dataset.g,reg=p.rg.find(r=>r.page===g),ls=await pageLines(p.col,g);
   d.querySelector('.ptx').innerHTML=ls.map(([t,top,size,bb])=>`<div class="ln${reg&&top>=reg.bbox[1]-1&&top<=reg.bbox[3]?' hit':''}${bb||size>=18?' h':''}${size<=12?' small':''}">${esc(t)}</div>`).join('')||'—';}));}
@@ -655,7 +663,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610012139';
+const APP_BUILD='202610012212';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1288,6 +1296,9 @@ document.addEventListener('click',e=>{const t=e.target;
   if(t.closest('.arranging .tile'))return;   // في وضع الترتيب البطاقة تُسحب ولا تُفتح
   const sf=t.closest('[data-sf]');if(sf){savedFold=sf.dataset.sf;viewSaved();return;}
   const mic=t.closest('[data-mic]');if(mic){listen(mic.dataset.mic,mic);return;}
+  const pn=t.closest('[data-pgnav]');if(pn){const p=BYID[pn.dataset.id],g=+pn.dataset.g,nx=pn.dataset.pgnav==='next'?g+1:g-1,box=pn.parentElement.querySelector('.pgs');if(!p||!box)return;
+    const d=pageDoc(p.col,g),lo=d?d.first:1,hi=d?d.last:1e9;if(nx<lo||nx>hi)return;box.insertAdjacentHTML(pn.dataset.pgnav==='next'?'beforeend':'afterbegin',pageFig(p,nx));pn.dataset.g=nx;wirePages(box);
+    if(nx<=lo&&pn.dataset.pgnav==='prev')pn.hidden=true;if(nx>=hi&&pn.dataset.pgnav==='next')pn.hidden=true;return;}
   const gb=t.closest('[data-go]');if(gb){go(gb.dataset.go);return;}
   if(t.closest('[data-back]')){if(navs>0)history.back();else go('#/');return;}
   if(t.closest('[data-print]')){printDlg();return;}

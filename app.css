@@ -732,3 +732,5 @@ details.fold>summary .i{width:18px;height:18px;color:var(--gold);flex:none}
 .ltxt.folded p:nth-child(n+3){display:none}
 .unfold{margin:6px 0 2px}
 .ajump{display:flex;justify-content:flex-end;margin:-4px 0 8px}.ajump .lnk .i{width:16px;height:16px}
+/* تصفح صفحات المصدر: السابقة والتالية */
+.pgnav{display:flex;justify-content:center;margin:6px 0}.pgnav[hidden]{display:none}
