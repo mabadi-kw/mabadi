@@ -379,6 +379,7 @@ function actsSheet(p){const k=(p.c.find(c=>c.k)||{}).k;
    ${it('copytext','copy','نسخ نص المبدأ فقط','دون الإسناد')}
    ${it('link','link','نسخ رابط المبدأ','رابط ثابت يفتحه مباشرة')}
    ${k&&RUL[k]&&RUL[k].length>1?`<button class="ash" data-go="#/r/${esc(k)}">${svg('gavel')}<span><b>كل مبادئ هذا الحكم</b><small>${RUL[k].length} مبدأ</small></span></button>`:''}
+   <a class="ash" href="${amaliP(p.id)}" target="_blank" rel="noopener"><img src="icons/partners/amali.svg" alt="" class="pic"><span><b>افتح في «عمّالي»</b><small>المبدأ نفسه في منصة القاضي ↗</small></span></a>
   </div>`,'sheet');return d;}
 function card(p,re,o={}){
   const h=[];let open=false;
@@ -649,7 +650,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610010920';
+const APP_BUILD='202610011203';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -935,7 +936,7 @@ function viewMore(){const inst=navigator.standalone===true||matchMedia('(display
   ${T('data-go="#/about"','info','عن المكتبة','المصادر وقواعد النزاهة والروابط')}
   ${T('data-go="#/report"','report','تقارير الاستخراج','طريقة العمل والفحوص وما يحتاج مراجعة')}
   ${T('data-go="#/review"','check',`المراجعة البشرية <span class="abadge">${nf(PR.filter(p=>p.rv.length).length-Object.keys(RVD).filter(i=>BYID[i]&&BYID[i].rv.length).length)}</span>`,'المبادئ المعلَّمة: قرّر فيها واحدًا واحدًا ثم صدّر قراراتك')}
- </div>`;}
+ </div><h2>التطبيق الشقيق</h2><div class="grid g2">${amaliCard()}</div>`;}
 // ---------- المراجعة البشرية: المبادئ المعلَّمة «يحتاج مراجعة»، قرار لكل مبدأ يُحفظ في الجهاز ويُصدَّر ملفًا يُدمج في الدفعة التالية
 let RVD=LS.get('rvdec',{}),rvCol='',rvSt='open',rvN=20;
 function viewReview(){const el=$('v-review');const all=PR.filter(p=>p.rv.length),cols=[...new Set(all.map(p=>p.col))];
@@ -993,6 +994,7 @@ function viewAbout(){setTimeout(aboutVer,0);$('v-about').innerHTML=`<div class="
    <li><b>الجريدة الرسمية «الكويت اليوم»</b>: ${nf(LAWIX.filter(x=>x.src==='gazette').length)} تشريعًا صدر في 2025–2026، منقولة من ملف العدد نفسه ومطابَقة مع صور صفحاته، وهي وحدها الموسومة «روجعت على الجريدة».</li>
    <li><b>مساهمة «عمّالي»</b>: ${nf(LAWIX.filter(x=>x.src==='amali').length)} وثيقة في مجال العمل نقلها تطبيق «عمّالي» بصريًا، ولم تُطابَق بعد مع صفحات الجريدة؛ تحمل تنبيهًا بذلك.</li></ul>
    <ul><li>نص المادة منقول حرفيًا. التعديل اللاحق لا يُدمج في النص آليًا، بل يظهر إلى جانبه بنصه المنشور، مع إمكان مقارنة النصين.</li><li>ما لم يُراجع على الجريدة الرسمية يُعلَّم، وما كان التعديل فيه جزئيًا يبقى «يحتاج مراجعة».</li><li>التشريعات تخضع للتعديل باستمرار؛ قبل الاعتماد في حكم ارجع إلى الجريدة الرسمية.</li></ul>
+  <h3>التطبيق الشقيق</h3></div>${amaliCard()}<div class="prose"><p class="muted">كل من التطبيقين مستقل ويعمل دون اتصال، ولا يطلب شيئًا من الآخر؛ الرابط يفتحه المستخدم بنفسه. على الآيفون والآيباد يُفتح في Safari لا في التطبيق المثبّت.</p>
   <h3>روابط ثابتة</h3><ul><li>لكل مبدأ رابط ثابت بمعرّفه: <code>#/p/V09L-0001</code></li><li>ولكل حكم رابط يجمع ما ورد عنه: <code>#/r/69/1977@1979-03-12</code></li><li>ولكل تشريع ومادة رابط: <code>#/law/LAW-6-2010</code> و<code>#/a/LAW-6-2010-A0041</code></li></ul>
 </div>`;}
 // ---------- SETTINGS
@@ -1141,6 +1143,9 @@ function installDlg(){if(deferredInstall){deferredInstall.prompt();deferredInsta
 // ---------- guide: جدول القسم ← صفحة الدليل (يتحقق منه ويحدّثه tools/guide/build-guide.mjs)
 const GUIDE={home:3,search:4,filters:6,item:7,source:9,ruling:10,index:11,laws:13,saved:15,offline:16,settings:17,feedback:19,about:20};
 const GUIDE_PDF='docs/guide.pdf',GUIDE_WEB='docs/guide/index.html';
+// «عمّالي» — التطبيق الشقيق: رابط يفتحه المستخدم بنفسه (لا اتصال بين التطبيقين)، وأيقونته محفوظة في هذا المستودع
+const AMALI_URL='https://ommali-app.github.io/',amaliP=id=>AMALI_URL+'#p='+encodeURIComponent(id);
+function amaliCard(){return `<a class="partner card" href="${AMALI_URL}" target="_blank" rel="noopener"><img src="icons/partners/amali.svg" alt="" width="56" height="56"><span><b>«عمّالي»</b><small>لقاضي الدائرة العمالية — رول الجلسة وقراراتها، وحساب المستحقات والمواعيد الإجرائية، وإخراج الحكم بقالبه؛ ومبادئه وتشريعاته من «مبادئ التمييز». يعمل على الجهاز دون اتصال.</small><em>${svg('open')}افتح عمّالي</em></span></a>`;}
 // الدليل داخل التطبيق: طبقة بشريط علوي فيه «إغلاق» وتنزيل PDF، فلا يُحبس المستخدم في ملف PDF داخل التطبيق المثبّت
 function openGuide(k){closeGuide(true);const w=document.createElement('div');w.className='gview';w.id='gview';w.setAttribute('role','dialog');w.setAttribute('aria-label','دليل الاستخدام');
   w.innerHTML=`<div class="gvtop"><button class="btn" id="gvx" aria-label="إغلاق الدليل">${svg('x')}إغلاق</button><b>دليل الاستخدام</b><a class="btn" href="${GUIDE_PDF}" download="دليل-مبادئ-التمييز.pdf">${svg('download')}PDF</a></div>

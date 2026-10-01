@@ -711,3 +711,12 @@ body::before{content:"";position:fixed;inset:0 0 auto 0;height:env(safe-area-ins
 .rvitem{margin-bottom:18px;padding:0 0 10px;border-bottom:2px dashed var(--gold)}
 .rvwhy{display:flex;gap:6px;align-items:flex-start;font-size:.82rem;color:var(--flag);background:var(--flag-soft);border-radius:10px;padding:6px 10px;margin-bottom:8px;line-height:1.7}.rvwhy .i{width:16px;height:16px;flex:none;margin-top:3px}
 .rvdec{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}.rvdec .btn.on{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:700}.rvdec .note{width:100%;grid-column:auto}
+
+/* التطبيق الشقيق «عمّالي» */
+.partner{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;text-decoration:none;color:var(--ink);border:1px solid var(--rule);background:var(--sheet);border-radius:16px;transition:border-color .15s,transform .15s}
+.partner:hover{border-color:var(--gold);transform:translateY(-1px)}
+.partner img{width:56px;height:56px;border-radius:14px;flex:none;box-shadow:0 2px 8px rgba(11,31,59,.25)}
+.partner span{display:grid;gap:4px;min-width:0}.partner b{font-size:1.05rem}.partner small{color:var(--muted);line-height:1.7}
+.partner em{font-style:normal;color:var(--blue);font-weight:600;display:inline-flex;gap:6px;align-items:center;margin-top:4px}.partner em .i{width:16px;height:16px}
+.ash.pic,.ash .pic{width:28px;height:28px;border-radius:8px;flex:none}
+a.ash{text-decoration:none;color:inherit}
