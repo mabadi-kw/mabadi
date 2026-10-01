@@ -37,13 +37,13 @@ try{for(const [dn,opt] of Object.entries(DEVS)){const c=await context(b,opt,url)
   const fonts=await p.$$eval('input,select,textarea',els=>els.filter(e=>e.offsetParent).map(e=>parseFloat(getComputedStyle(e).fontSize)).filter(f=>f<16));
   ck(`${dn}: كل الحقول بخط 16px فأكثر (لا تكبير تلقائي في iOS)`,!fonts.length,fonts.join(','));
   // الدليل يُفتح داخل التطبيق ويُغلق بزر الإغلاق وبالرجوع
-  await p.evaluate(()=>{location.hash='#/laws';});await p.waitForTimeout(900);await p.click('#v-laws .guidelnk');await p.waitForTimeout(1500);
+  await p.evaluate(()=>{location.hash='#/more';});await p.waitForTimeout(900);await p.click('[data-a2="guide"]');await p.waitForTimeout(1500);
   const gv=await p.evaluate(()=>{const f=document.querySelector('#gview iframe');return f&&{src:f.getAttribute('src'),top:document.querySelector('.gvtop').getBoundingClientRect().height};});
-  ck(`${dn}: «الدليل» يفتح داخل التطبيق على فصل القسم`,gv&&gv.src.endsWith('#ch-laws'),JSON.stringify(gv));
-  const fr=p.frame({url:/guide\/index\.html/});ck(`${dn}: نسخة الويب من الدليل تُحمَّل`,!!fr&&(await fr.locator('#ch-laws').count())===1);
+  ck(`${dn}: «الدليل» يفتح داخل التطبيق من «المزيد» على الغلاف`,gv&&gv.src.endsWith('#top'),JSON.stringify(gv));
+  const fr=p.frame({url:/guide\/index\.html/});ck(`${dn}: نسخة الويب من الدليل تُحمَّل`,!!fr&&(await fr.locator('#top').count())===1);
   await p.screenshot({path:path.join(OUT,`${dn}-guide.png`)});
-  await p.click('#gvx');await p.waitForTimeout(500);ck(`${dn}: «إغلاق» يغلق الدليل ويبقى في الصفحة نفسها`,!(await p.$('#gview'))&&(await p.evaluate(()=>location.hash))==='#/laws');
-  await p.click('#v-laws .guidelnk');await p.waitForTimeout(600);await p.goBack();await p.waitForTimeout(500);ck(`${dn}: زر الرجوع في الجهاز يغلق الدليل`,!(await p.$('#gview'))&&(await p.evaluate(()=>location.hash))==='#/laws');
+  await p.click('#gvx');await p.waitForTimeout(500);ck(`${dn}: «إغلاق» يغلق الدليل ويبقى في الصفحة نفسها`,!(await p.$('#gview'))&&(await p.evaluate(()=>location.hash))==='#/more');
+  await p.click('[data-a2="guide"]');await p.waitForTimeout(600);await p.goBack();await p.waitForTimeout(500);ck(`${dn}: زر الرجوع في الجهاز يغلق الدليل`,!(await p.$('#gview'))&&(await p.evaluate(()=>location.hash))==='#/more');
   // نافذة الملاحظات: زر الإغلاق يعمل
   await p.evaluate(()=>document.querySelector('[data-a2="rate"]').click());await p.waitForSelector('.fbx');
   const fx=await p.evaluate(()=>{const t=document.querySelector('.fbtop'),x=t.querySelector('.btn');const r=x.getBoundingClientRect();return {h:r.height,w:r.width};});

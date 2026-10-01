@@ -20,7 +20,7 @@ try{const c=await context(b,{viewport:{width:390,height:844},isMobile:true,hasTo
   ck('نطاق التشريعات: رقم التشريع وسنته',await p.locator('#lres [data-go="#/law/LAW-6-2010"]').count()>0);
   await p.click('[data-scope="p"]');
   await go('#/p/MUR1-0183');
-  ck('بطاقة المبدأ: «مشاركة» مخفية على الهاتف و«⋯» ظاهر',await p.locator('[data-main] [data-a="share"]').isHidden()&&await p.locator('[data-main] [data-a="more"]').isVisible());
+  ck('بطاقة المبدأ: أربعة أزرار و«⋯» للباقي',(await p.locator('[data-main] .acts .btn:visible').count())<=5&&await p.locator('[data-main] [data-a="more"]').isVisible());
   await p.click('[data-main] [data-a="more"]');await p.waitForTimeout(300);
   ck('قائمة «⋯» فيها نسخ الإسناد وكل مبادئ الحكم',await p.locator('.ashs [data-a="cite"]').count()===1&&await p.locator('.ashs [data-go^="#/r/"]').count()===1);
   await p.click('.ashs [data-a="cite"]');await p.waitForTimeout(300);
