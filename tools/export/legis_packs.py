@@ -60,9 +60,15 @@ def label_num(t):
     return None
 
 
+def strip_head(paras):
+    """مواد المساهمات تبدأ أحيانًا بسطر العنوان («مادة أولى»)؛ يُتخطّى لتكون الفقرة الأولى جملة التعديل"""
+    return paras[1:] if paras and re.match(r'^\(?\s*(?:ال)?مادة\s+\S+\s*\)?\s*:?\s*$', paras[0]) and len(paras[0]) < 30 else paras
+
+
 def segment(paras, target):
     """نص المادة target داخل مادة معدِّلة: الفقرات بعد سطر «مادة (n)…» حتى سطر «مادة» التالي.
     إن لم توجد أسطر عناوين فالنص كل ما بعد الفقرة الأولى (جملة التعديل)."""
+    paras = strip_head(paras)
     labs = [i for i, p in enumerate(paras) if i > 0 and RLABEL.match(p) and len(p) < 60]
     if not labs:
         return paras[1:] or None, None
@@ -116,12 +122,12 @@ def main():
         d = DOCS[x['id']]
         src = d.get('source') or {}
         is_gz = x.get('src') == 'gazette'
-        kind = 'gazette' if is_gz else ('moj_edition' if 'وزارة العدل' in (src.get('kind') or '') else 'pdf_file')
+        kind = 'gazette' if is_gz else ('amali_contrib' if x.get('src') == 'amali' else ('moj_edition' if 'وزارة العدل' in (src.get('kind') or '') else 'pdf_file'))
         source = {'kind': kind, 'label': src.get('kind'),
                   'gazette': {'name': 'الكويت اليوم', 'issue': src.get('issue'), 'supplement': src.get('supplement'), 'date': src.get('date')} if is_gz else None,
                   'edition': src.get('edition'), 'volume': src.get('volume'), 'file': src.get('file'), 'pdf_pages': src.get('pdf_pages'),
                   'extraction': src.get('note')}
-        text_as_of = src.get('date') if is_gz else ('2011-02' if kind == 'moj_edition' else None)
+        text_as_of = src.get('date') if is_gz else ('2011-02' if kind == 'moj_edition' else (x.get('issued') if kind == 'amali_contrib' else None))
         lev = AM['laws'].get(x['key'], [])
         rep = next((e for e in lev if e['what'] == 'إلغاء'), None)
         amended_by = [{'key': e['by'], 'id': e['by_id'], 'date': e.get('date') or gdate(e['by_id'])} for e in lev if e['what'] != 'إلغاء']
@@ -132,9 +138,22 @@ def main():
             body = a.get('paras') or []
             joined = ' '.join(body)
             repealed = bool(a.get('rep')) or bool(re.match(r'^[\(\s«]*ملغ[اى]ة[\)\s»]*$', joined))
+            empty_note = None
+            if not repealed and not body and not a.get('issue'):
+                RE_REP = r'(ألغي|الغي|ملغا|ملغى)'
+                own = ' '.join(a.get('notes') or [])
+                near = ' '.join(' '.join(b.get('notes') or []) for b in d['articles'][max(0, order - 4):order + 2] if b is not a)
+                if re.search(RE_REP, own):
+                    repealed = True
+                elif re.search(RE_REP, near) and re.search(r'(?<![٠-٩])' + ''.join('٠١٢٣٤٥٦٧٨٩'[int(c)] for c in str(a.get('n') or '')) + r'(?![٠-٩])', near):
+                    repealed = True
+                else:
+                    empty_note = 'المادة بلا نص في المصدر ولم تذكر الطبعة سبب ذلك (عليها علامة حاشية دون نص حاشية أحيانًا)؛ يُرجّح أنها ملغاة، ويحتاج التحقق إلى الجريدة الرسمية.'
             ev = [] if (a.get('issue') or a.get('bis')) else AM['arts'].get(f"{x['id']}#{a['n']}", [])
             if is_gz:
                 basis = 'نص الجريدة الرسمية'
+            elif kind == 'amali_contrib':
+                basis = 'نص مساهمة «عمّالي» (منقول بصريًا، لم يُطابَق مع الجريدة)'
             elif kind == 'moj_edition':
                 basis = 'نص طبعة وزارة العدل 2011 (شاملًا ما ورد فيها من تعديلات حتى تاريخها)'
             else:
@@ -152,7 +171,7 @@ def main():
                 bya = art_of(e['by_id'], e['by_art'])
                 seg, lab = segment(bya['paras'], a['n']) if bya else (None, None)
                 am = {'by_key': e['by'], 'by_id': e['by_id'], 'by_article': e['by_art'], 'date': e.get('date') or gdate(e['by_id']),
-                      'how': e['how'], 'scope': e.get('part'), 'enacting_clause': (bya['paras'] or [None])[0] if bya else None,
+                      'how': e['how'], 'scope': e.get('part'), 'enacting_clause': (strip_head(bya['paras']) or [None])[0] if bya else None,
                       'published_label': lab, 'published_text': seg}
                 rec['amendments'].append(am)
                 if e['how'] == 'إلغاء':
@@ -163,11 +182,17 @@ def main():
                                text_in_force_basis=f"نص الاستبدال الكامل المنشور في الجريدة الرسمية ({e['by']})")
                 else:
                     rec.update(status='معدّلة', original_text=body or None, text_in_force=None, text_in_force_basis=None, needs_review=True)
-                    rec['review_reasons'].append(f"تعديل جزئي ({e['how']}{' — ' + e['part'] if e.get('part') else ''}) بالمرسوم بقانون {e['by']}: "
+                    rec['review_reasons'].append(f"تعديل جزئي ({e['how']}{' — ' + e['part'] if e.get('part') else ''}) بـ{DOCS[e['by_id']]['type'] if e['by_id'] in DOCS else 'التشريع'} {e['by']}: "
                                                  'النص النافذ يحتاج دمجًا يدويًا للنص الأصلي مع نص التعديل المنشور، ولم يُدمج آليًا.')
             if rep:   # إلغاء التشريع كله
                 rec.update(status='ملغاة', repealed=True, original_text=rec['original_text'] or rec['text_in_force'], text_in_force=None, text_in_force_basis=None)
                 rec['repealed_by'] = {'key': rep['by'], 'id': rep['by_id'], 'article': rep.get('by_art'), 'date': rep.get('date'), 'basis': 'الجريدة الرسمية', 'scope': 'إلغاء التشريع كله'}
+            if empty_note:
+                rec.update(status='بلا نص', text_in_force=None, text_in_force_basis=None, needs_review=True)
+                rec['review_reasons'].append(empty_note)
+            if a.get('review'):
+                rec['needs_review'] = True
+                rec['review_reasons'] += a['review']
             if a['id'] in KNOWN:
                 rec['needs_review'] = True
                 rec['review_reasons'].append(KNOWN[a['id']])
@@ -183,7 +208,7 @@ def main():
                    'suffix': 'مكرراً' if 'مكرر' in e['n'] else None, 'label': lab or f"مادة ({e['n']})", 'part': None,
                    'chapter_path': [], 'status': 'مضافة', 'text_in_force': seg, 'text_in_force_basis': f"نص الإضافة المنشور في الجريدة الرسمية ({e['by']})" if seg else None,
                    'original_text': None, 'amendments': [{'by_key': e['by'], 'by_id': e['by_id'], 'by_article': e['by_art'], 'date': e.get('date') or gdate(e['by_id']),
-                                                         'how': 'إضافة', 'scope': None, 'enacting_clause': (bya['paras'] or [None])[0] if bya else None,
+                                                         'how': 'إضافة', 'scope': None, 'enacting_clause': (strip_head(bya['paras']) or [None])[0] if bya else None,
                                                          'published_label': lab, 'published_text': seg}],
                    'repealed': False, 'repealed_by': None, 'edition_notes': None, 'edition_note_refs': None, 'source_pages': [],
                    'needs_review': not seg, 'review_reasons': [] if seg else ['تعذّر تحديد نص المادة المضافة داخل المادة المعدِّلة.']}
@@ -206,7 +231,8 @@ def main():
              'verified_against_gazette': verified,
              'verification_note': 'استُخرج النص من ملف الجريدة الرسمية نفسه وطوبق مع صور صفحاته.' if verified else
              ('لم يُراجع على الجريدة الرسمية: النص من طبعة وزارة العدل «مجموعة التشريعات الكويتية» (فبراير 2011)، وقد تكون صدرت بعدها تعديلات لم تُضف.'
-              if kind == 'moj_edition' else 'لم يُراجع على الجريدة الرسمية: النص من ملف PDF مصدَّر من Word، وهو النص الأصلي كما صدر.'),
+              if kind == 'moj_edition' else ('لم يُراجع على الجريدة الرسمية: ' + (src.get('note') or 'مساهمة «عمّالي»'))
+              if kind == 'amali_contrib' else 'لم يُراجع على الجريدة الرسمية: النص من ملف PDF مصدَّر من Word، وهو النص الأصلي كما صدر.'),
              'known_issues': [DOC_KNOWN[x['id']]] if x['id'] in DOC_KNOWN else [],
              'preamble': d.get('preamble') or [], 'signature': d.get('signature') or [],
              'structure': [{'level': t.get('level'), 'title': t.get('title'), 'from_article': t.get('frm'), 'to_article': t.get('to')} for t in d.get('toc') or []],
@@ -232,7 +258,7 @@ def main():
                  'original_text': 'نص المادة قبل التعديل اللاحق للطبعة، حين عُدّلت أو أُلغيت بتشريع منشور في الجريدة.',
                  'edition_notes': 'حواشي طبعة وزارة العدل كما وردت (ومنها نص المادة قبل تعديلات سابقة للطبعة أحيانًا).',
                  'edition_note_refs': 'التشريعات المذكورة في الحاشية، مستخرجة آليًا من نصها للتيسير؛ المرجع نص الحاشية نفسه.',
-                 'status': 'نافذة | معدّلة | مضافة | ملغاة',
+                 'status': 'نافذة | معدّلة | مضافة | ملغاة | بلا نص (مادة فارغة في المصدر دون سبب مذكور)',
                  'verified_against_gazette': 'true فقط لما استُخرج من ملف الجريدة الرسمية نفسه وطوبق مع صوره.',
                  'needs_review': 'المادة تحتاج مراجعة بشرية، والسبب في review_reasons.'},
              'counts': {'legislations': len(Ls), 'articles': sum(L['counts']['articles'] for L in Ls),

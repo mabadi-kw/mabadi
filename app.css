@@ -586,3 +586,73 @@ body::before{content:"";position:fixed;inset:0 0 auto 0;height:env(safe-area-ins
   #v-more .tile b{font-size:.98rem}
   #v-more h2{margin:18px 0 10px}
 }
+/* بطاقة المبدأ: إجراءات أساسية ظاهرة، والباقي في «⋯» على الهاتف */
+.acts .more{display:none}
+.acts .more svg{stroke-width:3.2}
+@media (max-width:760px){.acts .x2{display:none}.acts .more{display:inline-flex}.acts .btn{padding:6px 11px}}
+.chip.plus{background:transparent;border:1px dashed var(--rule);color:var(--muted);cursor:pointer}
+.cmore{display:contents}.cmore[hidden]{display:none}
+/* ورقة الإجراءات */
+.dlg.sheet{padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))}
+.ashs{display:grid;gap:2px}
+.ash{display:flex;gap:14px;align-items:center;text-align:start;width:100%;padding:12px 6px;border:0;border-bottom:1px solid var(--rule);background:none;color:var(--ink);font:inherit;cursor:pointer;border-radius:10px}
+.ash:last-child{border-bottom:0}.ash:active,.ash:hover{background:var(--bg2)}
+.ash .i{width:22px;height:22px;color:var(--blue)}.ash span{display:grid;gap:1px}.ash b{font-weight:600;font-size:.95rem}.ash small{color:var(--muted);font-size:.78rem}
+@media (max-width:760px){#layer .dlg.sheet{position:fixed;inset:auto 0 0 0;margin:0;width:auto;max-width:none;border-radius:20px 20px 0 0;animation:shup .22s ease-out}}
+@keyframes shup{from{transform:translateY(40px);opacity:.4}to{transform:none;opacity:1}}
+/* زر الصعود: يظهر عند التمرير إلى أعلى فقط، ثم يختفي */
+.totop{width:40px;height:40px;opacity:0;pointer-events:none;transition:opacity .25s,transform .25s;transform:translateY(8px)}
+.totop.on{opacity:.92;pointer-events:auto;transform:none}
+/* البحث: نطاقان وحقول منظمة وانتقال مباشر */
+.scope{display:flex;gap:4px;background:var(--bg2);border:1px solid var(--rule);border-radius:14px;padding:4px;margin:10px 0 8px;max-width:420px}
+.scope button{flex:1;border:0;background:none;color:var(--muted);font:600 .92rem var(--f-ui);padding:9px 10px;border-radius:10px;cursor:pointer}
+.scope button[aria-selected="true"]{background:var(--sheet);color:var(--blue);box-shadow:var(--shadow)}
+.sfields{display:grid;grid-template-columns:1fr 1fr;gap:8px;max-width:420px;margin-bottom:8px}
+.sfields label{display:grid;gap:3px;font-size:.78rem;color:var(--muted)}
+.sfields input{font:inherit;font-size:16px;padding:9px 12px;border:1px solid var(--rule);border-radius:10px;background:var(--sheet);color:var(--ink)}
+#sqk{margin:4px 0 10px}
+.jump{border-inline-start:3px solid var(--gold);margin-bottom:12px}
+.jump h3{margin:0 0 6px;font-size:.95rem;display:flex;gap:6px;align-items:center;color:var(--gold)}
+.jump .arow{display:flex;gap:12px;align-items:center}
+.jump .arow .i{color:var(--blue);width:22px;height:22px}
+.jump .arow span{display:grid;gap:2px;text-align:start}.jump .arow small{color:var(--muted)}
+/* عناوين الأقسام في الرئيسية: خط ذهبي ورابط «عرض الكل» */
+#v-home .sech{margin-top:22px}
+#v-home .sech h2{position:relative;padding-inline-start:12px;margin:0 0 10px}
+#v-home .sech h2::before{content:"";position:absolute;inset-inline-start:0;top:.2em;bottom:.2em;width:4px;border-radius:4px;background:linear-gradient(180deg,var(--gold),#d9b865)}
+.lnk{border:0;background:none;color:var(--blue);font:600 .85rem var(--f-ui);cursor:pointer;padding:4px 2px;white-space:nowrap}
+.newl{padding:4px 12px}
+.nrow{display:flex;gap:12px;align-items:center;width:100%;text-align:start;border:0;border-bottom:1px solid var(--rule);background:none;color:var(--ink);font:inherit;padding:11px 2px;cursor:pointer}
+.nrow:last-child{border-bottom:0}.nrow:hover{background:var(--blue-soft)}
+.nrow .ic{width:36px;height:36px;border-radius:10px;background:var(--blue-soft);color:var(--gold);display:grid;place-items:center;flex:none}
+.nrow .t{display:grid;gap:2px;flex:1;min-width:0}.nrow .t b{font-weight:600;font-size:.95rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.nrow small{color:var(--muted);font-size:.78rem}
+/* صندوق التعديل: جملة التعديل، والنص بعد الاستبدال، والمقارنة كلمةً كلمة */
+.amendbox .clause{color:var(--muted);font-size:.9em}
+.amendbox .nlab{font:700 .8rem var(--f-ui);color:var(--gold);margin:8px 0 2px}
+.amendbox .slab{font-weight:700}
+.cmpb{margin-top:8px}.cmpb.on{background:var(--blue-soft);border-color:var(--blue)}
+.diff{margin-top:10px;border:1px solid var(--rule);border-radius:12px;padding:10px 14px;background:var(--sheet)}
+.diff .dtext{font-family:var(--f-text);line-height:2;white-space:normal}
+.diff del{background:rgba(196,60,60,.14);color:#a33;text-decoration:line-through;text-decoration-thickness:1.5px;border-radius:3px}
+.diff ins{background:rgba(46,140,80,.16);color:#1d6b3a;text-decoration:none;border-radius:3px}
+.dlg-l{display:flex;gap:8px;margin:0 0 6px;font-size:.75rem}.dk{padding:1px 8px;border-radius:6px}.dk.del{background:rgba(196,60,60,.14);color:#a33}.dk.ins{background:rgba(46,140,80,.16);color:#1d6b3a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .diff del{color:#f19a9a}:root:not([data-theme="light"]) .diff ins{color:#8fd8a8}}
+:root[data-theme="dark"] .diff del{color:#f19a9a}:root[data-theme="dark"] .diff ins{color:#8fd8a8}
+/* زر الانتقال السريع في الرأس، ولوحته */
+.pal{display:flex;align-items:center;gap:6px;border:0;background:rgba(255,255,255,.1);color:#fff;border-radius:999px;padding:7px 12px;cursor:pointer;margin-inline-start:6px}
+@media (max-width:760px){.pal{margin-inline-start:auto}}
+.pal .i{width:18px;height:18px}.pal kbd{font:600 .7rem var(--f-ui);opacity:.75;background:rgba(255,255,255,.12);border-radius:6px;padding:1px 6px}
+.pal+.me{margin-inline-start:0}
+@media (max-width:760px){.pal kbd{display:none}.pal{padding:8px}}
+.dlg.palette{max-width:620px;width:min(620px,calc(100% - 24px))}
+.pq{width:100%;font:inherit;font-size:17px;padding:12px 14px;border:1px solid var(--rule);border-radius:12px;background:var(--bg2);color:var(--ink);box-sizing:border-box}
+.pres{max-height:min(55vh,420px);overflow:auto;margin-top:8px}
+.pres .arow{display:flex;gap:12px;align-items:center;border-radius:10px}
+.pres .arow .i{color:var(--blue);width:20px;height:20px}.pres .arow span{display:grid;gap:1px;text-align:start;min-width:0}
+.pres .arow small{color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pres .arow.sel{background:var(--blue-soft)}
+.pk{margin:8px 0 0}
+@media (max-width:760px){.pk{display:none}}
+@media (min-width:1000px){.pal{margin-inline-start:auto}}
+.sfields input{width:100%;min-width:0;box-sizing:border-box}
+.sfields label{min-width:0}

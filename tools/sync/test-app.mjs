@@ -56,7 +56,7 @@ try{
   ck('الجلب بالرمز الصحيح يدمج (٢ من أ + ١ محلي) ويتبنّى المفتاح',sb.fav.join()==='V09L-0016,V09L-0184,V09L-0246'&&sb.hasKey&&sb.note['V09L-0184']==='ملاحظة أولى'&&sb.fold.includes('قضية 12/2026'));
   // ب يحذف مفضلة ويعدّل ملاحظة، ثم يحفظ
   await visit(B.p,'#/p/V09L-0016');await B.p.click('article.pr[data-id="V09L-0016"] [data-a="fav"]:visible');await B.p.click('#unfav');
-  await visit(B.p,'#/p/V09L-0184');await B.p.click('article.pr[data-id="V09L-0184"] [data-a="note"]:visible');await B.p.fill('#nt','ملاحظة معدّلة');await B.p.click('#ns');
+  await visit(B.p,'#/p/V09L-0184');await B.p.click('article.pr[data-id="V09L-0184"] [data-a="more"]:visible');await B.p.click('.ashs [data-a="note"]');await B.p.fill('#nt','ملاحظة معدّلة');await B.p.click('#ns');
   ck('علامة «تغييرات لم تُحفظ» بعد التعديل من الواجهة',(await st(B.p)).dirty);
   const F2=await push(B.p,'f2.amali');
   // أ يجلب: الحذف يصل والملاحظة تتحدث والمفضلة الجديدة تُضاف، دون طلب الرمز

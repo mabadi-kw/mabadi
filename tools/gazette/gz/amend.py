@@ -44,6 +44,22 @@ for base,(by,art) in REPEAL.items():
     AM['laws'].setdefault(base,[]).append(dict(by=by,by_id=lid(by),by_art=ba,date=dates.get(by),what='إلغاء',short=new[by]['short']))
     x=IX.get(base)
     if x:x['status']='ملغى';x['repealed_by']=by
+# أحداث إضافية من غير الجريدة المعالَجة هنا (مثل مساهمة «عمّالي»): ملف amend_extra.json إن وُجد
+import os
+XF=os.path.join(os.path.dirname(os.path.abspath(__file__)),'amend_extra.json')
+if os.path.exists(XF):
+    X=json.load(open(XF))
+    for e in sorted(X.get('events',[]),key=lambda e:e.get('date') or ''):
+        base=e['base_key'];rec=dict(by=e['by_key'],by_id=e['by_id'],by_art=e['by_art'],how=e['how'],date=e.get('date'),src=e.get('src'))
+        if e.get('part'):rec['part']=e['part']
+        AM['laws'].setdefault(base,[])
+        if not any(x['by']==e['by_key'] for x in AM['laws'][base]):AM['laws'][base].append(dict(by=e['by_key'],by_id=e['by_id'],date=e.get('date'),what='تعديل',short=e.get('short'),src=e.get('src')))
+        if e['how']=='إضافة':AM['added'].setdefault(base,[]).append(dict(rec,n=e['art']))
+        else:AM['arts'].setdefault(f"{e['base_id']}#{e['art']}",[]).append(rec)
+    for r in X.get('repeals',[]):
+        AM['laws'].setdefault(r['base_key'],[]).append(dict(by=r['by_key'],by_id=r['by_id'],by_art=r.get('by_art'),date=r.get('date'),what='إلغاء',short=r.get('short'),src=r.get('src')))
+        x=IX.get(r['base_key'])
+        if x:x['status']='ملغى';x['repealed_by']=r['by_key']
 # القوانين الجديدة التي تعدّل قوانين غير موجودة في المكتبة تبقى مذكورة في «amends» فقط
 json.dump(AM,open(SITE+'amend.json','w'),ensure_ascii=False,indent=0)
 keep=[x for x in I['laws'] if x['key'] not in new]

@@ -15,7 +15,7 @@ async function ready(p){await p.waitForFunction(()=>document.querySelector('.she
 async function act(p,a,dev){
   if(a==='search'){await p.fill('#sq',QUERY);await p.waitForTimeout(1200);}
   if(a==='filters'){await p.click('#ftog');await p.selectOption('#flw','6/2010');await p.fill('#fart','41');await p.waitForTimeout(900);}
-  if(a==='share'){await p.click(`article.pr[data-id="${DEMO}"] [data-a="share"]`);await p.waitForTimeout(400);}
+  if(a==='share'){await p.evaluate(d=>document.querySelector(`article.pr[data-id="${d}"] [data-a="share"]`).click(),DEMO);await p.waitForTimeout(400);}
   if(a==='src'){await p.click(`article.pr[data-id="${DEMO}"] [data-a="src"]`);await p.waitForTimeout(1500);}
   if(a==='ruling'){await p.click(`article.pr[data-id="${DEMO}"] .rk`);await p.waitForTimeout(800);}
   if(a==='offline'){await p.click('#v-more [data-a2="offline"]');await p.waitForTimeout(400);}
