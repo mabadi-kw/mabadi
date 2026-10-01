@@ -80,19 +80,48 @@ let wovenOnce=false;
 function playWeave(){if(wovenOnce)return;wovenOnce=true;document.querySelectorAll('.appbar,.hero').forEach(h=>{h.classList.remove('play');void h.offsetWidth;h.classList.add('play');});}
 // ---------- lock
 async function sha(t){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode('mabadi:'+t));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+// بصمة الوجه / البصمة: مفتاح مرور (WebAuthn) على هذا الجهاز وحده. لا خادم: نجاح التحقق من المستخدم (UV) يفتح القفل،
+// والرمز السري يبقى بديلًا دائمًا. لا يُرسل شيء خارج الجهاز.
+const b64u=a=>btoa(String.fromCharCode(...new Uint8Array(a))).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
+const ub64=s=>Uint8Array.from(atob(s.replace(/-/g,'+').replace(/_/g,'/')),c=>c.charCodeAt(0));
+const rnd=n=>crypto.getRandomValues(new Uint8Array(n));
+const BIO_IOS=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const bioName=()=>BIO_IOS?'بصمة الوجه':'البصمة';
+async function bioAvail(){try{return !!(window.PublicKeyCredential&&await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable());}catch(_){return false;}}
+async function bioEnroll(){const c=await navigator.credentials.create({publicKey:{rp:{name:'مبادئ التمييز',id:location.hostname},
+  user:{id:rnd(16),name:'قفل مبادئ التمييز',displayName:'قفل مبادئ التمييز'},challenge:rnd(32),
+  pubKeyCredParams:[{type:'public-key',alg:-7},{type:'public-key',alg:-257}],
+  authenticatorSelection:{authenticatorAttachment:'platform',userVerification:'required',residentKey:'discouraged'},timeout:60000,attestation:'none'}});
+  return b64u(c.rawId);}
+async function bioCheck(){const a=await navigator.credentials.get({publicKey:{challenge:rnd(32),rpId:location.hostname,timeout:60000,userVerification:'required',
+  allowCredentials:[{type:'public-key',id:ub64(S.bio),transports:['internal','hybrid']}]}});
+  const ad=new Uint8Array(a.response.authenticatorData);return b64u(a.rawId)===S.bio&&!!(ad[32]&4);}   // 4 = تحقق المستخدم بالوجه أو البصمة
+const FACEIC='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 8V6a2 2 0 0 1 2-2h2M16 4h2a2 2 0 0 1 2 2v2M20 16v2a2 2 0 0 1-2 2h-2M8 20H6a2 2 0 0 1-2-2v-2"/><path d="M9 9v1.5M15 9v1.5M12 9v4.2h-1M9.2 15.6c1.6 1.3 4 1.3 5.6 0"/></svg>';
 function lockScreen(){
   if(!S.pin||$('lock'))return;
   const d=document.createElement('div');d.className='lock';d.id='lock';
-  const ini=(S.name||'').trim().charAt(0);
-  d.innerHTML=`<div class="in"><i class="avatar">${S.photo?`<img src="${S.photo}" alt="">`:esc(ini||'م')}</i><b class="t">مبادئ التمييز</b><div>${S.name?'مرحبًا، '+esc(S.name):''}</div><div class="hint" style="color:#cfdcf1">أدخل الرمز السري</div><div class="dots" id="dots"></div>
-  <div class="pad">${[1,2,3,4,5,6,7,8,9,'',0,'⌫'].map(k=>k===''?'<span></span>':`<button data-k="${k}">${k}</button>`).join('')}</div></div>`;
-  document.body.appendChild(d);let v='';
+  const ini=(S.name||'').trim().charAt(0),now=new Date();
+  const day=new Intl.DateTimeFormat('ar-KW-u-nu-latn',{weekday:'long',day:'numeric',month:'long'}).format(now);
+  const bio=!!S.bio;
+  d.innerHTML=`<div class="lband top" aria-hidden="true"></div><div class="in">
+   <div class="lav"><i class="avatar">${S.photo?`<img src="${S.photo}" alt="">`:esc(ini||'م')}</i></div>
+   <b class="t">مبادئ التمييز</b>
+   ${S.name?`<div class="lhi">مرحبًا، ${esc(S.name)}</div>`:''}<div class="lday">${esc(day)}</div>
+   <div class="lmsg" id="lmsg">${bio?`افتح ب${bioName()} أو أدخل الرمز`:'أدخل الرمز السري'}</div><div class="dots" id="dots"></div>
+   <div class="pad">${[1,2,3,4,5,6,7,8,9,'bio',0,'⌫'].map(k=>k==='bio'?(bio?`<button class="kb" data-bio aria-label="فتح ب${bioName()}">${FACEIC}</button>`:'<span></span>'):k==='⌫'?`<button class="kb" data-k="⌫" aria-label="حذف"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5h11v14H9l-6-7z"/><path d="M12.5 9.5l5 5M17.5 9.5l-5 5"/></svg></button>`:`<button data-k="${k}">${k}</button>`).join('')}</div>
+  </div><div class="lband bot" aria-hidden="true"></div>`;
+  document.body.appendChild(d);weave(d,10);let v='';
+  const msg=t=>{const m=$('lmsg');if(m)m.textContent=t;};
+  const unlock=()=>{d.classList.add('open');document.removeEventListener('keydown',kd);setTimeout(()=>d.remove(),420);};
   const draw=()=>{$('dots').innerHTML=Array.from({length:Math.max(4,v.length)},(_,i)=>`<i class="${i<v.length?'f':''}"></i>`).join('')};draw();
   const press=async k=>{if(k==='⌫')v=v.slice(0,-1);else if(v.length<8)v+=k;draw();
-    if(v.length>=4&&await sha(v)===S.pin){d.remove();document.removeEventListener('keydown',kd);}
-    else if(v.length>=8||(v.length>=4&&v.length===S.pinLen)){d.querySelector('.in').classList.add('shake');setTimeout(()=>{d.querySelector('.in').classList.remove('shake');v='';draw();},350);}};
-  d.addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b)press(b.dataset.k)});
+    if(v.length>=4&&await sha(v)===S.pin)unlock();
+    else if(v.length>=8||(v.length>=4&&v.length===S.pinLen)){d.querySelector('.in').classList.add('shake');msg('الرمز غير صحيح');setTimeout(()=>{d.querySelector('.in').classList.remove('shake');v='';draw();},350);}};
+  let busy=false;const tryBio=async()=>{if(busy||!S.bio)return;busy=true;
+    try{if(await bioCheck())unlock();else msg('تعذّر التحقق، أدخل الرمز');}catch(e){msg(e&&e.name==='NotAllowedError'?`أُلغي — اضغط ${bioName()} للمحاولة أو أدخل الرمز`:'أدخل الرمز السري');}busy=false;};
+  d.addEventListener('click',e=>{const b=e.target.closest('[data-k]');if(b)return press(b.dataset.k);if(e.target.closest('[data-bio]'))tryBio();});
   const kd=e=>{if(/^\d$/.test(e.key))press(e.key);else if(e.key==='Backspace')press('⌫')};document.addEventListener('keydown',kd);
+  if(bio&&!document.hidden)setTimeout(tryBio,350);   // محاولة تلقائية عند الظهور؛ إن رفضها المتصفح يبقى الزر
 }
 lockScreen();
 let hiddenAt=0;document.addEventListener('visibilitychange',()=>{if(document.hidden)hiddenAt=Date.now();else if(S.pin&&hiddenAt&&Date.now()-hiddenAt>S.lockMin*60000)lockScreen();});
@@ -538,7 +567,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610010052';
+const APP_BUILD='202610010601';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -774,6 +803,7 @@ function settingsDlg(toSync){
     <input type="text" id="sname" placeholder="اسمك (يظهر في الترحيب فقط)" value="${esc(S.name)}"></div>
     <div class="rowi">${S.photo?'<button class="btn" id="avx">إزالة الصورة</button>':''}<span class="hint">الاسم والصورة يُحفظان في هذا الجهاز فقط ولا يُرسلان إلى أي مكان.</span></div></section>
    <section><h4>قفل التطبيق</h4><div class="rowi">${S.pin?`<span>القفل مفعّل.</span><button class="btn" id="pinoff">إلغاء القفل</button><button class="btn" id="pinchg">تغيير الرمز</button>`:`<input type="password" id="pin1" inputmode="numeric" maxlength="8" placeholder="رمز من 4 إلى 8 أرقام"><input type="password" id="pin2" inputmode="numeric" maxlength="8" placeholder="أعد كتابته"><button class="btn primary" id="pinon">تفعيل</button>`}</div>
+    ${S.pin?`<div class="rowi" id="biorow" hidden><span>${FACEIC.replace('<svg ','<svg class="i" ')} فتح ب${bioName()}</span>${S.bio?`<button class="btn" id="biooff">إيقاف</button>`:`<button class="btn primary" id="bioon">تفعيل</button>`}</div>`:''}
     <div class="rowi"><span>يُقفل بعد الخروج بـ</span><select id="lockmin" style="flex:0 1 140px">${[1,5,15,60].map(m=>`<option value="${m}"${S.lockMin==m?' selected':''}>${m} دقيقة</option>`).join('')}</select></div>
     <span class="hint">القفل يمنع فتح التطبيق على هذا الجهاز دون الرمز، ويحمي محفوظاتك وملاحظاتك من العرض. نصوص المكتبة نفسها عامة.</span></section>
    <section><h4>خط النصوص</h4><div class="fontopts">${Object.entries(FONTS).map(([k,f])=>`<button data-font="${k}" aria-pressed="${S.font===k}" style="font-family:${f.css.replace(/"/g,"'")},serif"><span>قضت المحكمة</span><small>${f.l}</small></button>`).join('')}</div>
@@ -804,8 +834,11 @@ function settingsDlg(toSync){
   $('avf').onchange=e=>{const f=e.target.files[0];if(!f)return;const img=new Image();img.onload=()=>{const c=document.createElement('canvas'),z=192,m=Math.min(img.width,img.height);c.width=c.height=z;c.getContext('2d').drawImage(img,(img.width-m)/2,(img.height-m)/2,m,m,0,0,z,z);S.photo=c.toDataURL('image/jpeg',.82);upd();settingsDlg();};img.src=URL.createObjectURL(f);};
   if($('avx'))$('avx').onclick=()=>{S.photo='';upd();settingsDlg();};
   if($('pinon'))$('pinon').onclick=async()=>{const a=$('pin1').value,b=$('pin2').value;if(!/^\d{4,8}$/.test(a))return toast('الرمز من 4 إلى 8 أرقام');if(a!==b)return toast('الرمزان غير متطابقين');S.pin=await sha(a);S.pinLen=a.length;upd();toast('فُعّل القفل');settingsDlg();};
-  if($('pinoff'))$('pinoff').onclick=()=>{S.pin='';delete S.pinLen;upd();toast('أُلغي القفل');settingsDlg();};
-  if($('pinchg'))$('pinchg').onclick=()=>{S.pin='';delete S.pinLen;upd();settingsDlg();};
+  if($('biorow'))bioAvail().then(ok=>{if(ok&&$('biorow'))$('biorow').hidden=false;});
+  if($('bioon'))$('bioon').onclick=async()=>{try{S.bio=await bioEnroll();upd();toast(`فُعّل الفتح ب${bioName()}`);settingsDlg();}catch(e){toast(e&&e.name==='NotAllowedError'?'أُلغي التفعيل':'تعذّر التفعيل على هذا الجهاز');}};
+  if($('biooff'))$('biooff').onclick=()=>{delete S.bio;upd();toast(`أُوقف الفتح ب${bioName()}`);settingsDlg();};
+  if($('pinoff'))$('pinoff').onclick=()=>{S.pin='';delete S.pinLen;delete S.bio;upd();toast('أُلغي القفل');settingsDlg();};
+  if($('pinchg'))$('pinchg').onclick=()=>{S.pin='';delete S.pinLen;delete S.bio;upd();settingsDlg();};
   $('lockmin').onchange=()=>{S.lockMin=+$('lockmin').value;upd();};
   d.querySelectorAll('[data-font]').forEach(b=>b.onclick=()=>{S.font=b.dataset.font;upd();d.querySelectorAll('[data-font]').forEach(x=>x.setAttribute('aria-pressed',x===b));});
   $('fs').oninput=()=>{S.fs=+$('fs').value;$('fsv').textContent=Math.round(S.fs*100)+'٪';upd();};

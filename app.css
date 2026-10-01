@@ -215,16 +215,32 @@ figcaption{font-size:.75rem;color:var(--muted);text-align:center;margin-top:4px}
 .bigav{width:72px;height:72px;font-size:1.8rem}
 .preview{font-family:var(--f-text);font-size:calc(1.12rem*var(--fs));line-height:var(--lh);background:var(--bg);border-radius:12px;padding:10px 14px}
 /* lock */
-.lock{position:fixed;inset:0;z-index:100;background:linear-gradient(160deg,var(--navy),var(--navy2) 60%,#1b3f73);color:#fff;display:grid;place-items:center;padding:24px}
-.lock .in{display:grid;justify-items:center;gap:14px;text-align:center;width:min(320px,100%)}
-.lock .avatar{width:84px;height:84px;font-size:2rem;box-shadow:0 0 0 3px var(--gold)}
-.lock b.t{font-family:"Reem Kufi",sans-serif!important;font-size:1.6rem}
-.dots{display:flex;gap:12px;justify-content:center;height:16px}
-.dots i{width:14px;height:14px;border-radius:50%;border:2px solid rgba(255,255,255,.7)}
-.dots i.f{background:#fff}
-.pad{display:grid;grid-template-columns:repeat(3,72px);gap:12px;justify-content:center}
-.pad button{height:72px;border-radius:50%;border:0;background:rgba(255,255,255,.12);color:#fff;font-size:1.5rem;cursor:pointer}
-.pad button:active{background:rgba(255,255,255,.25)}
+/* شاشة القفل: كحلي عميق بنقش السدو، وحزامان ذهبيان، ولوحة أرقام زجاجية، وزر بصمة الوجه في خانة اللوحة */
+.lock{position:fixed;inset:0;z-index:100;color:#fff;display:grid;place-items:center;overflow:hidden;
+  padding:calc(env(safe-area-inset-top,0px) + 34px) 20px calc(env(safe-area-inset-bottom,0px) + 30px);
+  background:radial-gradient(120% 70% at 50% 18%,#1d3d6b 0%,#0f2747 45%,#081a33 100%);transition:opacity .4s,transform .4s}
+.lock.open{opacity:0;transform:scale(1.04)}
+.lock svg.weave{opacity:.13}
+.lock .lband{position:absolute;inset-inline:0;height:12px;background:repeating-linear-gradient(90deg,#b8923a 0 18px,transparent 18px 24px,#e3c77e 24px 30px,transparent 30px 36px);opacity:.85}
+.lock .lband.top{top:env(safe-area-inset-top,0px)}.lock .lband.bot{bottom:0;height:8px;opacity:.6}
+.lock .in{position:relative;display:grid;justify-items:center;gap:10px;text-align:center;width:min(330px,100%)}
+.lock .lav{position:relative;padding:5px;border-radius:50%;background:conic-gradient(from 200deg,#8a6a22,#e9d08d,#b8923a,#f3e2ad,#8a6a22);box-shadow:0 10px 40px rgba(201,162,75,.28)}
+.lock .lav .avatar{width:96px;height:96px;font-size:2.2rem;box-shadow:0 0 0 3px #0f2747;background:#14335c;color:#e9d08d}
+.lock b.t{font-family:"Reem Kufi",sans-serif!important;font-size:1.75rem;margin-top:6px;letter-spacing:0;background:linear-gradient(180deg,#fff,#e9d08d);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lock .lhi{font-size:1.02rem;font-weight:500;color:#f4ecd6}
+.lock .lday{font-size:.8rem;color:#9fb3d1;margin-top:-4px}
+.lock .lmsg{font-size:.86rem;color:#cfdcf1;margin-top:10px;min-height:1.4em}
+.dots{display:flex;gap:14px;justify-content:center;height:16px;margin-bottom:8px}
+.dots i{width:13px;height:13px;border-radius:50%;border:1.6px solid rgba(233,208,141,.75);transition:background .15s,transform .15s}
+.dots i.f{background:#e9d08d;border-color:#e9d08d;transform:scale(1.08)}
+.pad{display:grid;grid-template-columns:repeat(3,74px);gap:14px 22px;justify-content:center;direction:ltr}
+.pad button{height:74px;border-radius:50%;border:1px solid rgba(255,255,255,.14);background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.05));
+  color:#fff;font:400 1.75rem "Cairo",sans-serif;cursor:pointer;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);transition:background .12s,transform .08s;-webkit-tap-highlight-color:transparent}
+.pad button:active{background:rgba(233,208,141,.32);transform:scale(.96)}
+.pad button.kb{background:transparent;border-color:transparent;display:grid;place-items:center}
+.pad button.kb svg{width:30px;height:30px}
+.pad button[data-bio]{color:#e9d08d}.pad button[data-bio] svg{width:38px;height:38px}
+@media (max-height:700px){.lock .lav .avatar{width:72px;height:72px}.pad{grid-template-columns:repeat(3,64px)}.pad button{height:64px;font-size:1.5rem}.lock .in{gap:6px}}
 .shake{animation:sh .35s}@keyframes sh{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
 .toast{position:fixed;bottom:calc(90px + env(safe-area-inset-bottom,0px));inset-inline:0;margin:auto;width:max-content;max-width:calc(100% - 32px);background:var(--ink);color:var(--bg);padding:9px 18px;border-radius:999px;font-size:.88rem;z-index:120}
 @media (min-width:761px){.toast{bottom:24px}}
