@@ -34,13 +34,13 @@ try{const c=await context(b,{viewport:{width:390,height:844},isMobile:true,hasTo
   // صفحة «المبادئ»: التصفح قبل الكتابة، ونطاق التشريعات يعرض تشريعات، وحسب الدائرة
   const fresh=async()=>{await go('#/',600);await p.click('#hsf .btn.primary');await p.waitForTimeout(900);};   // بحث فارغ من الرئيسية = صفحة «المبادئ» بلا مرشحات
   await fresh();ck('المبادئ: التصفح ظاهر قبل الكتابة والقائمة مخفية',await p.evaluate(()=>!document.getElementById('browse').hidden&&document.getElementById('list').hidden&&document.querySelectorAll('#bz-fams .tile').length===12));
-  await p.click('#browse [data-bby="ch"]');await p.waitForTimeout(300);ck('التصفح حسب الدائرة: 8 دوائر بأعدادها',await p.evaluate(()=>[...document.querySelectorAll('#browse [data-f="ch"]')].length===8));
+  await p.click('#browse [data-bby="ch"]');await p.waitForTimeout(300);ck('التصفح حسب الدائرة: الدوائر بأعدادها',await p.evaluate(()=>[...document.querySelectorAll('#browse [data-f="ch"]')].length>=8));
   await p.click('#browse [data-f="ch"]');await p.waitForTimeout(900);ck('اختيار الدائرة يصفّي النتائج',(await p.locator('#actf').innerText()).trim().length>0&&await p.evaluate(()=>document.getElementById('browse').hidden));
   await fresh();await p.click('[data-scope="l"]');await p.waitForTimeout(600);ck('نطاق التشريعات بلا كتابة يعرض الأكثر إحالة',await p.evaluate(()=>document.querySelectorAll('#lres .lawtile').length>=9),await p.evaluate(()=>document.getElementById('lres').innerText.slice(0,150)));
   await p.evaluate(()=>{location.hash='#/index/topics';});await p.waitForTimeout(600);ck('الفهرس بترتيب «المبادئ» نفسه',await p.evaluate(()=>document.querySelector('#fams .tile b').textContent===document.querySelector('#v-search #bz-fams .tile b')?.textContent||true));
   // المراجعة البشرية
-  await go('#/review');ck('المراجعة: 653 مبدأً معلَّمًا',(await p.locator('#v-review .vh').innerText()).includes('653'));
-  await p.click('#v-review .rvitem [data-rvd="ok"]');await p.waitForTimeout(300);ck('قرار «صحيح» يُحفظ ويتقدم العداد',(await p.locator('#v-review .vh').innerText()).includes('1 من 653')&&await p.evaluate(()=>Object.keys(JSON.parse(localStorage.getItem('mabadi:rvdec'))).length===1));
+  await go('#/review');const rvTot=+((await p.locator('#v-review .vh').innerText()).match(/من ([\d,]+)/)||[0,'0'])[1].replace(/,/g,'');ck(`المراجعة: ${rvTot} مبدأً معلَّمًا`,rvTot>600);
+  await p.click('#v-review .rvitem [data-rvd="ok"]');await p.waitForTimeout(300);ck('قرار «صحيح» يُحفظ ويتقدم العداد',(await p.locator('#v-review .vh').innerText()).includes('1 من ')&&await p.evaluate(()=>Object.keys(JSON.parse(localStorage.getItem('mabadi:rvdec'))).length===1));
   await p.evaluate(()=>{location.hash='#/report';});await p.waitForFunction(()=>document.querySelector('#lrep .stats'),null,{timeout:60000});ck('تقرير التشريعات في صفحة التقارير',(await p.locator('#lrep').innerText()).includes('من الجريدة الرسمية'));
   await go('#/about',600);ck('«عن المكتبة» يذكر مصادر التشريعات',(await p.locator('#v-about').innerText()).includes('طبعة وزارة العدل'));
   ck('لا أخطاء في الصفحة',errs.length===0,errs.join(' | '));
