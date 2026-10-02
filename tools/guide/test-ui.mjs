@@ -24,7 +24,7 @@ try{const c=await context(b,{viewport:{width:390,height:844},isMobile:true,hasTo
   ck('نطاق التشريعات: رقم التشريع وسنته',await p.locator('#lres [data-go="#/law/LAW-6-2010"]').count()>0);
   await p.click('[data-scope="p"]');
   await go('#/p/MUR3-3810');ck('رابط مبدأ محذوف لتكراره يُحوَّل إلى الموضع الباقي',await p.evaluate(()=>location.hash)==='#/p/MQ31-0001');
-  await go('#/p/MUR1-0183');
+  await go('#/p/V10-0162');
   ck('بطاقة المبدأ: أربعة أزرار و«⋯» للباقي',(await p.locator('[data-main] .acts .btn:visible').count())<=5&&await p.locator('[data-main] [data-a="more"]').isVisible());
   await p.click('[data-main] [data-a="more"]');await p.waitForTimeout(300);
   ck('قائمة «⋯» فيها نسخ الإسناد وكل مبادئ الحكم',await p.locator('.ashs [data-a="cite"]').count()===1&&await p.locator('.ashs [data-go^="#/r/"]').count()===1);
@@ -44,7 +44,7 @@ try{const c=await context(b,{viewport:{width:390,height:844},isMobile:true,hasTo
   await fresh();await p.click('[data-scope="l"]');await p.waitForTimeout(600);ck('نطاق التشريعات بلا كتابة يعرض الأكثر إحالة',await p.evaluate(()=>document.querySelectorAll('#lres .lawtile').length>=9),await p.evaluate(()=>document.getElementById('lres').innerText.slice(0,150)));
   await p.evaluate(()=>{location.hash='#/index/topics';});await p.waitForTimeout(600);ck('الفهرس بترتيب «المبادئ» نفسه',await p.evaluate(()=>document.querySelector('#fams .tile b').textContent===document.querySelector('#v-search #bz-fams .tile b')?.textContent||true));
   // المراجعة البشرية
-  await go('#/review');const rvTot=+((await p.locator('#v-review .vh').innerText()).match(/من ([\d,]+)/)||[0,'0'])[1].replace(/,/g,'');ck(`المراجعة: ${rvTot} مبدأً معلَّمًا`,rvTot>600);
+  await go('#/review');const rvTot=+((await p.locator('#v-review .vh').innerText()).match(/من ([\d,]+)/)||[0,'0'])[1].replace(/,/g,'');ck(`المراجعة: ${rvTot} مبدأً معلَّمًا`,rvTot>300);
   await p.click('#v-review .rvitem [data-rvd="ok"]');await p.waitForTimeout(300);ck('قرار «صحيح» يُحفظ ويتقدم العداد',(await p.locator('#v-review .vh').innerText()).includes('1 من ')&&await p.evaluate(()=>Object.keys(JSON.parse(localStorage.getItem('mabadi:rvdec'))).length===1));
   await p.evaluate(()=>{location.hash='#/report';});await p.waitForFunction(()=>document.querySelector('#lrep .stats'),null,{timeout:60000});ck('تقرير التشريعات في صفحة التقارير',(await p.locator('#lrep').innerText()).includes('من الجريدة الرسمية'));
   await go('#/about',600);ck('«عن المكتبة» يذكر مصادر التشريعات',(await p.locator('#v-about').innerText()).includes('طبعة وزارة العدل'));

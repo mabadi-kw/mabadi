@@ -7,9 +7,9 @@ import {DEMO,QUERY} from './chapters.mjs';
 const OUT=path.join(HERE,'out','video');fs.rmSync(OUT,{recursive:true,force:true});mkdirp(OUT);
 const W=1280,H=720;
 const SEED={'mabadi:intro':'1','mabadi:bknudge':'9999999999999','mabadi:iosnudge':'9999999999999','mabadi:folders':JSON.stringify(['عام','إنهاء الخدمة والمكافأة']),
- 'mabadi:favs':JSON.stringify({'V09L-0184':{f:'إنهاء الخدمة والمكافأة',t:1},'V09L-0016':{f:'إنهاء الخدمة والمكافأة',t:2},'V09L-0246':{f:'عام',t:3}}),
+ 'mabadi:favs':JSON.stringify({'V09L-0184':{f:'إنهاء الخدمة والمكافأة',t:1},'V09L-0016':{f:'إنهاء الخدمة والمكافأة',t:2},'V09L-0016':{f:'عام',t:3}}),
  'mabadi:notes':JSON.stringify({'V09L-0184':'للرجوع إليه في مسائل الحرمان من المكافأة.'}),
- 'mabadi:hist':JSON.stringify(['V09L-0184','V09L-0016','V09L-0246'])};
+ 'mabadi:hist':JSON.stringify(['V09L-0184','V09L-0016','V09L-0016'])};
 
 // طبقة العرض: شريط التعليق ومؤشر مرئي — تُحقن في كل صفحة
 const OVERLAY=()=>{const mk=()=>{if(document.getElementById('vcap'))return;

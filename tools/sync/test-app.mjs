@@ -28,7 +28,7 @@ try{
   // الجهاز أ: حاسوب ببيانات بالصيغة القديمة (ملاحظات نصية ومجلدات بلا أوقات)
   const old=Date.now()-10*D;
   const A=await dev('A',{viewport:{width:1280,height:800}},{'mabadi:folders':JSON.stringify(['عام','قضية 12/2026']),
-    'mabadi:favs':JSON.stringify({'V09L-0184':{f:'قضية 12/2026',t:old},'V09L-0016':{f:'عام',t:old+1}}),'mabadi:notes':JSON.stringify({'V09L-0184':'ملاحظة أولى'}),'mabadi:hist':JSON.stringify(['V09L-0246'])});
+    'mabadi:favs':JSON.stringify({'V09L-0184':{f:'قضية 12/2026',t:old},'V09L-0016':{f:'عام',t:old+1}}),'mabadi:notes':JSON.stringify({'V09L-0184':'ملاحظة أولى'}),'mabadi:hist':JSON.stringify(['V09L-0193'])});
   let s=await A.p.evaluate(()=>{const g=k=>JSON.parse(localStorage.getItem('mabadi:'+k)||'{}');return {n:g('notest'),f:g('foldt'),u:g('favs')['V09L-0184'].updated};});
   ck('الترحيل: أوقات للملاحظات والمجلدات، والمفضلة تأخذ وقت حفظها',s.n['V09L-0184']&&s.f['قضية 12/2026']&&s.u===old);
   ck('التذكير بالنسخ الاحتياطي يظهر لبيانات عمرها أكثر من أسبوع',await A.p.waitForSelector('#nudge',{timeout:8000}).then(()=>true,()=>false));
@@ -43,7 +43,7 @@ try{
   const AMALI=req('../../sync-core.js');const inner=await AMALI.decrypt(env,await AMALI.derive(PASS,AMALI.unb64(env.kdf.salt)));
   ck('المحتوى الداخلي mabadi-data بالأقسام الثلاثة، دون السجل والإعدادات',inner.app==='mabadi-data'&&inner.favorites.items['V09L-0184']&&inner.notes.items['V09L-0184'].x==='ملاحظة أولى'&&inner.folders.items['قضية 12/2026']&&!inner.hist&&!inner.settings);
   // الجهاز ب: آيفون فيه مفضلة خاصة به
-  const B=await dev('B',{viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:IPHONE},{'mabadi:favs':JSON.stringify({'V09L-0246':{f:'عام',t:Date.now()}})});
+  const B=await dev('B',{viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true,userAgent:IPHONE},{'mabadi:favs':JSON.stringify({'V09L-0193':{f:'عام',t:Date.now()}})});
   ck('آيفون غير مثبّت: يظهر تنبيه التثبيت أولًا',(await B.p.locator('#nudge').textContent()||'').includes('الشاشة الرئيسية'));
   await B.p.click('#nudge [data-nu="ok"]');
   await openSync(B.p);ck('آيفون: زرّا «① قبل العمل» و«② بعد العمل»',(await B.p.textContent('#spull')).includes('①')&&(await B.p.textContent('#spush')).includes('②'));
@@ -51,9 +51,9 @@ try{
   ck('واجهة المزامنة على 390: بلا تمرير أفقي، والأزرار ≥44',ov.sw<=ov.cw&&!ov.small,JSON.stringify(ov));
   await B.p.screenshot({path:path.join(OUT,'sync-iphone.png')});
   await pull(B.p,F1,'رمز-خطأ');let sb=await st(B.p);
-  ck('رمز خاطئ: لا يُفتح ولا تتغير البيانات',sb.fav.join()==='V09L-0246'&&!sb.hasKey);
+  ck('رمز خاطئ: لا يُفتح ولا تتغير البيانات',sb.fav.join()==='V09L-0193'&&!sb.hasKey);
   await pull(B.p,F1,PASS);sb=await st(B.p);
-  ck('الجلب بالرمز الصحيح يدمج (٢ من أ + ١ محلي) ويتبنّى المفتاح',sb.fav.join()==='V09L-0016,V09L-0184,V09L-0246'&&sb.hasKey&&sb.note['V09L-0184']==='ملاحظة أولى'&&sb.fold.includes('قضية 12/2026'));
+  ck('الجلب بالرمز الصحيح يدمج (٢ من أ + ١ محلي) ويتبنّى المفتاح',sb.fav.join()==='V09L-0016,V09L-0184,V09L-0193'&&sb.hasKey&&sb.note['V09L-0184']==='ملاحظة أولى'&&sb.fold.includes('قضية 12/2026'));
   // ب يحذف مفضلة ويعدّل ملاحظة، ثم يحفظ
   await visit(B.p,'#/p/V09L-0016');await B.p.click('article.pr[data-id="V09L-0016"] [data-a="fav"]:visible');await B.p.click('#unfav');
   await visit(B.p,'#/p/V09L-0184');await B.p.click('article.pr[data-id="V09L-0184"] [data-a="more"]:visible');await B.p.click('.ashs [data-a="note"]');await B.p.fill('#nt','ملاحظة معدّلة');await B.p.click('#ns');
@@ -61,7 +61,7 @@ try{
   const F2=await push(B.p,'f2.amali');
   // أ يجلب: الحذف يصل والملاحظة تتحدث والمفضلة الجديدة تُضاف، دون طلب الرمز
   await pull(A.p,F2);let sa=await st(A.p);
-  ck('أ يجلب دون رمز: حُذفت المحذوفة، وأُضيفت الجديدة، وتحدّثت الملاحظة',sa.fav.join()==='V09L-0184,V09L-0246'&&sa.note['V09L-0184']==='ملاحظة معدّلة'&&sa.del.includes('V09L-0016'));
+  ck('أ يجلب دون رمز: حُذفت المحذوفة، وأُضيفت الجديدة، وتحدّثت الملاحظة',sa.fav.join()==='V09L-0184,V09L-0193'&&sa.note['V09L-0184']==='ملاحظة معدّلة'&&sa.del.includes('V09L-0016'));
   await pull(A.p,F1);sa=await st(A.p);
   ck('ملف قديم لا يعيد ما حُذف',!sa.fav.includes('V09L-0016'));
   // الاستبدال بتأكيد مزدوج، ثم حارس الاستبدال، ثم التراجع
@@ -69,11 +69,11 @@ try{
   ck('الاستبدال يجعل بيانات الجهاز مطابقة للملف',sa.fav.join()==='V09L-0016,V09L-0184'&&sa.note['V09L-0184']==='ملاحظة أولى');
   await pull(A.p,F1);ck('حارس الاستبدال: ملف أقدم من الاستبدال لا يُدمج',(await st(A.p)).toast.includes('أقدم من آخر استبدال'));
   await openSync(A.p);await A.p.click('.syncadv summary');await A.p.click('#sundo');await A.p.waitForTimeout(400);sa=await st(A.p);
-  ck('التراجع عن آخر استبدال يعيد البيانات السابقة',sa.fav.join()==='V09L-0184,V09L-0246'&&sa.note['V09L-0184']==='ملاحظة معدّلة');
+  ck('التراجع عن آخر استبدال يعيد البيانات السابقة',sa.fav.join()==='V09L-0184,V09L-0193'&&sa.note['V09L-0184']==='ملاحظة معدّلة');
   await A.p.screenshot({path:path.join(OUT,'sync-desktop.png')});
   // السجل: زر الإضافة إلى المحفوظات
   await visit(A.p,'#/more');await visit(A.p,'#/saved');await A.p.waitForTimeout(500);await A.p.click('[data-st="hist"]');await A.p.waitForTimeout(300);
-  await A.p.click('[data-hfav="V09L-0246"]');ck('زر النجمة في السجل يفتح حوار الحفظ',await A.p.locator('.dlg [data-fold]').count()>0);
+  await A.p.click('[data-hfav="V09L-0193"]');ck('زر النجمة في السجل يفتح حوار الحفظ',await A.p.locator('.dlg [data-fold]').count()>0);
   // النسخة الاحتياطية تُحسب في «آخر نسخة»
   await openSync(A.p);await Promise.all([A.p.waitForEvent('download'),A.p.click('#bk')]);
   ck('تصدير النسخة الاحتياطية يسجَّل وقتًا لآخر نسخة',await A.p.evaluate(()=>Date.now()-(JSON.parse(localStorage.getItem('mb_sync')||'{}').exported||0)<5000));

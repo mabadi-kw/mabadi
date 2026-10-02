@@ -8,9 +8,9 @@ const FIX=process.argv.includes('--fix');const SKIPSHOTS=process.argv.includes('
 const DEV={d:{viewport:{width:1280,height:800},deviceScaleFactor:1.5},m:{viewport:{width:390,height:844},deviceScaleFactor:2,isMobile:true,hasTouch:true}};
 // بيانات تجريبية محلية: مجلد محفوظات بمبادئ حقيقية، دون أي اسم شخص
 const SEED={'mabadi:intro':'1','mabadi:bknudge':'9999999999999','mabadi:iosnudge':'9999999999999','mabadi:folders':JSON.stringify(['عام','إنهاء الخدمة والمكافأة']),
- 'mabadi:favs':JSON.stringify({'V09L-0184':{f:'إنهاء الخدمة والمكافأة',t:1},'V09L-0016':{f:'إنهاء الخدمة والمكافأة',t:2},'V09L-0246':{f:'عام',t:3}}),
+ 'mabadi:favs':JSON.stringify({'V09L-0184':{f:'إنهاء الخدمة والمكافأة',t:1},'V09L-0016':{f:'إنهاء الخدمة والمكافأة',t:2},'V09L-0016':{f:'عام',t:3}}),
  'mabadi:notes':JSON.stringify({'V09L-0184':'للرجوع إليه في مسائل الحرمان من المكافأة.'}),
- 'mabadi:hist':JSON.stringify(['V09L-0184','V09L-0016','V09L-0246']),'mabadi:qhist':JSON.stringify([QUERY])};
+ 'mabadi:hist':JSON.stringify(['V09L-0184','V09L-0016','V09L-0016']),'mabadi:qhist':JSON.stringify([QUERY])};
 async function ready(p){await p.waitForFunction(()=>document.querySelector('.shell')&&!document.getElementById('loading'),null,{timeout:120000}).catch(()=>{});await p.waitForTimeout(400);}
 async function act(p,a,dev){
   if(a==='search'){await p.fill('#sq',QUERY);await p.waitForTimeout(1200);}
