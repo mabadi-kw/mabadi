@@ -18,12 +18,30 @@ ap = os.path.join(ROOT, 'data', 'alias.json')
 ALIAS = json.load(open(ap, encoding='utf-8')) if os.path.exists(ap) else {}
 G = json.load(open(os.path.join(ROOT, 'data', 'dups.json'), encoding='utf-8'))
 cnt = collections.Counter()
+RK = lambda i: {c['k'] for c in BY[i]['c'] if c.get('k') and '@' in c['k']}
+import re
+def _nz(x):
+    s = ' '.join(x['p'] if isinstance(x['p'], list) else [x['p']])
+    s = re.sub(r'[\u064B-\u0652\u0640]', '', s); s = re.sub('[أإآ]', 'ا', s).replace('ة', 'ه').replace('ى', 'ي')
+    return re.sub(r'[^\w]', '', s)
+def SIM(a, b):
+    A, B = _nz(BY[a]), _nz(BY[b])
+    if A == B: return True
+    if len(A) < 12 or len(B) < 12: return False
+    ga = set(A[j:j + 5] for j in range(len(A) - 4)); gb = set(B[j:j + 5] for j in range(len(B) - 4))
+    return len(ga & gb) / max(1, len(ga | gb)) >= 0.8
+ALLK = lambda i: {c['k'] for c in BY[i]['c'] if c.get('k')}
+POS = {x['id']: n for n, x in enumerate(x for c in ORDER for x in D[c])}
 for g in G:
-    keep = [i for i in g if KEEP(BY[i]['col'])]
-    # لا موضع في المجلة أو القواعد: يبقى أسبق المواضع في ترتيب المكتبة وحده (قرار 2/10: لا حكمان بالبيانات نفسها)
-    k0 = keep[0] if keep else g[0]
-    for i in g:
-        if KEEP(BY[i]['col']) or i == k0: continue
+    # الباقي: المجلة والقواعد أولًا، ثم أسبق المواضع في ترتيب المكتبة
+    order = sorted(g, key=lambda i: (0 if KEEP(BY[i]['col']) else 1, POS[i]))
+    kept = [i for i in order if KEEP(BY[i]['col'])]
+    for i in order:
+        if KEEP(BY[i]['col']): continue
+        # يُحذف فقط ما له موضع باقٍ من الحكم نفسه، بالموجز نفسه، وفيه كل إسنادات المحذوف
+        # (المجموعة قد تضم «المبدأ المتواتر» من أحكام أخرى، وقد يحمل الموضع إسنادًا إضافيًا لحكم آخر فلا يُحذف)
+        k0 = next((k for k in kept if RK(i) & RK(k) and ALLK(i) <= ALLK(k) and SIM(i, k)), None)
+        if not k0: kept.append(i); continue
         ALIAS[i] = k0; cnt[BY[i]['col']] += 1
         tgt = BY[k0]
         have = {t[0] for t in tgt['tp']}

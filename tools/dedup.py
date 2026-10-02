@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """المبدأ الواحد منشورًا في أكثر من موضع: يجمع المواضع التي تحمل الطعن نفسه (رقمه وجلسته) والموجز نفسه
 (تطابق بعد توحيد الرسم، أو تشابه 5-حروف ≥ 0.8)، ليدمجها التطبيق في نتيجة واحدة. البيانات نفسها لا تُمسّ.
-ترتيب كل مجموعة: الموضع الذي معه نص القاعدة أولًا (المجلة ثم مجموعة القواعد)، ثم ترتيب الكتب في المكتبة.
+ويُضم إليها «المبدأ المتواتر»: الموجز نفسه بنصه في أحكام مختلفة.
+ترتيب كل مجموعة: أحدث جلسة أولًا، ثم الموضع الذي معه نص القاعدة (المجلة ثم مجموعة القواعد)، ثم ترتيب الكتب في المكتبة.
 المخرج: data/dups.json = [[معرّف، …], …] (المجموعات التي فيها أكثر من موضع فقط).
 الاستعمال: python3 tools/dedup.py
 """
@@ -52,7 +53,33 @@ for k, L in byk.items():
     for g in seeds: cl[g[0]] = g
 pos = {i: n for n, i in enumerate(i for c in ORDER for i in (x['id'] for x in D[c]))}
 hasrule = lambda i: 0 if COL[i].startswith('MQ') else 1 if COL[i] in ('QK5', 'QJ5') else 2
-groups = [sorted(m, key=lambda i: (hasrule(i), pos[i])) for m in cl.values() if len(m) > 1]
+# المبدأ المتواتر: الموجز نفسه بنصه (بعد توحيد الرسم، 40 حرفًا فأكثر) في أحكام مختلفة → مجموعة عرض واحدة يتصدرها أحدث حكم
+DATE = {}
+for c in ORDER:
+    for x in D[c]:
+        DATE[x['id']] = max([cc['k'].split('@')[1] for cc in x['c'] if cc.get('k') and '@' in cc['k']] or [''])
+root = {}
+for r, m in cl.items():
+    for i in m: root[i] = r
+par = {}
+def f(a):
+    while par.setdefault(a, a) != a: par[a] = par[par[a]]; a = par[a]
+    return a
+bytext = collections.defaultdict(list)
+for i in COL:
+    if len(PP[i]) >= 40: bytext[PP[i]].append(i)
+tw = 0
+for t, L in bytext.items():
+    rs = list(dict.fromkeys(root.get(i, i) for i in L))
+    if len(rs) > 1:
+        tw += 1
+        for r in rs[1:]: par[f(r)] = f(rs[0])
+merged = collections.defaultdict(list)
+for i in COL:
+    r = root.get(i, i); merged[f(r)].append(i)
+cl = merged
+print('مبادئ متواترة (نص واحد في أحكام مختلفة):', tw)
+groups = [sorted(m, key=lambda i: (-int(DATE[i].replace('-', '') or 0), hasrule(i), pos[i])) for m in cl.values() if len(m) > 1]
 groups.sort(key=lambda m: pos[m[0]])
 json.dump(groups, open(os.path.join(ROOT, 'data', 'dups.json'), 'w', encoding='utf-8'), separators=(',', ':'))
 n = sum(len(m) for m in groups)

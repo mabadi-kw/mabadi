@@ -421,7 +421,10 @@ function card(p,re,o={}){
     const n=x.k&&RUL[x.k]?RUL[x.k].length:0;h.push(`<li>${hl(x.raw,re)}${x.k?`<button class="rk" data-go="#/r/${esc(x.k)}" title="كل ما ورد عن هذا الحكم">الحكم${n>1?' · '+n:''}</button>`:''}</li>`);}});
   if(open)h.push('</ul>');if(!p.c.length)h.push('<ul class="cits"><li>لا يوجد إسناد في المصدر</li></ul>');
   const rchip=q=>`<button class="chip" data-go="#/p/${q.id}">${esc(COLS[q.col].name)} ${q.n}</button>`,al=alsoOf(p),[rs0,ro]=relSplit(p),rs=rs0.filter(q=>!al.includes(q.id));
-  const also=al.length?`<div class="also"><span>ورد أيضًا في</span>${chipsFold(al.map(i=>{const q=BYID[i];return `<button class="chip" data-go="#/p/${q.id}"${q.rx!==undefined||q.rule?' title="ومعه نص القاعدة"':''}>${esc(COLS[q.col].name)} · ${q.n}</button>`;}),3)}</div>`:'';
+  const pk=new Set(p.c.map(c=>c.k).filter(Boolean)),same=al.filter(i=>BYID[i].c.some(c=>c.k&&pk.has(c.k))),twk=new Set(),tw=al.filter(i=>{if(same.includes(i))return false;const k=(BYID[i].c.find(c=>c.k)||{}).k||i;if(twk.has(k))return false;twk.add(k);return true;});
+  const yr=q=>{const d=q.c.map(c=>(c.k||'').split('@')[1]).filter(Boolean).sort().pop();return d?d.slice(0,4):'';};
+  const also=(same.length?`<div class="also"><span>ورد أيضًا في</span>${chipsFold(same.map(i=>{const q=BYID[i];return `<button class="chip" data-go="#/p/${q.id}"${q.rx!==undefined||q.rule?' title="ومعه نص القاعدة"':''}>${esc(COLS[q.col].name)} · ${q.n}</button>`;}),3)}</div>`:'')
+    +(tw.length?`<div class="also tw"><span title="المبدأ نفسه بنصه في أحكام أخرى">وتواتر عليه ${tw.length===1?'حكم آخر':tw.length===2?'حكمان آخران':tw.length<=10?tw.length+' أحكام أخرى':tw.length+' حكمًا آخر'}</span>${chipsFold(tw.map(i=>BYID[i]).sort((a,b)=>yr(b).localeCompare(yr(a))).map(q=>`<button class="chip" data-go="#/p/${q.id}" title="${esc(COLS[q.col].name)} · ${q.n}">${yr(q)||esc(COLS[q.col].name)}</button>`),4)}</div>`:'');
   const rel=(rs.length?`<span class="relw" title="النص نفسه منشور في موضع آخر">المبدأ نفسه في: ${rs.map(rchip).join('')}</span>`:'')+(ro.length?`<span class="relw other" title="مبادئ أخرى قررها الحكم نفسه في مسائل مختلفة">من الحكم نفسه: ${ro.map(rchip).join('')}</span>`:'');
   const tps=p.tp.filter(x=>TL[x[0]]).map(([t,m,lo])=>`<button class="chip${m==='a'?' auto':''}${lo?' low':''}" data-f="tp" data-v="${esc(t)}" title="${esc(TL[t][0])} — ${MT[m]||''}">${esc(TL[t][1])}</button>`).join('');
   const lws=p.lw.map(([l,as,su])=>`<button class="chip lw${su?' sus':''}${LAWBYKEY[l]?' full':''}" ${LAWBYKEY[l]?(artOf(l,as[0])?`data-go="#/a/${artOf(l,as[0]).id}"`:`data-go="#/law/${LAWBYKEY[l].id}"`):`data-f="lw" data-v="${esc(l)}"`} title="${esc(LL[l]||l)}${LAWBYKEY[l]?' — افتح نص المادة':''}">${as.length?'م '+esc(as.slice(0,3).join('، '))+(as.length>3?'…':'')+' · ':''}${l==='دستور'?'الدستور':'ق '+esc(l)}</button>`).join('');
@@ -691,7 +694,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610021447';
+const APP_BUILD='202610021526';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -854,7 +857,7 @@ function runSearch(){shown=30;cur=filterPR();RAWN=cur.length;cur=collapse(cur);c
   const L={col:v=>COLS[v]?.name,tp:v=>TL[v]?.[1],ch:v=>v,lw:v=>LL[v]||v,art:v=>'المادة '+v,rv:()=>'يحتاج مراجعة',sec:v=>v.split('›').slice(-1)[0],ap:v=>'طعن رقم '+v,ay:v=>'سنة الطعن '+v};
   $('actf').innerHTML=Object.keys(L).filter(k=>F[k]).map(k=>`<button class="chip" data-clr="${k}">${esc(L[k](F[k]))}</button>`).join('');
   const dn=RAWN-cur.length;
-  $('count').innerHTML=idle?`${nf(PR.length)} مبدأ في ${ORDER.length} مجموعة`:`${nf(cur.length)} ${mbW(cur.length)}`+(dn>0?` <button class="lnk" data-dupall title="المبدأ نفسه منشور في أكثر من كتاب يُعرض مرة واحدة">دُمج ${nf(dn)} مكرر</button>`:DUPALL&&Object.keys(DG).length?` <button class="lnk" data-dupall>دمج المكرر</button>`:'');}
+  $('count').innerHTML=idle?`${nf(PR.length)} مبدأ في ${ORDER.length} مجموعة`:`${nf(cur.length)} ${mbW(cur.length)}`+(dn>0?` <button class="lnk" data-dupall title="المبدأ نفسه في أكثر من موضع (كتاب آخر أو حكم آخر) يُعرض مرة واحدة يتصدرها أحدث حكم">دُمج ${nf(dn)} متكرر</button>`:DUPALL&&Object.keys(DG).length?` <button class="lnk" data-dupall>دمج المكرر</button>`:'');}
 // ---------- التصفح ووضع الترتيب (سحب وإفلات من المقبض، والأسهم بديلًا)
 let ARR=null;   // نوع البطاقات الجاري ترتيبها: fams | cols | null
 function renderBrowse(){const b=$('browse');if(!b)return;

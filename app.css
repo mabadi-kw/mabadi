@@ -752,3 +752,4 @@ details.fold>summary .i{width:18px;height:18px;color:var(--gold);flex:none}
 .pr .also>span:first-child{font-weight:600}
 .pr .also .chip{font-size:.78rem}
 .count .lnk{font-size:inherit;margin-inline-start:.35rem}
+.pr .also.tw>span:first-child{color:var(--ink)}
