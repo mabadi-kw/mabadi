@@ -13,6 +13,10 @@ try{const c=await context(b,{viewport:{width:390,height:844},isMobile:true,hasTo
   ck('انتقال مباشر إلى المادة 41 من قانون العمل',await p.locator('.jump [data-go*="LAW-6-2010-A"]').count()>0);
   await p.fill('#sq','730/2012');await p.waitForTimeout(900);
   ck('انتقال مباشر إلى الطعن 730/2012',await p.locator('.jump [data-go^="#/r/730/2012"]').count()>0);
+  await p.fill('#sq','المقاصة القضائية');await p.waitForTimeout(900);
+  const d1=parseInt(await p.textContent('#count'));ck('المكرر مدموج: «دُمج … مكرر» و«ورد أيضًا في» في البطاقة',await p.locator('#count [data-dupall]').count()===1&&await p.locator('#list .pr .also').count()>0,await p.textContent('#count')+' | also='+await p.locator('#list .pr .also').count()+' | '+await p.inputValue('#sq'));
+  await p.click('#count [data-dupall]');await p.waitForTimeout(600);const d2=parseInt(await p.textContent('#count'));ck('عرض المكرر يعيد كل المواضع',d2>d1,`${d1}→${d2}`);
+  await p.click('#count [data-dupall]');await p.waitForTimeout(400);await p.fill('#sq','');
   await p.fill('#sq','');if(await p.locator('#fap').isHidden())await p.click('#ftog');await p.fill('#fap','730');await p.fill('#fay','2012');await p.waitForTimeout(800);
   const n=parseInt((await p.textContent('#count')).replace(/[^\d].*$/,''));ck('تصفية برقم الطعن وسنته',n>0&&n<20,n);
   await p.fill('#fap','');await p.fill('#fay','');

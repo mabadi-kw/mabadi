@@ -133,6 +133,13 @@ const arrs=await Promise.all(ORDER.map(c=>fetch('data/'+c+'.json').then(r=>r.jso
 const PR=arrs.flat(),BYID={},RUL={},POS={};PR.forEach((p,i)=>{BYID[p.id]=p;POS[p.id]=i;});
 PR.forEach(p=>{p.ns=norm(p.p.join(' ')+' '+(p.rule||'')+' '+(p.ttl||'')+' '+p.c.map(c=>c.raw).join(' ')+' '+p.fn.join(' '));p.sk=p.sec.join('›');
   new Set(p.c.map(c=>c.k).filter(Boolean)).forEach(k=>(RUL[k]=RUL[k]||[]).push(p.id));});
+// المبدأ نفسه منشورًا في أكثر من موضع (tools/dedup.py): يُعرض مرة واحدة في النتائج، ومعه «ورد أيضًا في»
+const DG={};let DUPALL=LS.get('dupall','')==='1';
+fetch('data/dups.json').then(r=>r.ok?r.json():[]).catch(()=>[]).then(G=>{G.forEach(g=>g.forEach(i=>{if(BYID[i])DG[i]=g;}));
+  const l=$('list');if(G.length&&l&&!l.hidden&&location.hash.startsWith('#/search'))runSearch();});
+function collapse(list){if(DUPALL)return list;const have=new Set(list.map(p=>p.id)),seen=new Set(),out=[];
+  for(const p of list){const g=DG[p.id];if(!g){out.push(p);continue;}if(seen.has(g[0]))continue;seen.add(g[0]);out.push(BYID[g.find(i=>have.has(i))]);}return out;}
+const alsoOf=p=>(DG[p.id]||[]).filter(i=>i!==p.id&&BYID[i]);
 $('sub').textContent=`${nf(PR.length)} مبدأً · ${ORDER.length} مجموعة`;
 const famOf=t=>TL[t]?TL[t][0]:'';
 const tcount={},lcount={},acount={},famcount={};
@@ -404,7 +411,8 @@ function card(p,re,o={}){
   blocks(p).forEach(([k,x])=>{if(k==='t'){if(open){h.push('</ul>');open=false;}h.push(`<p>${hl(x,re)}</p>`);}else{if(!open){h.push('<ul class="cits">');open=true;}
     const n=x.k&&RUL[x.k]?RUL[x.k].length:0;h.push(`<li>${hl(x.raw,re)}${x.k?`<button class="rk" data-go="#/r/${esc(x.k)}" title="كل ما ورد عن هذا الحكم">الحكم${n>1?' · '+n:''}</button>`:''}</li>`);}});
   if(open)h.push('</ul>');if(!p.c.length)h.push('<ul class="cits"><li>لا يوجد إسناد في المصدر</li></ul>');
-  const rchip=q=>`<button class="chip" data-go="#/p/${q.id}">${esc(COLS[q.col].name)} ${q.n}</button>`,[rs,ro]=relSplit(p);
+  const rchip=q=>`<button class="chip" data-go="#/p/${q.id}">${esc(COLS[q.col].name)} ${q.n}</button>`,al=alsoOf(p),[rs0,ro]=relSplit(p),rs=rs0.filter(q=>!al.includes(q.id));
+  const also=al.length?`<div class="also"><span>ورد أيضًا في</span>${chipsFold(al.map(i=>{const q=BYID[i];return `<button class="chip" data-go="#/p/${q.id}"${q.rx!==undefined||q.rule?' title="ومعه نص القاعدة"':''}>${esc(COLS[q.col].name)} · ${q.n}</button>`;}),3)}</div>`:'';
   const rel=(rs.length?`<span class="relw" title="النص نفسه منشور في موضع آخر">المبدأ نفسه في: ${rs.map(rchip).join('')}</span>`:'')+(ro.length?`<span class="relw other" title="مبادئ أخرى قررها الحكم نفسه في مسائل مختلفة">من الحكم نفسه: ${ro.map(rchip).join('')}</span>`:'');
   const tps=p.tp.filter(x=>TL[x[0]]).map(([t,m,lo])=>`<button class="chip${m==='a'?' auto':''}${lo?' low':''}" data-f="tp" data-v="${esc(t)}" title="${esc(TL[t][0])} — ${MT[m]||''}">${esc(TL[t][1])}</button>`).join('');
   const lws=p.lw.map(([l,as,su])=>`<button class="chip lw${su?' sus':''}${LAWBYKEY[l]?' full':''}" ${LAWBYKEY[l]?(artOf(l,as[0])?`data-go="#/a/${artOf(l,as[0]).id}"`:`data-go="#/law/${LAWBYKEY[l].id}"`):`data-f="lw" data-v="${esc(l)}"`} title="${esc(LL[l]||l)}${LAWBYKEY[l]?' — افتح نص المادة':''}">${as.length?'م '+esc(as.slice(0,3).join('، '))+(as.length>3?'…':'')+' · ':''}${l==='دستور'?'الدستور':'ق '+esc(l)}</button>`).join('');
@@ -421,7 +429,7 @@ function card(p,re,o={}){
     ${p.rule===undefined&&p.rx!==undefined?`<details class="rule" data-rx="${p.id}"${o.open?' open':''}><summary>القاعدة — نص الحكم</summary><div class="text">جارٍ التحميل…</div></details>`:''}
     ${p.rule?`<details class="rule"${o.open||(re&&(re.lastIndex=0,re.test(p.rule)))?' open':''}><summary>القاعدة — نص الحكم</summary><div class="text">${hl(p.rule,re)}</div></details>`:''}
     ${p.fn.length?`<div class="fn">${p.fn.map(esc).join('<br>')}</div>`:''}${p.sa.length?`<div class="sa">${p.sa.map(esc).join('<br>')}</div>`:''}
-    <div class="meta">${meta}</div>
+    ${also}<div class="meta">${meta}</div>
     <div class="acts no-print">
      <button class="btn" data-a="copy">${svg('copy')}نسخ</button>
      <button class="btn${fav?' on':''}" data-a="fav">${svg('star')}${fav?'محفوظ':'حفظ'}</button>
@@ -674,7 +682,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610021054';
+const APP_BUILD='202610021142';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -830,11 +838,14 @@ function fsReset(){document.querySelectorAll('.fsrch').forEach(i=>{if(i.value){i
 function syncInputs(){fsReset();$('sq').value=F.q;$('fcol').value=F.col;$('ftp').value=F.tp;$('fch').value=F.ch;$('flw').value=F.lw;$('fart').value=F.art;$('frv').checked=F.rv;$('fap').value=F.ap;$('fay').value=F.ay;}
 // صفحة «المبادئ» بلا بحث ولا مرشح = تصفح: الموضوعات والكتب (مع وضع الترتيب)؛ ومع البحث = النتائج
 const idleF=()=>!F.q&&!F.col&&!F.tp&&!F.ch&&!F.lw&&!F.art&&!F.rv&&!F.sec&&!F.ap&&!F.ay;
-function runSearch(){shown=30;cur=filterPR();const idle=idleF()&&SCOPE==='p';
+let RAWN=0;
+const mbW=n=>{const r=n%100;return n===1?'مبدأ':n===2?'مبدآن':r>=3&&r<=10?'مبادئ':r>=11?'مبدأً':'مبدأ';};
+function runSearch(){shown=30;cur=filterPR();RAWN=cur.length;cur=collapse(cur);const idle=idleF()&&SCOPE==='p';
   $('browse').hidden=!idle;$('list').hidden=idle;document.querySelector('#v-search>.hint').hidden=idle;if(idle){renderBrowse();$('more').hidden=true;}else renderList();
   const L={col:v=>COLS[v]?.name,tp:v=>TL[v]?.[1],ch:v=>v,lw:v=>LL[v]||v,art:v=>'المادة '+v,rv:()=>'يحتاج مراجعة',sec:v=>v.split('›').slice(-1)[0],ap:v=>'طعن رقم '+v,ay:v=>'سنة الطعن '+v};
   $('actf').innerHTML=Object.keys(L).filter(k=>F[k]).map(k=>`<button class="chip" data-clr="${k}">${esc(L[k](F[k]))}</button>`).join('');
-  $('count').textContent=idle?`${nf(PR.length)} مبدأ في ${ORDER.length} مجموعة`:`${nf(cur.length)} من ${nf(PR.length)}`;}
+  const dn=RAWN-cur.length;
+  $('count').innerHTML=idle?`${nf(PR.length)} مبدأ في ${ORDER.length} مجموعة`:`${nf(cur.length)} ${mbW(cur.length)}`+(dn>0?` <button class="lnk" data-dupall title="المبدأ نفسه منشور في أكثر من كتاب يُعرض مرة واحدة">دُمج ${nf(dn)} مكرر</button>`:DUPALL&&Object.keys(DG).length?` <button class="lnk" data-dupall>دمج المكرر</button>`:'');}
 // ---------- التصفح ووضع الترتيب (سحب وإفلات من المقبض، والأسهم بديلًا)
 let ARR=null;   // نوع البطاقات الجاري ترتيبها: fams | cols | null
 function renderBrowse(){const b=$('browse');if(!b)return;
@@ -920,11 +931,11 @@ function viewItem(id){const el=$('v-item'),p=BYID[id];
    ${rs.length?`<h2>المبدأ نفسه في مواضع أخرى (${rs.length})</h2><p class="muted">النص نفسه — كاملًا أو بعضه — منشور في مجموعة أو باب آخر.</p><div class="list">${rs.map(q=>card(q,null)).join('')}</div>`:''}
    ${ro.length?`<h2>مبادئ أخرى من الحكم نفسه (${ro.length})</h2><p class="muted">قررها الحكم ذاته (رقم الطعن والدائرة وتاريخ الجلسة واحدة) في مسائل أخرى، فوردت في أبواب أخرى.</p><div class="list">${ro.map(q=>card(q,null)).join('')}</div>`:''}`;
   wirePages(el);}
-function viewRuling(key){const el=$('v-item'),ids=RUL[key]||[],[ap,ses]=key.split('@');
-  const chs=[...new Set(ids.flatMap(i=>BYID[i].c.filter(c=>c.k===key).map(c=>c.ch)).filter(Boolean))],srcs=[...new Set(ids.map(i=>COLS[BYID[i].col].name))];
+function viewRuling(key){const el=$('v-item'),all=RUL[key]||[],ids=collapse(all.map(i=>BYID[i])).map(p=>p.id),[ap,ses]=key.split('@');
+  const chs=[...new Set(all.flatMap(i=>BYID[i].c.filter(c=>c.k===key).map(c=>c.ch)).filter(Boolean))],srcs=[...new Set(all.map(i=>COLS[BYID[i].col].name))];
   const cit=ids.length?BYID[ids[0]].c.find(c=>c.k===key):null;document.title=`الطعن ${ap} — مبادئ التمييز`;
   el.innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>بطاقة الحكم</h2><button class="btn" data-print>${svg('print')}طباعة</button></div>
-   <div class="card rhead"><div class="kv"><span><b>الطعن</b>${esc(ap.replace(/\+/g,' ، '))}</span>${chs.length?`<span><b>الدائرة</b>${esc(chs.join('، '))}</span>`:''}<span><b>الجلسة</b>${esc(ses?ses.split('-').reverse().join('/'):'')}</span><span><b>المبادئ</b>${ids.length}</span></div>
+   <div class="card rhead"><div class="kv"><span><b>الطعن</b>${esc(ap.replace(/\+/g,' ، '))}</span>${chs.length?`<span><b>الدائرة</b>${esc(chs.join('، '))}</span>`:''}<span><b>الجلسة</b>${esc(ses?ses.split('-').reverse().join('/'):'')}</span><span><b>المبادئ</b>${ids.length}${all.length>ids.length?` <small class="muted">(في ${all.length} موضعًا)</small>`:''}</span></div>
    ${srcs.length?`<div class="kv"><span><b>ورد في</b>${esc(srcs.join('، '))}</span></div>`:''}${cit?`<div class="hint">سطر الإسناد كما في المصدر: ${esc(cit.raw)}</div>`:''}</div>
    <div class="list">${ids.length?ids.map(i=>card(BYID[i],null)).join(''):`<div class="empty">لا يوجد في المكتبة حكم بهذا المفتاح.</div>`}</div>`;}
 // ---------- SAVED
@@ -1305,6 +1316,7 @@ document.addEventListener('click',e=>{const t=e.target;
   const am=t.closest('[data-arrmode]');if(am){arrMode(am.dataset.arrmode);return;}
   if(t.closest('[data-scope-l]')){setScope('l');$('sq').value=F.q;lawScope();window.scrollTo({top:0});return;}
   const bb=t.closest('[data-bby]');if(bb){LS.set('browseby',bb.dataset.bby);renderBrowse();return;}
+  if(t.closest('[data-dupall]')){DUPALL=!DUPALL;LS.set('dupall',DUPALL?'1':'');runSearch();return;}
   const ad=t.closest('[data-arrdef]');if(ad){const o=Object.assign({},S.ord);delete o[ad.dataset.arrdef];S.ord=o;saveS();renderBrowse();toast('عاد الترتيب الأصلي');return;}
   if(t.closest('.arranging .tile'))return;   // في وضع الترتيب البطاقة تُسحب ولا تُفتح
   const sf=t.closest('[data-sf]');if(sf){savedFold=sf.dataset.sf;viewSaved();return;}

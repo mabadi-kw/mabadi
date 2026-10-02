@@ -747,3 +747,8 @@ details.fold>summary .i{width:18px;height:18px;color:var(--gold);flex:none}
 .arthits.fold>summary{flex-wrap:wrap}.arthits.fold>summary small{flex:1 1 100%;white-space:normal}
 .arthits .arow b{flex-wrap:wrap}
 .meta .chip{white-space:normal;text-align:start;max-width:100%}
+/* المبدأ نفسه في مواضع أخرى */
+.pr .also{display:flex;flex-wrap:wrap;align-items:center;gap:.3rem .35rem;margin:.45rem 0 .1rem;font-size:.82rem;color:var(--muted)}
+.pr .also>span:first-child{font-weight:600}
+.pr .also .chip{font-size:.78rem}
+.count .lnk{font-size:inherit;margin-inline-start:.35rem}
