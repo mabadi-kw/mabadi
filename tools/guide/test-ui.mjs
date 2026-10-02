@@ -13,6 +13,9 @@ try{const c=await context(b,{viewport:{width:390,height:844},isMobile:true,hasTo
   ck('انتقال مباشر إلى المادة 41 من قانون العمل',await p.locator('.jump [data-go*="LAW-6-2010-A"]').count()>0);
   await p.fill('#sq','730/2012');await p.waitForTimeout(900);
   ck('انتقال مباشر إلى الطعن 730/2012',await p.locator('.jump [data-go^="#/r/730/2012"]').count()>0);
+  await p.fill('#sq','"تسريح"');await p.waitForTimeout(900);const s1=parseInt((await p.textContent('#count')).replace(/,/g,''));
+  await p.fill('#sq','تسريح');await p.waitForTimeout(900);const s2=parseInt((await p.textContent('#count')).replace(/,/g,''));
+  ck('المرادفات المشتركة مع «مداولة» توسّع البحث، والعبارة بين علامتي تنصيص حرفية',s2>s1&&(await p.textContent('#count')).includes('المرادفات'),`${s1}→${s2}`);
   await p.fill('#sq','المقاصة القضائية');await p.waitForTimeout(900);
   const d1=parseInt(await p.textContent('#count'));ck('المكرر مدموج: «دُمج … مكرر» و«ورد أيضًا في» في البطاقة',await p.locator('#count [data-dupall]').count()===1&&await p.locator('#list .pr .also').count()>0,await p.textContent('#count')+' | also='+await p.locator('#list .pr .also').count()+' | '+await p.inputValue('#sq'));
   await p.click('#count [data-dupall]');await p.waitForTimeout(600);const d2=parseInt(await p.textContent('#count'));ck('عرض المكرر يعيد كل المواضع',d2>d1,`${d1}→${d2}`);
@@ -39,7 +42,7 @@ try{const c=await context(b,{viewport:{width:390,height:844},isMobile:true,hasTo
   await p.evaluate(()=>document.getElementById('pal').click());await p.fill('#pq','م 154 جزاء');await p.waitForTimeout(400);await p.keyboard.press('Enter');await p.waitForTimeout(2500);
   ck('الانتقال السريع: «م 154 جزاء» يفتح المادة',(await p.evaluate(()=>location.hash))==='#/a/LAW-16-1960-A0154');
   await go('#/a/LAW-16-1960-A0100');ck('مواد الجزاء الملغاة (92–108) ظاهرة بحاشيتها',(await p.locator('#v-item').innerText()).includes('ملغاة بالقانون رقم ٣١ لسنة ١٩٧٠'));
-  await go('#/law/REG-MIN-22-2022');ck('وثيقة مساهمة «عمّالي» تُعرض مع بيان مصدرها',(await p.locator('#v-item').innerText()).includes('«عمّالي»'));
+  await go('#/law/REG-MIN-22-2022');ck('وثيقة مساهمة «مداولة» تُعرض مع بيان مصدرها',(await p.locator('#v-item').innerText()).includes('«مداولة»'));
   // صفحة «المبادئ»: التصفح قبل الكتابة، ونطاق التشريعات يعرض تشريعات، وحسب الدائرة
   const fresh=async()=>{await go('#/',600);await p.click('#hsf .btn.primary');await p.waitForTimeout(900);};   // بحث فارغ من الرئيسية = صفحة «المبادئ» بلا مرشحات
   await fresh();ck('المبادئ: التصفح ظاهر قبل الكتابة والقائمة مخفية',await p.evaluate(()=>!document.getElementById('browse').hidden&&document.getElementById('list').hidden&&document.querySelectorAll('#bz-fams .tile').length===12));

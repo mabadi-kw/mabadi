@@ -1,7 +1,7 @@
 // مبادئ التمييز — عامل الخدمة: يجعل المكتبة تعمل دون اتصال.
-const VERSION='202610021548';
+const VERSION='202610021717';
 const SHELL='mabadi-shell-'+VERSION, DATA='mabadi-data', FILES='mabadi-files', FONTS='mabadi-fonts';
-const SHELL_FILES=['./','index.html','app.js','sync-core.js','app.css','embed.html','embed.js','manifest.webmanifest','icons/icon.svg','icons/favicon.svg','icons/partners/amali.svg','icons/icon-192.png','data/meta.json'];
+const SHELL_FILES=['./','index.html','app.js','sync-core.js','app.css','embed.html','embed.js','manifest.webmanifest','icons/icon.svg','icons/favicon.svg','icons/partners/mudawala.png','icons/icon-192.png','data/meta.json'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(SHELL).then(c=>c.addAll(SHELL_FILES)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k.startsWith('mabadi-shell-')&&k!==SHELL).map(k=>caches.delete(k)))).then(()=>self.clients.claim()));});
 async function networkFirst(req,cacheName){
