@@ -15,12 +15,19 @@ def src(f):
 tot = bad = 0
 for code in sys.argv[2:]:
     items = json.load(open(os.path.join(ROOT, 'data', code + '.json'), encoding='utf-8'))
+    import glob
+    RX = {}
+    for f in glob.glob(os.path.join(ROOT, 'data', 'rx', code + '-*.json')): RX.update(json.load(open(f, encoding='utf-8')))
+    for it in items:
+        if 'rule' not in it: it['rule'] = RX.get(it['id'], '')
     nb = 0
     for it in items:
         t = src(it['src']['file'])
-        for sg in it['p'] + [x for x in it['rule'].split('\n') if x] + [c['raw'] for c in it['c']] + it['sa']:
+        tp = src(it['src']['pf']) if it['src'].get('pf') else t  # موجز منقول من موضع آخر للقاعدة نفسها (fixflags.py)
+        for j, sg in enumerate(it['p'] + [x for x in it['rule'].split('\n') if x] + [c['raw'] for c in it['c']] + it['sa']):
             tot += 1
-            if W(sg) not in t:
+            if j < len(it['p']) and it['src'].get('pfrom') and not it['src'].get('pf'): tot -= 1; continue  # موجز من المجلة: تحققه في tools/journal/check.py
+            if W(sg) not in (tp if j < len(it['p']) else t):
                 bad += 1; nb += 1
                 if nb <= 5: print(code, it['id'], 'غير موجود حرفيًا:', sg[:80], file=sys.stderr)
     print(code, 'غير مطابق', nb, file=sys.stderr)
