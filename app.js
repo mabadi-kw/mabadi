@@ -133,6 +133,15 @@ const arrs=await Promise.all(ORDER.map(c=>fetch('data/'+c+'.json').then(r=>r.jso
 const PR=arrs.flat(),BYID={},RUL={},POS={};PR.forEach((p,i)=>{BYID[p.id]=p;POS[p.id]=i;});
 PR.forEach(p=>{p.ns=norm(p.p.join(' ')+' '+(p.rule||'')+' '+(p.ttl||'')+' '+p.c.map(c=>c.raw).join(' ')+' '+p.fn.join(' '));p.sk=p.sec.join('›');
   new Set(p.c.map(c=>c.k).filter(Boolean)).forEach(k=>(RUL[k]=RUL[k]||[]).push(p.id));});
+// المواضع المحذوفة لورودها بنصها في مجموعة القواعد أو المجلة (tools/prune_dups.py): تُحوَّل إلى الموضع الباقي
+const ALIAS=await fetch('data/alias.json').then(r=>r.ok?r.json():{}).catch(()=>({}));
+const pid=id=>BYID[id]?id:(ALIAS[id]||id);
+function migrateIds(){let ch=false;const n=Date.now();
+  for(const id of Object.keys(FAV)){const t=ALIAS[id];if(!t||BYID[id])continue;if(!FAV[t])FAV[t]=Object.assign({},FAV[id],{updated:n});delete FAV[id];DEL.favs[id]=n;ch=true;}
+  for(const id of Object.keys(NOTE)){const t=ALIAS[id];if(!t||BYID[id])continue;NOTE[t]=NOTE[t]&&NOTE[t]!==NOTE[id]?NOTE[t]+'\n— '+NOTE[id]:NOTE[id];NOTET[t]=n;delete NOTE[id];delete NOTET[id];DEL.notes[id]=n;ch=true;}
+  if(HIST.some(i=>ALIAS[i]&&!BYID[i])){HIST=[...new Set(HIST.map(pid))];LS.set('hist',HIST);}
+  if(ch)saveUser();}
+migrateIds();
 // المبدأ نفسه منشورًا في أكثر من موضع (tools/dedup.py): يُعرض مرة واحدة في النتائج، ومعه «ورد أيضًا في»
 const DG={};let DUPALL=LS.get('dupall','')==='1';
 fetch('data/dups.json').then(r=>r.ok?r.json():[]).catch(()=>[]).then(G=>{G.forEach(g=>g.forEach(i=>{if(BYID[i])DG[i]=g;}));
@@ -370,7 +379,7 @@ function lawByName(t){t=norm(t).replace(/^(?:ق|قانون|القانون)\s+/,'
   const a=LAWALIAS[t];if(a)return LAWBYKEY[a]||LAWIX.find(x=>x.type==='دستور')||null;
   const c=LAWIX.filter(x=>x.cat==='law'&&x.status!=='ملغى'&&norm(x.short).includes(t)).sort((x,y)=>x.short.length-y.short.length);return c[0]||null;}
 function smartJump(q){const s=' '+west(q).replace(/[()«»]/g,' ').replace(/\s+/g,' ')+' ',out=[],seen=new Set();const add=o=>{if(!seen.has(o.go)){seen.add(o.go);out.push(o);}};
-  const idm=s.match(/\b([A-Za-z0-9]{2,5}-\d{4})\b/);if(idm&&BYID[idm[1].toUpperCase()]){const p=BYID[idm[1].toUpperCase()];add({ic:'page',t:`${COLS[p.col].name} — المبدأ ${p.n}`,s:p.id,go:'#/p/'+p.id});}
+  const idm=s.match(/\b([A-Za-z0-9]{2,5}-\d{4,5})\b/);if(idm&&BYID[pid(idm[1].toUpperCase())]){const p=BYID[pid(idm[1].toUpperCase())];add({ic:'page',t:`${COLS[p.col].name} — المبدأ ${p.n}`,s:p.id,go:'#/p/'+p.id});}
   const am=s.match(/\s(?:م|مادة|المادة|ماده|الماده)\s*\.?\s*(\d{1,4})\s/);
   const lm=s.match(/\s(\d{1,4})\s*\/\s*(\d{4})\s/)||s.match(/\s(\d{1,4})\s+(?:لسنة|لسنه|سنة)\s+(\d{4})\s/);
   let law=lm?LAWBYKEY[`${+lm[1]}/${lm[2]}`]:null;
@@ -584,7 +593,7 @@ function prArticle(a,withText,withPg){const L=a.law;
    ${withPg?`<div class="prpages">${lawPagesHTML(a)}</div>`:''}</section>`;}
 // حوار خيارات الطباعة بحسب الصفحة المفتوحة
 function printDlg(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));let T='',O=[];
-  if(h.startsWith('p/')){const p=BYID[h.slice(2)];if(!p)return window.print();T=`${COLS[p.col].title} — المبدأ ${p.n}`;
+  if(h.startsWith('p/')){const p=BYID[pid(h.slice(2))];if(!p)return window.print();T=`${COLS[p.col].title} — المبدأ ${p.n}`;
     O=[['المبدأ فقط','النص والإسناد والمصدر',()=>printHTML(T,prPrinciple(p,false))],
        ['المبدأ مع صورة صفحته','للمطابقة بالمصدر',()=>printHTML(T,prPrinciple(p,true))],
        ['صورة الصفحة فقط','كما في الكتاب',()=>printHTML(T,`<div class="prpages">${pagesHTML(p)}</div>`,`ص ${printed(p).join('–')}`)]];}
@@ -605,7 +614,7 @@ function printDlg(){const h=decodeURIComponent((location.hash||'').replace(/^#\/
   else if(h.startsWith('m/')){const lid=h.slice(2).split('/')[0],M=MEMO[lid+'-M'];if(!M)return;T=M.title;
     const np=new Set(M.paras.map(x=>x.pg)).size;O=[['المذكرة كاملة',`نصها كما في الطبعة — ${np} صفحة في الأصل${np>60?'، فالطباعة طويلة':''}`,()=>printHTML(T,M.paras.map(p=>p.h?`<h2 class="prsec">${esc(p.t)}</h2>`:prPara(p.t)).join(''),M.note)]];}
   else return window.print();
-  const cur=h.startsWith('p/')?BYID[h.slice(2)]:h.startsWith('a/')?ARTBYID[h.slice(2)]:null;
+  const cur=h.startsWith('p/')?BYID[pid(h.slice(2))]:h.startsWith('a/')?ARTBYID[h.slice(2)]:null;
   if(cur)prPreload(h.startsWith('p/')?pagesHTML(cur):lawPagesHTML(cur));
   if(h.startsWith('r/'))prPreload((RUL[h.slice(2)]||[]).filter(i=>BYID[i]).map(i=>pagesHTML(BYID[i])).join(''));
   if(O.length===1&&!h.startsWith('m/'))return O[0][2]();
@@ -682,7 +691,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610021142';
+const APP_BUILD='202610021201';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -918,7 +927,7 @@ function bookPage(el,c){const C=COLS[c];if(!C){el.innerHTML='<div class="empty">
 // ---------- ITEM & RULING
 function pnav(p){const i=POS[p.id],a=PR[i-1],b=PR[i+1];const ok=q=>q&&q.col===p.col;
   return `<div class="pn no-print">${ok(a)?`<button class="btn" data-go="#/p/${a.id}">${svg('back')}<span>السابق: ${a.n}</span></button>`:'<span></span>'}${ok(b)?`<button class="btn" data-go="#/p/${b.id}"><span>التالي: ${b.n}</span><svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)"><path d="${IC.back}"/></svg></button>`:''}</div>`;}
-function viewItem(id){const el=$('v-item'),p=BYID[id];
+function viewItem(id){if(!BYID[id]&&ALIAS[id]){location.replace('#/p/'+ALIAS[id]);return;}const el=$('v-item'),p=BYID[id];
   if(!p){el.innerHTML=`<div class="empty">لا يوجد مبدأ بالمعرّف ${esc(id)}.</div>`;return;}
   if(p.rx!==undefined&&p.rule===undefined){el.innerHTML=LOADMSG;ensureRule(p).then(()=>{if(location.hash==='#/p/'+id)viewItem(id);});return;}
   HIST=[id,...HIST.filter(x=>x!==id)].slice(0,30);LS.set('hist',HIST);
@@ -1084,7 +1093,7 @@ function settingsDlg(toSync){
   $('bk').onclick=()=>{const blob=new Blob([JSON.stringify({app:'mabadi',v:1,date:new Date().toISOString(),settings:S,favs:FAV,folders:FOLD,notes:NOTE,hist:HIST},null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`mabadi-backup-${new Date().toISOString().slice(0,10)}.json`;a.click();syncMarkExported();};
   $('rs').onchange=async e=>{try{const j=JSON.parse(await e.target.files[0].text());if(j.app!=='mabadi')throw 0;S=Object.assign({},DEF,j.settings||{});FAV=j.favs||{};FOLD=j.folders&&j.folders.length?j.folders:['عام'];NOTE=j.notes||{};HIST=j.hist||[];
     const n=Date.now();for(const id in FAV)FAV[id].updated=n;NOTET={};for(const id in NOTE)NOTET[id]=n;FOLDT={};FOLD.forEach(f=>FOLDT[f]=n);DEL={favs:{},folders:{},notes:{}};
-    saveS();saveUser();LS.set('hist',HIST);applyLook();toast('استُعيدت بياناتك');closeDlg();route();}catch(_){toast('الملف غير صالح');}};
+    migrateIds();saveS();saveUser();LS.set('hist',HIST);applyLook();toast('استُعيدت بياناتك');closeDlg();route();}catch(_){toast('الملف غير صالح');}};
 }
 // ---------- المزامنة المشفّرة بين الأجهزة (نواة «عمّالي» في sync-core.js، بلا خادم)
 const SYNC_FILE='mabadi-data.amali',SYNC_META='mb_sync',TOMB_DAYS=180;
@@ -1107,7 +1116,7 @@ function syncApply(P){const it=k=>(P[k]&&P[k].items)||{},dl=k=>Object.assign({},
   NOTE={};NOTET={};for(const [id,x] of Object.entries(it('notes')))if(x&&x.x){NOTE[id]=x.x;NOTET[id]=x.updated||n;}
   for(const k in DEL)for(const id in DEL[k])if(DEL[k][id]<old)delete DEL[k][id];
   LS.set('favs',FAV);LS.set('folders',FOLD);LS.set('notes',NOTE);LS.set('del',DEL);LS.set('notest',NOTET);LS.set('foldt',FOLDT);
-  syncRefresh();}
+  migrateIds();syncRefresh();}
 function syncRefresh(){if(/^#\/saved/.test(location.hash))viewSaved();if($('syncbox'))syncUI();}
 function syncMarkExported(){try{const m=JSON.parse(localStorage.getItem(SYNC_META)||'{}')||{};m.exported=Date.now();localStorage.setItem(SYNC_META,JSON.stringify(m));}catch(_){}syncNudge();}
 // حوار داخل التطبيق يطلب رمز المزامنة (يعيد النص أو null)

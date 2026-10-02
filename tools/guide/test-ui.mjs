@@ -23,6 +23,7 @@ try{const c=await context(b,{viewport:{width:390,height:844},isMobile:true,hasTo
   await p.click('[data-scope="l"]');await p.fill('#lnum','6');await p.fill('#lyr','2010');await p.waitForTimeout(700);
   ck('نطاق التشريعات: رقم التشريع وسنته',await p.locator('#lres [data-go="#/law/LAW-6-2010"]').count()>0);
   await p.click('[data-scope="p"]');
+  await go('#/p/MUR3-3810');ck('رابط مبدأ محذوف لتكراره يُحوَّل إلى الموضع الباقي',await p.evaluate(()=>location.hash)==='#/p/MQ31-0001');
   await go('#/p/MUR1-0183');
   ck('بطاقة المبدأ: أربعة أزرار و«⋯» للباقي',(await p.locator('[data-main] .acts .btn:visible').count())<=5&&await p.locator('[data-main] [data-a="more"]').isVisible());
   await p.click('[data-main] [data-a="more"]');await p.waitForTimeout(300);
