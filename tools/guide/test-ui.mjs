@@ -30,6 +30,10 @@ try{const c=await context(b,{viewport:{width:390,height:844},isMobile:true,hasTo
   ck('قائمة «⋯» فيها نسخ الإسناد وكل مبادئ الحكم',await p.locator('.ashs [data-a="cite"]').count()===1&&await p.locator('.ashs [data-go^="#/r/"]').count()===1);
   await p.click('.ashs [data-a="cite"]');await p.waitForTimeout(300);
   const clip=await p.evaluate(()=>navigator.clipboard.readText());ck('نسخ الإسناد فقط',clip.includes('19/1973')&&!clip.includes('العقد ذو العنصر'),clip.slice(0,60));
+  await go('#/a/LAW-6-2010-A051',3500);const js=await p.locator('#ajur .jsum').innerText().catch(()=>'');
+  ck('صفحة المادة: «قضاء التمييز في هذه المادة» بسطر خلاصة والأحدث أولًا',/من \d+ (حكم|أحكام|حكمًا|حكمين)/.test(js)&&await p.locator('#ajur .list .pr').count()>0,js);
+  const n1=await p.locator('#ajur .list .pr').count();const jt=p.locator('#ajur [data-jt]').nth(1);
+  if(await jt.count()){await jt.click();await p.waitForTimeout(300);ck('صفحة المادة: التصفية بالمسألة',await p.locator('#ajur .list .pr').count()<=n1);}
   await go('#/a/LAW-6-2010-A070',3000);await p.click('[data-cmp]');await p.waitForTimeout(300);
   ck('مقارنة النص السابق بالنص بعد الاستبدال',await p.locator('.diff ins').count()>0&&await p.locator('.diff del').count()>0);
   await p.evaluate(()=>document.getElementById('pal').click());await p.fill('#pq','م 154 جزاء');await p.waitForTimeout(400);await p.keyboard.press('Enter');await p.waitForTimeout(2500);

@@ -200,6 +200,24 @@ function artHits(){const ts=terms(F.q);if(!ts.length||F.col||F.tp||F.ch||F.rv||F
   LAWIX.forEach(x=>{const L=LAWDATA[x.id];if(!L||(F.lw&&F.lw!==L.key))return;L.articles.forEach(a=>{if(ts.every(t=>a.ns.includes(t)))o.push([L,a,(ph&&a.ns.includes(ph)?1e6:0)+(lcount[L.key]||0)]);});});
   return o.sort((a,b)=>b[2]-a[2]);}   // الصلة: العبارة متصلة أولًا، ثم القانون الأكثر إحالةً في المبادئ
 const artPR=a=>a.issue?[]:(ARTMAP[a.law.key+'#'+a.n]||[]).map(i=>BYID[i]).filter(Boolean);
+// قضاء التمييز في المادة: سطر خلاصة، ثم المسائل (إن تعددت)، ثم المبادئ الأحدث أولًا، والمكرر والمتواتر بطاقة واحدة
+const pDate=p=>p.c.map(c=>(c.k||'').split('@')[1]).filter(Boolean).sort().pop()||'';
+const AJ={};
+function artJur(a,ps){const box=$('ajur');if(!box)return;const st=AJ[a.id]||(AJ[a.id]={tp:'',old:false,n:20});
+  const cards=collapse(ps.slice().sort((x,y)=>pDate(y).localeCompare(pDate(x))));
+  const rul=new Set(ps.flatMap(p=>p.c.map(c=>c.k).filter(Boolean))),ys=ps.map(pDate).filter(Boolean).map(d=>d.slice(0,4)).sort();
+  const twn=cards.filter(p=>alsoOf(p).some(i=>!BYID[i].c.some(c=>c.k&&p.c.some(d=>d.k===c.k)))).length;
+  const tc={};cards.forEach(p=>new Set(p.tp.map(t=>t[0]).filter(t=>TL[t])).forEach(t=>tc[t]=(tc[t]||0)+1));
+  const tps=Object.entries(tc).filter(([,n])=>n>1&&n<cards.length).sort((x,y)=>y[1]-x[1]).slice(0,8);
+  let L=st.tp?cards.filter(p=>p.tp.some(t=>t[0]===st.tp)):cards;if(st.old)L=L.slice().reverse();
+  box.innerHTML=`<p class="jsum">${nf(cards.length)} ${mbW(cards.length)} من ${nf(rul.size)} ${rul.size===1?'حكم':rul.size===2?'حكمين':rul.size<=10?'أحكام':'حكمًا'}${ys.length?` · ${ys[0]===ys[ys.length-1]?ys[0]:ys[0]+'–'+ys[ys.length-1]}`:''}${twn?` · ${nf(twn)} متواتر`:''}</p>
+   ${tps.length?`<div class="jtp no-print"><button class="chip${st.tp?'':' on'}" data-jt="">الكل</button>${tps.map(([t,n])=>`<button class="chip${st.tp===t?' on':''}" data-jt="${esc(t)}">${esc(TL[t][1])} <small>${n}</small></button>`).join('')}</div>`:''}
+   <div class="jsort no-print"><button class="lnk" data-jo="1">${st.old?'الأقدم أولًا ↑':'الأحدث أولًا ↓'}</button></div>
+   <div class="list">${L.slice(0,st.n).map(p=>card(p,null)).join('')}</div>${L.length>st.n?`<button class="btn" data-jm="1">المزيد (${nf(L.length-st.n)})</button>`:''}`;
+  prefetchRules(L.slice(0,st.n));
+  box.querySelectorAll('[data-jt]').forEach(b=>b.onclick=()=>{st.tp=b.dataset.jt;st.n=20;artJur(a,ps);});
+  const o=box.querySelector('[data-jo]');if(o)o.onclick=()=>{st.old=!st.old;artJur(a,ps);};
+  const m=box.querySelector('[data-jm]');if(m)m.onclick=()=>{st.n+=20;artJur(a,ps);};}
 const lawTitle=L=>L.number?`${L.type} رقم ${L.number} لسنة ${L.year}`:`${L.type}${L.year?' — '+L.year:''}`;
 function artQuote(a){const L=a.law;return `${a.label} — ${L.title}:\n${a.paras.join('\n')}\n— ${L.text_version}.`;}
 function pgCaption(M,g){const pr=M.printed&&M.printed[g-1];return pr?(M.issue?`الصفحة ${pr} من العدد ${M.issue} من «الكويت اليوم»`:`الصفحة ${pr} من الطبعة`):`الصفحة ${g} من ملف المصدر`;}
@@ -304,7 +322,7 @@ function viewArt(id){const el=$('v-item');el.innerHTML=LOADMSG;const lid=lawOfAr
   const trail=a.trail||[a.part,a.chapter,a.section].filter(Boolean);
   el.innerHTML=`<div class="crumbs no-print"><button data-go="#/laws">التشريعات</button>›<button data-go="#/law/${L.id}">${esc(L.short)}</button>${trail.length?'›<span>'+trail.map(esc).join(' › ')+'</span>':''}</div>
    <div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>${esc(a.label)}${a.issue?' (من مواد الإصدار)':''} — ${esc(L.short)}</h2><button class="btn" data-print>${svg('print')}طباعة</button></div>
-   ${!a.issue&&ps.length?`<div class="ajump no-print"><button class="lnk" data-jump="aprs">${svg('scale')}مبادئ تذكر هذه المادة (${ps.length}) ↓</button></div>`:''}
+   ${!a.issue&&ps.length?`<div class="ajump no-print"><button class="lnk" data-jump="aprs">${svg('scale')}قضاء التمييز في هذه المادة (${collapse(ps).length}) ↓</button></div>`:''}
    <article class="card artcard"><div class="ltxt${a.paras.length>4?' folded':''}">${a.paras.length?a.paras.map(x=>`<p>${esc(x)}</p>`).join(''):'<p class="muted">لا يوجد نص لهذه المادة في الطبعة، وقد تبيّن الحاشية سبب ذلك.</p>'}</div>${a.paras.length>4?`<button class="btn sm unfold no-print" data-unfoldtxt>${svg('dots')}بقية نص المادة (${a.paras.length-2} فقرات)</button>`:''}
     ${a.notes&&a.notes.length?`<div class="lnotes"><b>حاشية الطبعة</b>${a.notes.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}
     <div class="verban small">${svg('info')}<span>${esc(L.text_version)}.</span></div>
@@ -313,7 +331,8 @@ function viewArt(id){const el=$('v-item');el.innerHTML=LOADMSG;const lid=lawOfAr
    <details class="card inline-src fold"><summary>${svg('page')} صفحة المصدر — اضغط للعرض</summary>${lawPagesHTML(a)}</details>
    <div class="pn no-print">${pv?`<button class="btn" data-go="#/a/${pv.id}">${svg('back')}<span>${esc(pv.label)}</span></button>`:'<span></span>'}${nx?`<button class="btn" data-go="#/a/${nx.id}"><span>${esc(nx.label)}</span><svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)"><path d="${IC.back}"/></svg></button>`:''}</div>
    <div id="amemo"></div>
-   ${a.issue?'':`<h2 id="aprs">مبادئ تذكر هذه المادة (${ps.length})</h2>${ps.length?`<div class="list">${ps.slice(0,40).map(p=>card(p,null)).join('')}</div>${ps.length>40?`<button class="btn" data-f2="1">عرض الكل (${ps.length})</button>`:''}`:'<p class="muted">لا توجد في المكتبة مبادئ تحيل إلى هذه المادة بعد.</p>'}`}`;
+   ${a.issue?'':`<h2 id="aprs">قضاء التمييز في هذه المادة</h2>${ps.length?'<div id="ajur"></div>':'<p class="muted">لا توجد في المكتبة مبادئ تحيل إلى هذه المادة بعد.</p>'}`}`;
+  if(!a.issue&&ps.length)artJur(a,ps);
   const url=location.href.split('#')[0]+'#/a/'+a.id;
   const uf=el.querySelector('[data-unfoldtxt]');if(uf)uf.onclick=()=>{el.querySelector('.ltxt').classList.remove('folded');uf.remove();};
   const jp=el.querySelector('[data-jump]');if(jp)jp.onclick=()=>{const h=$('aprs');if(h)window.scrollTo({top:h.getBoundingClientRect().top+scrollY-70,behavior:'smooth'});};
@@ -694,7 +713,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610021526';
+const APP_BUILD='202610021548';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
