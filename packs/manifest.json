@@ -1,8 +1,8 @@
 {
  "format": "mabadi-manifest",
  "producer": "مكتبة مبادئ التمييز",
- "schema_version": "1.5",
- "updated": "2026-09-30",
+ "schema_version": "1.6",
+ "updated": "2026-10-02",
  "site": "https://mabadi-kw.github.io/mabadi/",
  "links": {
   "principle": "https://mabadi-kw.github.io/mabadi/#/p/{id}",
@@ -11,148 +11,507 @@
  },
  "packs": [
   {
-   "file": "mabadi-pack_administrative_v1.5.json",
+   "file": "mabadi-pack_administrative_v1.6_part1of2.json",
    "pack": "إداري",
-   "schema_version": "1.5",
-   "generated": "2026-09-30",
-   "bytes": 7015166,
-   "sha256": "f9687cb056580dfccbf38169f0a3142ec8c595c6267030b2018a6b06dd42130d",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 7477248,
+   "sha256": "8301fa86dbebd86a7468a1cf0593f9591f511553cbcf0b622ad2e59c960c987c",
    "counts": {
-    "items": 2270,
-    "rulings": 581,
-    "needs_review": 41
+    "items": 1221,
+    "rulings": 591,
+    "needs_review": 33
+   },
+   "part": {
+    "n": 1,
+    "of": 2,
+    "items_total": 1973
+   },
+   "changelog": {
+    "version": "1.6",
+    "previous": "1.5",
+    "date": "2026-10-02",
+    "items_before": 2270,
+    "items_after": 1973,
+    "added": 1222,
+    "deleted": 1519,
+    "updated": 649,
+    "added_by_source": {
+     "MQ31": 60,
+     "MQ32": 67,
+     "MQ33": 43,
+     "MQ34": 40,
+     "QK5": 990,
+     "ADM": 7,
+     "MUR1": 1,
+     "V09": 6,
+     "V10": 6,
+     "V11": 2
+    },
+    "notes": [
+     "أُضيفت «مجلة القضاء والقانون» (2003–2006) و«مجموعة القواعد القانونية — القسم الخامس» (2002–2006)، ومع كل مبدأ نص القاعدة (rule_text).",
+     "حُذف المكرر: deleted_items مع replaced_by؛ انقلوا طبقة القاضي (الملاحظات والروابط) إلى المعرّف الباقي.",
+     "حقول جديدة: same_principle، tawatur (الأحدث أولًا)، keywords، page_doc، mujaz_from."
+    ]
    }
   },
   {
-   "file": "mabadi-pack_civil_v1.5.json",
+   "file": "mabadi-pack_administrative_v1.6_part2of2.json",
+   "pack": "إداري",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 6729456,
+   "sha256": "6c6d967cf39d08cbb4579d5d916065d08aa5d2236184b63eaf85912fd93175ec",
+   "counts": {
+    "items": 752,
+    "rulings": 222,
+    "needs_review": 0
+   },
+   "part": {
+    "n": 2,
+    "of": 2,
+    "items_total": 1973
+   }
+  },
+  {
+   "file": "mabadi-pack_civil_v1.6_part1of3.json",
    "pack": "مدني",
-   "schema_version": "1.5",
-   "generated": "2026-09-30",
-   "bytes": 13334066,
-   "sha256": "d5165e87226b489e53b7c9ae2980d657704f10d667d1f435a05f196ccaa33e8d",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 9812198,
+   "sha256": "140687be3e62bd329efd10bac26af86ca2e79bdd8f20f9146df4ea6f222231ed",
    "counts": {
-    "items": 5135,
-    "rulings": 1679,
-    "needs_review": 101
-   }
-  },
-  {
-   "file": "mabadi-pack_commercial_v1.5_part1of3.json",
-   "pack": "تجاري",
-   "schema_version": "1.5",
-   "generated": "2026-09-30",
-   "bytes": 12348377,
-   "sha256": "377adb1ca2847224ae4f9169b1014dd30787def5619dd16a747deee8c5570677",
-   "counts": {
-    "items": 5210,
-    "rulings": 3000,
-    "needs_review": 66
+    "items": 2774,
+    "rulings": 1541,
+    "needs_review": 75
    },
    "part": {
     "n": 1,
     "of": 3,
-    "items_total": 15628
+    "items_total": 5270
+   },
+   "changelog": {
+    "version": "1.6",
+    "previous": "1.5",
+    "date": "2026-10-02",
+    "items_before": 5135,
+    "items_after": 5270,
+    "added": 2850,
+    "deleted": 2715,
+    "updated": 1670,
+    "added_by_source": {
+     "MQ31": 126,
+     "MQ32": 115,
+     "MQ33": 108,
+     "MQ34": 181,
+     "QK5": 2283,
+     "ADM": 3,
+     "AHW": 1,
+     "MUR2": 3,
+     "V09": 14,
+     "V09L": 1,
+     "V10": 10,
+     "V11": 5
+    },
+    "notes": [
+     "أُضيفت «مجلة القضاء والقانون» (2003–2006) و«مجموعة القواعد القانونية — القسم الخامس» (2002–2006)، ومع كل مبدأ نص القاعدة (rule_text).",
+     "حُذف المكرر: deleted_items مع replaced_by؛ انقلوا طبقة القاضي (الملاحظات والروابط) إلى المعرّف الباقي.",
+     "حقول جديدة: same_principle، tawatur (الأحدث أولًا)، keywords، page_doc، mujaz_from."
+    ]
    }
   },
   {
-   "file": "mabadi-pack_commercial_v1.5_part2of3.json",
-   "pack": "تجاري",
-   "schema_version": "1.5",
-   "generated": "2026-09-30",
-   "bytes": 11238793,
-   "sha256": "7d4248dac364735603f0b0d4b7dfa8bb84cb7a2d1ef9897ad97555c0f12e4f8a",
+   "file": "mabadi-pack_civil_v1.6_part2of3.json",
+   "pack": "مدني",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 8450982,
+   "sha256": "ae7a36d58d83ecd11ede357e66b6177b81d216c03298ee414f86d8f28b5b67a1",
    "counts": {
-    "items": 5210,
-    "rulings": 2910,
-    "needs_review": 61
+    "items": 1244,
+    "rulings": 388,
+    "needs_review": 1
    },
    "part": {
     "n": 2,
     "of": 3,
-    "items_total": 15628
+    "items_total": 5270
    }
   },
   {
-   "file": "mabadi-pack_commercial_v1.5_part3of3.json",
-   "pack": "تجاري",
-   "schema_version": "1.5",
-   "generated": "2026-09-30",
-   "bytes": 11676007,
-   "sha256": "6eac202d9b0f68464dafb0b5cad2510e02476446343d3cd5085a800216d843ac",
+   "file": "mabadi-pack_civil_v1.6_part3of3.json",
+   "pack": "مدني",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 8448552,
+   "sha256": "0d6988c77a08b9da52cdfeeefbdcd3470e6f81e926e1e323c7429f0cb6903d63",
    "counts": {
-    "items": 5208,
-    "rulings": 2434,
-    "needs_review": 113
+    "items": 1252,
+    "rulings": 370,
+    "needs_review": 1
    },
    "part": {
     "n": 3,
     "of": 3,
-    "items_total": 15628
+    "items_total": 5270
    }
   },
   {
-   "file": "mabadi-pack_criminal_v1.5.json",
-   "pack": "جزائي",
-   "schema_version": "1.5",
-   "generated": "2026-09-30",
-   "bytes": 8641218,
-   "sha256": "7bb7667eb0050dfed8bd9035d3a2118aefff21163f37b13b886d5c39de342006",
+   "file": "mabadi-pack_commercial_v1.6_part1of5.json",
+   "pack": "تجاري",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 14638106,
+   "sha256": "dc2f57970800fd6e8f5b120572f9dc769137f2cd7e3c89103cf3514b363aa8e6",
    "counts": {
-    "items": 3853,
-    "rulings": 2231,
-    "needs_review": 79
+    "items": 5354,
+    "rulings": 3577,
+    "needs_review": 93
+   },
+   "part": {
+    "n": 1,
+    "of": 5,
+    "items_total": 13490
+   },
+   "changelog": {
+    "version": "1.6",
+    "previous": "1.5",
+    "date": "2026-10-02",
+    "items_before": 15628,
+    "items_after": 13490,
+    "added": 4887,
+    "deleted": 7025,
+    "updated": 5600,
+    "added_by_source": {
+     "MQ31": 230,
+     "MQ32": 272,
+     "MQ33": 201,
+     "MQ34": 240,
+     "QK5": 3875,
+     "ADM": 14,
+     "MUR1": 4,
+     "MUR2": 10,
+     "MUR3": 1,
+     "V09": 12,
+     "V09L": 7,
+     "V10": 16,
+     "V11": 5
+    },
+    "notes": [
+     "أُضيفت «مجلة القضاء والقانون» (2003–2006) و«مجموعة القواعد القانونية — القسم الخامس» (2002–2006)، ومع كل مبدأ نص القاعدة (rule_text).",
+     "حُذف المكرر: deleted_items مع replaced_by؛ انقلوا طبقة القاضي (الملاحظات والروابط) إلى المعرّف الباقي.",
+     "حقول جديدة: same_principle، tawatur (الأحدث أولًا)، keywords، page_doc، mujaz_from."
+    ]
    }
   },
   {
-   "file": "mabadi-pack_example.json",
-   "pack": "مثال",
-   "schema_version": "1.5",
-   "generated": "2026-09-30",
-   "bytes": 31078,
-   "sha256": "a7eb8afcee107679e7f0c0be8ab528d9c4d7f2a1123071be93a54aa9456b1695",
+   "file": "mabadi-pack_commercial_v1.6_part2of5.json",
+   "pack": "تجاري",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 11410521,
+   "sha256": "dbee2542ba0bbe6979df8eb7ff39a98d1375909d00afb3bceb227295fa674848",
    "counts": {
-    "items": 3,
-    "rulings": 4,
+    "items": 3789,
+    "rulings": 2469,
+    "needs_review": 109
+   },
+   "part": {
+    "n": 2,
+    "of": 5,
+    "items_total": 13490
+   }
+  },
+  {
+   "file": "mabadi-pack_commercial_v1.6_part3of5.json",
+   "pack": "تجاري",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 11106309,
+   "sha256": "d12142e2ade769346748d75d90cceba9ca205ae410996a130107ffaf8405c6e3",
+   "counts": {
+    "items": 1413,
+    "rulings": 449,
+    "needs_review": 11
+   },
+   "part": {
+    "n": 3,
+    "of": 5,
+    "items_total": 13490
+   }
+  },
+  {
+   "file": "mabadi-pack_commercial_v1.6_part4of5.json",
+   "pack": "تجاري",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 11131845,
+   "sha256": "dd2a95067a48ee6f12d44fdb2a329cf73c88500241be281ff7eedd30a462b844",
+   "counts": {
+    "items": 1470,
+    "rulings": 542,
     "needs_review": 0
+   },
+   "part": {
+    "n": 4,
+    "of": 5,
+    "items_total": 13490
    }
   },
   {
-   "file": "mabadi-pack_judiciary_v1.5.json",
-   "pack": "طلبات رجال القضاء",
-   "schema_version": "1.5",
-   "generated": "2026-09-30",
-   "bytes": 420963,
-   "sha256": "39b15c68555bc2d120827ba3b018c93910190149e9af8bff739f18b5d32002ca",
+   "file": "mabadi-pack_commercial_v1.6_part5of5.json",
+   "pack": "تجاري",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 11116710,
+   "sha256": "3516222a2d1b19242d670cd8e0acabd2af38ef70329d8da77739db78c1009b48",
    "counts": {
-    "items": 55,
+    "items": 1464,
+    "rulings": 560,
+    "needs_review": 1
+   },
+   "part": {
+    "n": 5,
+    "of": 5,
+    "items_total": 13490
+   }
+  },
+  {
+   "file": "mabadi-pack_criminal_v1.6_part1of3.json",
+   "pack": "جزائي",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 10985465,
+   "sha256": "a1743e563a8c59d989ff286b4d1aca8c693840bc4d3d86b214ad472e079ccbb3",
+   "counts": {
+    "items": 3512,
+    "rulings": 2137,
+    "needs_review": 77
+   },
+   "part": {
+    "n": 1,
+    "of": 3,
+    "items_total": 7254
+   },
+   "changelog": {
+    "version": "1.6",
+    "previous": "1.5",
+    "date": "2026-10-02",
+    "items_before": 3853,
+    "items_after": 7254,
+    "added": 4671,
+    "deleted": 1270,
+    "updated": 881,
+    "added_by_source": {
+     "MQ31": 381,
+     "MQ32": 427,
+     "MQ33": 319,
+     "MQ34": 361,
+     "QK5": 1,
+     "QJ5": 3182
+    },
+    "notes": [
+     "أُضيفت «مجلة القضاء والقانون» (2003–2006) و«مجموعة القواعد القانونية — القسم الخامس» (2002–2006)، ومع كل مبدأ نص القاعدة (rule_text).",
+     "حُذف المكرر: deleted_items مع replaced_by؛ انقلوا طبقة القاضي (الملاحظات والروابط) إلى المعرّف الباقي.",
+     "حقول جديدة: same_principle، tawatur (الأحدث أولًا)، keywords، page_doc، mujaz_from."
+    ]
+   }
+  },
+  {
+   "file": "mabadi-pack_criminal_v1.6_part2of3.json",
+   "pack": "جزائي",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 10184118,
+   "sha256": "4e7559e7596bef34a049698f42e4d4d61fcd4cd2b1ca03f8f898e6b9370b8779",
+   "counts": {
+    "items": 1818,
+    "rulings": 427,
+    "needs_review": 32
+   },
+   "part": {
+    "n": 2,
+    "of": 3,
+    "items_total": 7254
+   }
+  },
+  {
+   "file": "mabadi-pack_criminal_v1.6_part3of3.json",
+   "pack": "جزائي",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 10178835,
+   "sha256": "a09b597ec04ab3c89c63ccadfb23c3814142466578cae379b8012391580e3bf0",
+   "counts": {
+    "items": 1924,
+    "rulings": 428,
+    "needs_review": 0
+   },
+   "part": {
+    "n": 3,
+    "of": 3,
+    "items_total": 7254
+   }
+  },
+  {
+   "file": "mabadi-pack_judiciary_v1.6.json",
+   "pack": "طلبات رجال القضاء",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 258946,
+   "sha256": "e31e1bd5d8d9e71587d0f08eef53ea7df24c275a96c2b8891b54782f9f30ba70",
+   "counts": {
+    "items": 41,
     "rulings": 20,
     "needs_review": 3
+   },
+   "changelog": {
+    "version": "1.6",
+    "previous": "1.5",
+    "date": "2026-10-02",
+    "items_before": 55,
+    "items_after": 41,
+    "added": 1,
+    "deleted": 15,
+    "updated": 27,
+    "added_by_source": {
+     "V10": 1
+    },
+    "notes": [
+     "أُضيفت «مجلة القضاء والقانون» (2003–2006) و«مجموعة القواعد القانونية — القسم الخامس» (2002–2006)، ومع كل مبدأ نص القاعدة (rule_text).",
+     "حُذف المكرر: deleted_items مع replaced_by؛ انقلوا طبقة القاضي (الملاحظات والروابط) إلى المعرّف الباقي.",
+     "حقول جديدة: same_principle، tawatur (الأحدث أولًا)، keywords، page_doc، mujaz_from."
+    ]
    }
   },
   {
-   "file": "mabadi-pack_labour_v1.5.json",
+   "file": "mabadi-pack_labour_v1.6_part1of2.json",
    "pack": "عمالي",
-   "schema_version": "1.5",
-   "generated": "2026-09-30",
-   "bytes": 11469918,
-   "sha256": "3a570b647909a8edbfb2e80858d8536b06f6e4079b88e170b53d27728ae58ce1",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 8340114,
+   "sha256": "d6351a95dc0aef5a2c8f1869c29725363de7ea35885e3815e413d3d53b67ef14",
    "counts": {
-    "items": 3187,
-    "rulings": 1300,
-    "needs_review": 93
+    "items": 1930,
+    "rulings": 1115,
+    "needs_review": 64
+   },
+   "part": {
+    "n": 1,
+    "of": 2,
+    "items_total": 3227
+   },
+   "changelog": {
+    "version": "1.6",
+    "previous": "1.5",
+    "date": "2026-10-02",
+    "items_before": 3187,
+    "items_after": 3227,
+    "added": 1191,
+    "deleted": 1151,
+    "updated": 974,
+    "added_by_source": {
+     "MQ31": 83,
+     "MQ32": 55,
+     "MQ33": 45,
+     "MQ34": 43,
+     "QK5": 950,
+     "MUR2": 3,
+     "MUR3": 1,
+     "MUS": 1,
+     "V09": 6,
+     "V10": 3,
+     "V11": 1
+    },
+    "notes": [
+     "أُضيفت «مجلة القضاء والقانون» (2003–2006) و«مجموعة القواعد القانونية — القسم الخامس» (2002–2006)، ومع كل مبدأ نص القاعدة (rule_text).",
+     "حُذف المكرر: deleted_items مع replaced_by؛ انقلوا طبقة القاضي (الملاحظات والروابط) إلى المعرّف الباقي.",
+     "حقول جديدة: same_principle، tawatur (الأحدث أولًا)، keywords، page_doc، mujaz_from."
+    ]
    }
   },
   {
-   "file": "mabadi-pack_personal-status_v1.5.json",
-   "pack": "أحوال شخصية",
-   "schema_version": "1.5",
-   "generated": "2026-09-30",
-   "bytes": 6198298,
-   "sha256": "dad8b38ff49118f23a445ce86038d87588f506119693cb648818d761fd7fdcf3",
+   "file": "mabadi-pack_labour_v1.6_part2of2.json",
+   "pack": "عمالي",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 7608112,
+   "sha256": "1aea1781ab9d8d2b5655eebda5658c9ae7161217b4318d5127c06163a9611b3a",
    "counts": {
-    "items": 2783,
-    "rulings": 1217,
-    "needs_review": 46
+    "items": 1297,
+    "rulings": 352,
+    "needs_review": 4
+   },
+   "part": {
+    "n": 2,
+    "of": 2,
+    "items_total": 3227
+   }
+  },
+  {
+   "file": "mabadi-pack_personal-status_v1.6_part1of2.json",
+   "pack": "أحوال شخصية",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 6906699,
+   "sha256": "1b9c145302a2f1acb5a3f4b92fb4081ef6c253e4e699b795a2ddcfa5089fa881",
+   "counts": {
+    "items": 2059,
+    "rulings": 1187,
+    "needs_review": 45
+   },
+   "part": {
+    "n": 1,
+    "of": 2,
+    "items_total": 3127
+   },
+   "changelog": {
+    "version": "1.6",
+    "previous": "1.5",
+    "date": "2026-10-02",
+    "items_before": 2783,
+    "items_after": 3127,
+    "added": 1521,
+    "deleted": 1177,
+    "updated": 841,
+    "added_by_source": {
+     "MQ31": 96,
+     "MQ32": 110,
+     "MQ33": 54,
+     "MQ34": 76,
+     "QK5": 1166,
+     "ADM": 1,
+     "AHW": 1,
+     "MUR1": 4,
+     "MUR2": 2,
+     "MUR3": 1,
+     "V09": 1,
+     "V10": 7,
+     "V11": 2
+    },
+    "notes": [
+     "أُضيفت «مجلة القضاء والقانون» (2003–2006) و«مجموعة القواعد القانونية — القسم الخامس» (2002–2006)، ومع كل مبدأ نص القاعدة (rule_text).",
+     "حُذف المكرر: deleted_items مع replaced_by؛ انقلوا طبقة القاضي (الملاحظات والروابط) إلى المعرّف الباقي.",
+     "حقول جديدة: same_principle، tawatur (الأحدث أولًا)، keywords، page_doc، mujaz_from."
+    ]
+   }
+  },
+  {
+   "file": "mabadi-pack_personal-status_v1.6_part2of2.json",
+   "pack": "أحوال شخصية",
+   "schema_version": "1.6",
+   "generated": "2026-10-02",
+   "bytes": 6252333,
+   "sha256": "cf8ed1a0811dc3164836445b5fa204c8c073324ee61ebd5bf6d8fa136453a3ad",
+   "counts": {
+    "items": 1068,
+    "rulings": 324,
+    "needs_review": 0
+   },
+   "part": {
+    "n": 2,
+    "of": 2,
+    "items_total": 3127
    }
   }
  ]
