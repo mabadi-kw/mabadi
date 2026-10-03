@@ -53,7 +53,8 @@ def redact(text,vars_):
         pat=r'(?<![ء-ي])([وبلكفس]?)'+re.escape(x).replace(r'\ ',r'\s+')+r'(?![ء-ي])'
         text,c=re.subn(pat,lambda m:m.group(1)+'[…]',text); n+=c
     return text,n
-APP=re.compile(r'(?:المقيد(?:ين|ة|ان)?|والمقيد(?:ين|ة|ان)?)\s+بالجدول\s+(?:برقم(?:ي|ين)?|بأرقام|رقم)?\s*:?\s*-?\s*([^\n]{0,90})')
+APP=re.compile(r'(?:المقيد(?:ين|ة|ان)?|والمقيد(?:ين|ة|ان)?|الطعن(?:ين|ان)?)\s+(?:ب?ال?جدول\s+)?(?:برقم(?:ي|ين)?|بأرقام|رقم(?:ي|ين)?)\s*:?\s*-?\s*([^\n]{0,90})')
+APP2=re.compile(r'(?:قرار|حكم)?\s*في\s+الطعن(?:ين)?\s+()(\d[^\n]{0,60})')
 def pairs(raw):
     s=nd(raw); out=[]
     for m in re.finditer(r'((?:\d+\s*[-–/،,و]\s*)*\d+)\s*(?:لسنة\s*/?|/)\s*(\d{4})',s):
@@ -101,15 +102,16 @@ def parse_one(t,circ_dir,fname):
     if d:
         dd,mm,yy=map(int,d.groups())
         if 1<=mm<=12 and 1<=dd<=31 and 2010<=yy<=2016: r['date']=f'{yy:04d}-{mm:02d}-{dd:02d}'
-    am=APP.search(T)
-    pr=pairs(am.group(1)) if am else []
-    ap=([p[0] for p in pr],pr[-1][1]) if pr else (appeals(am.group(1)) if am else None)
+    _hd=T[:T.find('المحكم',T.find('المرفوع')+1)+10] if T.find('المرفوع')>0 else T[:3500]
+    am=APP.search(_hd) or APP.search(T[:3500]) or APP2.search(T[:2500])
+    pr=pairs(am.group(am.lastindex or 1)) if am else []
+    ap=([p[0] for p in pr],pr[-1][1]) if pr else (appeals(am.group(am.lastindex or 1)) if am else None)
     r['appeal_raw']=am.group(0).strip() if am else None
     fc=file_code(fname)
     r['appeal']=None;r['appeal_src']=None;flags=[]
     if ap and ap[0] and ap[1]:
         r['appeal']={'nums':ap[0],'year':ap[1],'pairs':pr or [(n,ap[1]) for n in ap[0]]}; r['appeal_src']='text'
-        if fc and not any(n==fc[1] and y%100==fc[0] for n,y in r['appeal']['pairs']): flags.append('رقم الطعن في النص لا يطابق اسم الملف')
+        if fc and not any(n==fc[1] for n,y in r['appeal']['pairs']): flags.append('رقم الطعن في النص لا يطابق اسم الملف')
     elif fc:
         flags.append('رقم الطعن من اسم الملف (غير مذكور في النص)')
         yy=2000+fc[0]; r['appeal']={'nums':[fc[1]],'year':yy}; r['appeal_src']='filename'
