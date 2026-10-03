@@ -36,7 +36,11 @@ for c in META['order']:
         for x in p['c']:
             if x.get('k'): RK[x['k']].add(p['id'])
 ws=lambda s:re.sub(r'\s+',' ',s).strip()
-items=[];seen={};dupfile=0;duprule=0
+items=[];seen={};dupfile=0;duprule=0;crossdup=0
+PRE=set()
+for c,d in OLD.items():
+    if META['cols'][c].get('unpub'):
+        for p in d: PRE.add((p['c'][0].get('k') or p['src'].get('file'),ws(p['p'][0])[:240]))
 R.sort(key=lambda r:(r['circuit'],r['date'] or '9',r['appeal']['nums'][0] if r['appeal'] else 0))
 for r in R:
     k,raw=key(r)
@@ -44,6 +48,7 @@ for r in R:
     for x in r['rules']:
         t=x['t'].strip()
         h=(k or r['file'],ws(t)[:240])
+        if h in PRE: crossdup+=1; continue
         if h in seen:
             duprule+=1; seen[h]['src']['dupf']=seen[h]['src'].get('dupf',0)+1; continue
         rv=[]
@@ -89,7 +94,7 @@ for it in items:
             for p in OLD[oc]:
                 if p['id']==i and it['id'] not in p.get('rel',[]): p['rel']=sorted(set(p.get('rel',[]))|{it['id']}); touched[oc].add(i)
 if '--dry' in sys.argv:
-    print(len(items),'rules; dup rules',duprule,'; linked',nlink,'; review',sum(1 for i in items if i['rv'])); sys.exit()
+    print(len(items),'rules; dup rules',duprule,'cross-year dup',crossdup,'; linked',nlink,'; review',sum(1 for i in items if i['rv'])); sys.exit()
 s=json.dumps(items,ensure_ascii=False,separators=(',',':'))
 open(os.path.join(ROOT,'data',CODE+'.json'),'w',encoding='utf-8').write(s)
 META['cols'][CODE]={'name':f'غير منشورة {YEAR}','title':f'أحكام محكمة التمييز غير المنشورة — {YEAR}','off':0,'n':len(items),'bytes':len(s.encode()),'noimg':True,'unpub':True,'src':'unpub','gp':20,'docs':[],'last':0}
@@ -98,4 +103,4 @@ for oc,ids in touched.items():
     s2=json.dumps(OLD[oc],ensure_ascii=False,separators=(',',':')); open(os.path.join(ROOT,'data',oc+'.json'),'w',encoding='utf-8').write(s2); META['cols'][oc]['bytes']=len(s2.encode())
 json.dump(META,open(mp,'w',encoding='utf-8'),ensure_ascii=False,separators=(',',':'))
 print(CODE,len(items),'قاعدة؛ مكررة محذوفة',duprule,'؛ مرتبطة بمجموعات أخرى',nlink,'؛ تحتاج مراجعة',sum(1 for i in items if i['rv']),'؛ rel محدّث',{k:len(v) for k,v in touched.items()})
-json.dump({'rulings':len(R),'rules':len(items),'dup':duprule,'linked':nlink,'review':collections.Counter(re.sub(r'\s*\(.*$','',x) for i in items for x in i['rv'])},open('/tmp/r13/build_report.json','w'),ensure_ascii=False,default=dict)
+json.dump({'rulings':len(R),'rules':len(items),'dup':duprule,'cross':crossdup,'linked':nlink,'review':collections.Counter(re.sub(r'\s*\(.*$','',x) for i in items for x in i['rv'])},open('/tmp/rr/build_report.json','w'),ensure_ascii=False,default=dict)

@@ -3,10 +3,10 @@
 import json,os,sys,collections
 CODE,YEAR=sys.argv[1],sys.argv[2]
 rep=[r for r in json.load(open('data/reports.json')) if r['col']!=CODE]
-items=json.load(open(f'data/{CODE}.json')); b=json.load(open('/tmp/r13/build_report.json'))
+items=json.load(open(f'data/{CODE}.json')); b=json.load(open('/tmp/rr/build_report.json'))
 rv=sum(1 for i in items if i['rv'])
 rep.append({'col':CODE,'title':f'أحكام محكمة التمييز غير المنشورة — {YEAR}',
- 'stats':[[b['rulings'],'حكمًا'],[len(items),'قاعدة'],[b['dup'],'فقرة مكررة (نسخ للحكم نفسه) لم تُعد'],[b['linked'],'قاعدة مرتبطة بحكمها في مجموعة أخرى'],[rv,'يحتاج مراجعة']],
+ 'stats':[[b['rulings'],'حكمًا'],[len(items),'قاعدة'],[b['dup']+b.get('cross',0),'فقرة مكررة (نسخ الحكم نفسه، أو حكم ورد في مجلد السنة السابقة) لم تُعد'],[b['linked'],'قاعدة مرتبطة بحكمها في مجموعة أخرى'],[rv,'يحتاج مراجعة']],
  'method':['المصدر ملفات Word (.doc) لأحكام السنة بحسب الدوائر الست.',
   'رقم الطعن وتاريخ الجلسة والدائرة من ديباجة الحكم نفسه؛ وإن لم يُذكر رقم الطعن في النص أُخذ من اسم الملف وعُلّم للمراجعة.',
   'القاعدة: كل فقرة تبدأ بـ«المقرر…» حتى موضع تطبيقها على الوقائع، بنصها حرفيًا.',
