@@ -468,7 +468,7 @@ function card(p,re,o={}){
   return `<article class="pr card" id="p${p.id}" data-id="${p.id}">
    <div class="num">${p.n}${p.np!==p.n?`<small>طُبع ${p.np}</small>`:''}<div class="idchip">${p.id}</div></div>
    <div class="body">
-    <div class="crumb"><span>${esc(COLS[p.col].name)}</span>${p.sec.map(x=>`<span>${esc(x)}</span>`).join('')}</div>
+    <div class="crumb"><span>${esc(COLS[p.col].name)}</span>${COLS[p.col].unpub?'<span class="abadge">من حكم غير منشور</span>':''}${p.sec.map(x=>`<span>${esc(x)}</span>`).join('')}</div>
     ${p.ttl?`<div class="ttl">${hl(p.ttl,re)}</div>`:''}<div class="text">${h.join('')}</div>
     ${p.rule===undefined&&p.rx!==undefined?`<details class="rule" data-rx="${p.id}"${o.open?' open':''}><summary>القاعدة — نص الحكم</summary><div class="text">جارٍ التحميل…</div></details>`:''}
     ${p.rule?`<details class="rule"${o.open||(re&&(re.lastIndex=0,re.test(p.rule)))?' open':''}><summary>القاعدة — نص الحكم</summary><div class="text">${hl(p.rule,re)}</div></details>`:''}
@@ -704,7 +704,7 @@ function pageFig(p,g){const C=COLS[p.col],PW=C.pw||595.276,PH=C.ph||822.047,cr=C
   const gp=C.gp||20,gc=gp/10,b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
   return `<figure class="pg" data-g="${g}"><div class="pgimg" role="img" data-src="pages/${p.col}/g${String(b).padStart(3,'0')}.webp" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="صورة الصفحة ${pageNo(p.col,g)}" style="aspect-ratio:${cell[0]}/${cell[1]};background-image:url(pages/${p.col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>${pageCap(p.col,g)}</figcaption></figure><details class="pgtxt" data-id="${p.id}" data-g="${g}"><summary>نص الصفحة المستخرج</summary><div class="ptx">…</div></details>`;}
 // صفحات المبدأ متصلة من أولها إلى آخرها، وزرّان لعرض الصفحة السابقة والتالية (داخل حدود المجموعة أو الملف)
-function pagesHTML(p){if(COLS[p.col].noimg){const ns=printed(p);return `<p class="muted pgnote">${ns.length?`الصفحة ${ns.join('–')} من الكتاب. `:''}المصدر ملف Word نُقل نصه كما هو، فلا صورة صفحة لهذه المجموعة.</p>`;}
+function pagesHTML(p){if(COLS[p.col].noimg){if(COLS[p.col].unpub)return '<p class="muted pgnote">حكم غير منشور: نص القاعدة كما ورد في الحكم، وحُجبت أسماء الأطراف من الأشخاص والشركات وبقيت الجهات الحكومية والصفات.</p>';const ns=printed(p);return `<p class="muted pgnote">${ns.length?`الصفحة ${ns.join('–')} من الكتاب. `:''}المصدر ملف Word نُقل نصه كما هو، فلا صورة صفحة لهذه المجموعة.</p>`;}
   if(!p.pg.length)return '';const g0=p.pg[0],g1=p.pg[p.pg.length-1],C=COLS[p.col],d=pageDoc(p.col,g0),lo=d?d.first:1,hi=d?d.last:(C.last||1e9);
   const gs=[];for(let g=g0;g<=g1;g++)gs.push(g);
   return `<div class="pgnav no-print" data-pgnav="prev" data-id="${p.id}" data-g="${g0}"${g0<=lo?' hidden':''}><button class="btn sm">${svg('back')}الصفحة السابقة</button></div><div class="pgs">${gs.map(g=>pageFig(p,g)).join('')}</div><div class="pgnav no-print" data-pgnav="next" data-id="${p.id}" data-g="${g1}"${g1>=hi?' hidden':''}><button class="btn sm">الصفحة التالية<svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)"><path d="${IC.back}"/></svg></button></div>`;}
@@ -726,7 +726,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610021717';
+const APP_BUILD='202610031102';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;

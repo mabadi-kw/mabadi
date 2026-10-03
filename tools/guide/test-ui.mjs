@@ -20,13 +20,14 @@ try{const c=await context(b,{viewport:{width:390,height:844},isMobile:true,hasTo
   const d1=parseInt(await p.textContent('#count'));ck('المكرر مدموج: «دُمج … مكرر» و«ورد أيضًا في» في البطاقة',await p.locator('#count [data-dupall]').count()===1&&await p.locator('#list .pr .also').count()>0,await p.textContent('#count')+' | also='+await p.locator('#list .pr .also').count()+' | '+await p.inputValue('#sq'));
   await p.click('#count [data-dupall]');await p.waitForTimeout(600);const d2=parseInt(await p.textContent('#count'));ck('عرض المكرر يعيد كل المواضع',d2>d1,`${d1}→${d2}`);
   await p.click('#count [data-dupall]');await p.waitForTimeout(400);await p.fill('#sq','');
-  await p.fill('#sq','');if(await p.locator('#fap').isHidden())await p.click('#ftog');await p.fill('#fap','730');await p.fill('#fay','2012');await p.waitForTimeout(800);
+  await p.fill('#sq','');if(await p.locator('#fap').isHidden())await p.click('#ftog');await p.fill('#fap','730');await p.fill('#fay','2012');await p.waitForTimeout(1800);
   const n=parseInt((await p.textContent('#count')).replace(/[^\d].*$/,''));ck('تصفية برقم الطعن وسنته',n>0&&n<20,n);
   await p.fill('#fap','');await p.fill('#fay','');
   await p.click('[data-scope="l"]');await p.fill('#lnum','6');await p.fill('#lyr','2010');await p.waitForTimeout(700);
   ck('نطاق التشريعات: رقم التشريع وسنته',await p.locator('#lres [data-go="#/law/LAW-6-2010"]').count()>0);
   await p.click('[data-scope="p"]');
   await go('#/p/MUR3-3810');ck('رابط مبدأ محذوف لتكراره يُحوَّل إلى الموضع الباقي',await p.evaluate(()=>location.hash)==='#/p/MQ31-0001');
+  await go('#/p/UN13-00005');await p.waitForTimeout(500);{const tx=await p.evaluate(()=>document.body.innerText);ck('حكم غير منشور: وسم المصدر ولا صورة صفحة',tx.includes('من حكم غير منشور')&&tx.includes('حُجبت أسماء الأطراف'));}
   await go('#/p/V10-0162');
   ck('بطاقة المبدأ: أربعة أزرار و«⋯» للباقي',(await p.locator('[data-main] .acts .btn:visible').count())<=5&&await p.locator('[data-main] [data-a="more"]').isVisible());
   await p.click('[data-main] [data-a="more"]');await p.waitForTimeout(300);
