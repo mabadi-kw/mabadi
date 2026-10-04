@@ -728,7 +728,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610042004';
+const APP_BUILD='202610042019';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1380,13 +1380,21 @@ if('serviceWorker' in navigator){const hadSW=!!navigator.serviceWorker.controlle
 // التحقق من وجود إصدار أحدث منشور (version.json) عند الفتح وعند العودة للتطبيق وكل نصف ساعة: رسالة صغيرة وزر «تحديث الآن»
 let updLater=false;
 async function checkUpdate(){if(updLater||!navigator.onLine||$('updbar'))return;try{const r=await fetch('version.json?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const j=await r.json();
-  if(j&&j.build&&String(j.build)>APP_BUILD)showUpdate(String(j.build));}catch(_){}}
+  if(!(j&&j.build&&String(j.build)>APP_BUILD))return;
+  // version.json يُطلب متجاوزًا ذاكرة الخادم الوسيط، أما app.js فقد يبقى قديمًا عنده دقائق بعد النشر؛ فلا نعرض التنبيه حتى يصل app.js الجديد نفسه، وإلا تكرر التنبيه بعد كل تحديث
+  const t=await (await fetch('app.js',{cache:'no-cache'})).text(),m=t.match(/const APP_BUILD='(\d+)'/);
+  if(m&&m[1]>APP_BUILD)showUpdate(m[1]);else{clearTimeout(checkUpdate.t);checkUpdate.t=setTimeout(checkUpdate,120e3);}}catch(_){}}
 function showUpdate(b){if($('updbar'))return;const e=document.createElement('div');e.id='updbar';e.className='nudge upd';e.setAttribute('role','status');
   e.innerHTML=`<b>يتوفر تحديث جديد للتطبيق</b> (الإصدار ${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}).<span><button class="btn primary" id="updgo">${svg('download')}تحديث الآن</button><button class="btn" id="updno">لاحقًا</button></span>`;
   document.body.appendChild(e);
   $('updgo').onclick=async()=>{$('updgo').disabled=true;$('updgo').textContent='جارٍ التحديث…';
-    try{const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();if(reg)await reg.update();
-      if('caches' in window){const ks=await caches.keys();await Promise.all(ks.filter(k=>k.startsWith('mabadi-shell-')).map(k=>caches.delete(k)));}}catch(_){}
+    // نحذف نسخة الواجهة المخزّنة، ثم نجلب ملفاتها من الخادم متجاوزين ذاكرة المتصفح (وإلا عاد الملف القديم وتكرر التنبيه)
+    try{if('caches' in window){const ks=await caches.keys();await Promise.all(ks.filter(k=>k.startsWith('mabadi-shell-')).map(k=>caches.delete(k)));}
+      await Promise.all(['./','index.html','app.js','sync-core.js','app.css','sw.js'].map(u=>fetch(u,{cache:'reload'}).catch(()=>null)));
+      const reg=navigator.serviceWorker&&await navigator.serviceWorker.getRegistration();
+      // محاولة ثانية للإصدار نفسه: نلغي عامل الخدمة القديم كليًا ليُسجَّل من جديد
+      let tried='';try{tried=sessionStorage.getItem('mabadi:updtry')||'';sessionStorage.setItem('mabadi:updtry',b);}catch(_){}
+      if(reg){if(tried===b)await reg.unregister();else await reg.update();}}catch(_){}
     location.reload();};
   $('updno').onclick=()=>{updLater=true;e.remove();};}
 setTimeout(checkUpdate,4000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate();});setInterval(checkUpdate,30*60e3);
