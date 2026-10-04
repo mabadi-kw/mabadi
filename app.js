@@ -225,7 +225,9 @@ const fdate=d=>d?d.split('-').reverse().join('/'):'';
 const lawLink=k=>{const x=LAWBYKEY[k];const [n,y]=k.split('/');return x?`<button class="linkbtn" data-go="#/law/${x.id}">${esc(x.short)} (${esc(n)}/${esc(y)})</button>`:`القانون رقم ${esc(n)} لسنة ${esc(y)} <small class="muted">(ليس في المكتبة بعد)</small>`;};
 // لافتات القانون: ملغى / معدّل بعد الطبعة / مواد مضافة / ما يعدّله أو يلغيه هذا المرسوم
 function amendBanner(L){const ix=LAWBYKEY[L.key]||{},ev=(AMEND.laws||{})[L.key]||[];let h='';
-  const rp=ev.find(e=>e.what==='إلغاء');
+  const rp=ev.find(e=>e.what==='إلغاء'&&!e.pending),pp=ev.find(e=>e.what==='إلغاء'&&e.pending);
+  if(ix.effective)h+=`<div class="aban mod">${svg('info')}<span><b>لم يُعمل به بعد.</b> ${esc(ix.effective)}.</span></div>`;
+  if(pp&&!rp)h+=`<div class="aban mod">${svg('info')}<span><b>صدر ما يلغيه ولم يُعمل بالإلغاء بعد.</b> ألغاه ${lawLink(pp.by)}${pp.date?' الصادر في '+fdate(pp.date):''} (<button class="linkbtn" data-go="#/a/${pp.by_art}">مادة الإلغاء</button>)، ويُعمل به ${esc(pp.effective||'')}. النص المعروض نافذ إلى ذلك الحين.</span></div>`;
   if(rp)h+=`<div class="aban rep">${svg('info')}<span><b>ملغى.</b> ألغاه ${lawLink(rp.by)}${rp.date?' الصادر في '+fdate(rp.date):''} (<button class="linkbtn" data-go="#/a/${rp.by_art}">مادة الإلغاء</button>). يبقى النص هنا للرجوع إليه في الوقائع السابقة على الإلغاء، وفي المبادئ الصادرة في ظله.</span></div>`;
   const am=ev.filter(e=>e.what==='تعديل');
   if(am.length)h+=`<div class="aban mod">${svg('info')}<span><b>صدرت بعد هذه النسخة تعديلات:</b> ${am.map(e=>lawLink(e.by)+(e.date?' — '+fdate(e.date):'')).join('، ')}. المواد المعدّلة معلَّمة في القائمة، وفي كل منها نص التعديل. النص المعروض نص النسخة الأصلية.</span></div>`;
@@ -255,7 +257,7 @@ function viewLaws(){const el=$('v-laws');document.title='التشريعات — 
   const chips=()=>$('lwc').innerHTML=[['','الكل'],...(L.some(x=>x.src==='gazette'&&(x.cat||'law')===cat)?[['__new','صدر حديثًا (2025–2026)']]:[]),...G().map(x=>[x,x])].map(([k,t])=>`<button class="chip${g===k?' on':''}" data-lg="${esc(k)}">${esc(t)}</button>`).join('');
   chips();draw('');$('lwf').oninput=()=>draw(norm(west($('lwf').value).trim()));
   $('lwc').onclick=e=>{const b=e.target.closest('[data-lg]');if(!b)return;g=b.dataset.lg;chips();draw(norm(west($('lwf').value).trim()));};}
-function lawTile(x){return `<button class="tile card lawtile" data-go="#/law/${x.id}"><span class="ic">${svg('scroll')}</span><b>${esc(x.short)}${x.status==='ملغى'?' <span class="abadge rep">ملغى</span>':x.status==='معدّل'?' <span class="abadge">معدّل</span>':''}${x.src==='gazette'?' <span class="abadge new">جديد</span>':''}</b><small>${esc(lawTitle(x))} · ${x.articles?nf(x.articles)+' مادة':'بلا مواد مرقمة'}${lcount[x.key]?` · ${nf(lcount[x.key])} مبدأ`:''}${x.memo?' · مع المذكرة':''}</small><small class="ver">${esc(x.ver||x.text_version)}</small></button>`;}
+function lawTile(x){return `<button class="tile card lawtile" data-go="#/law/${x.id}"><span class="ic">${svg('scroll')}</span><b>${esc(x.short)}${x.status==='ملغى'?' <span class="abadge rep">ملغى</span>':x.status==='معدّل'?' <span class="abadge">معدّل</span>':''}${x.repeal_pending&&x.status!=='ملغى'?' <span class="abadge">يُلغى لاحقًا</span>':''}${x.src==='gazette'?' <span class="abadge new">جديد</span>':''}</b><small>${esc(lawTitle(x))} · ${x.articles?nf(x.articles)+' مادة':'بلا مواد مرقمة'}${lcount[x.key]?` · ${nf(lcount[x.key])} مبدأ`:''}${x.memo?' · مع المذكرة':''}</small><small class="ver">${esc(x.ver||x.text_version)}</small></button>`;}
 function lawTree(L){const tree=[],st=[];(L.toc||[]).filter(t=>t.i0>=0).forEach(t0=>{const t={...t0,kids:[]};while(st.length&&st[st.length-1].level>=t.level)st.pop();(st.length?st[st.length-1].kids:tree).push(t);st.push(t);});return tree;}
 function viewLaw(id){const el=$('v-item');el.innerHTML=LOADMSG;
   loadLaw(id).then(L=>{
@@ -726,7 +728,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610040834';
+const APP_BUILD='202610041713';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;

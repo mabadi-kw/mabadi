@@ -122,6 +122,7 @@ def parse(L,i0,i1,mode):
                     sig=body[j:k2];lawtitle=body[k2]['t'];phase='law';j=k2+1;continue
             sig=sig+body[j:] if sig else body[j:];break
         mo=RORD.match(t);mn=RNUM.match(t);mh=RHEAD.match(t)
+        if mh and mh.group(2).startswith('و'):mh=None  # «الفصل والمادة…» تتمة سطر لا عنوان
         top=None
         if mode=='ordinal' and mo:top=('o',ordn(mo.group(1)),t)
         elif mode=='numeric' and (mn or mo):top=('n',int(mn.group(1)) if mn else ordn(mo.group(1)),t,mn.group(2) if mn else None)

@@ -25,6 +25,14 @@ try{const c=await context(b,{viewport:{width:390,height:844},isMobile:true,hasTo
   ck('المادة 128 مرافعات تعرض تعديل المرسوم 6/2025',await p.locator('#aev .amendbox').count()>0&&(await p.locator('#aev').innerText()).includes('6/2025'));
   await go('#/law/LAW-11-2026');t=await p.locator('body').innerText();
   ck('قانون العنف الأسري الجديد يذكر إلغاء 16/2020',t.includes('العنف')&&t.includes('يلغي')&&t.includes('رقم 16 لسنة 2020'));
+  await go('#/law/LAW-102-2026');t=await p.locator('body').innerText();
+  ck('قانون تنظيم الإعلام يفتح وينبّه أنه لم يُعمل به بعد',t.includes('تنظيم الإعلام')&&t.includes('لم يُعمل به بعد')&&t.includes('رقم 8 لسنة 2016'));
+  await p.screenshot({path:'out/law102.png',fullPage:false});
+  await go('#/law/LAW-3-2006');t=await p.locator('body').innerText();
+  ck('قانون المطبوعات 3/2006 عليه تنبيه الإلغاء المؤجَّل لا شريط «ملغى»',t.includes('لم يُعمل بالإلغاء بعد')&&!t.includes('ملغى.'));
+  await p.screenshot({path:'out/law3.png',fullPage:false});
+  await go('#/a/LAW-102-2026-A0035');t=await p.locator('body').innerText();
+  ck('المادة 35 من قانون الإعلام كاملة',t.includes('في هذا الفصل والمادة (52) من هذا القانون'));
   ck('لا أخطاء في الصفحة',errs.length===0,errs.join(' | '));
   const w=await p.evaluate(()=>document.documentElement.scrollWidth-innerWidth);ck('لا تمرير أفقي',w<=1,w);
 }finally{await b.close();server.close();}

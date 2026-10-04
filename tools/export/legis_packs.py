@@ -129,7 +129,7 @@ def main():
                   'extraction': src.get('note')}
         text_as_of = src.get('date') if is_gz else ('2011-02' if kind == 'moj_edition' else (x.get('issued') if kind == 'amali_contrib' else None))
         lev = AM['laws'].get(x['key'], [])
-        rep = next((e for e in lev if e['what'] == 'إلغاء'), None)
+        rep = next((e for e in lev if e['what'] == 'إلغاء' and not e.get('pending')), None)   # الإلغاء المؤجَّل لا يُعدّ إلغاءً قبل نفاذه
         amended_by = [{'key': e['by'], 'id': e['by_id'], 'date': e.get('date') or gdate(e['by_id'])} for e in lev if e['what'] != 'إلغاء']
         applied_until = max([a['date'] for a in amended_by if a['date']], default=None)
         arts = []

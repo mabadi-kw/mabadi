@@ -18,6 +18,11 @@ EV=[
  ('6/2025',1,'38/1980','128','استبدال',None),('6/2025',1,'38/1980','152','استبدال','الفقرة الأولى'),('6/2025',1,'38/1980','153','استبدال',None),
  ('6/2025',1,'38/1980','154','استبدال','الفقرات الأولى والرابعة والخامسة'),('6/2025',1,'38/1980','155','استبدال',None),
 ]
+# إلغاء مؤجَّل: يسري بعد نفاذ القانون الملغي، فيبقى القانون الملغى «نافذًا» إلى ذلك الحين مع لافتة تنبّه إلى الإلغاء
+REPEAL_PENDING={'3/2006':('102/2026','I4','بعد مرور ستة أشهر من تاريخ نشره في الجريدة الرسمية (العدد 1811 بتاريخ 4/10/2026) — المادة الخامسة من مواد الإصدار'),
+ '61/2007':('102/2026','I4','بعد مرور ستة أشهر من تاريخ نشره في الجريدة الرسمية (العدد 1811 بتاريخ 4/10/2026) — المادة الخامسة من مواد الإصدار')}
+# قوانين لم يبدأ العمل بها بعد: نص قاعدة النفاذ كما في مواد الإصدار (لا يُحسب تاريخ)
+PENDING_START={'102/2026':'يُعمل به بعد مرور ستة أشهر من تاريخ نشره في الجريدة الرسمية (العدد 1811 بتاريخ 4/10/2026) — المادة الخامسة من مواد الإصدار'}
 REPEAL={'74/1983':('159/2025',83),'48/1987':('159/2025',83),'23/1990':('80/2026','I10'),'16/2020':('11/2026',30)}
 I=json.load(open(SITE+'index.json'));IX={x['key']:x for x in I['laws']}
 def lid(k):n,y=k.split('/');return f'LAW-{n}-{y}'
@@ -44,6 +49,10 @@ for base,(by,art) in REPEAL.items():
     AM['laws'].setdefault(base,[]).append(dict(by=by,by_id=lid(by),by_art=ba,date=dates.get(by),what='إلغاء',short=new[by]['short']))
     x=IX.get(base)
     if x:x['status']='ملغى';x['repealed_by']=by
+for base,(by,art,eff) in REPEAL_PENDING.items():
+    AM['laws'].setdefault(base,[]).append(dict(by=by,by_id=lid(by),by_art=f'{lid(by)}-{art}',date=dates.get(by),what='إلغاء',pending=True,effective=eff,short=new[by]['short']))
+    x=IX.get(base)
+    if x:x['repeal_pending']=by
 # أحداث إضافية من غير الجريدة المعالَجة هنا (مثل مساهمة «عمّالي»): ملف amend_extra.json إن وُجد
 import os
 XF=os.path.join(os.path.dirname(os.path.abspath(__file__)),'amend_extra.json')
@@ -65,6 +74,7 @@ json.dump(AM,open(SITE+'amend.json','w'),ensure_ascii=False,indent=0)
 keep=[x for x in I['laws'] if x['key'] not in new]
 I['laws']=keep+list(new.values())
 for x in I['laws']:
-    if x['key'] in AM['laws'] and x.get('status')!='ملغى':x['status']='معدّل'
+    if any(not e.get('pending') for e in AM['laws'].get(x['key'],[])) and x.get('status')!='ملغى':x['status']='معدّل'
+    if x['key'] in PENDING_START:x['effective']=PENDING_START[x['key']]
 json.dump(I,open(SITE+'index.json','w'),ensure_ascii=False,indent=1)
 print(len(I['laws']),'entries;',len(new),'new;',{k:len(v) for k,v in AM['laws'].items()})
