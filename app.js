@@ -728,7 +728,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610041713';
+const APP_BUILD='202610042004';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1393,6 +1393,28 @@ setTimeout(checkUpdate,4000);document.addEventListener('visibilitychange',()=>{i
 buildSearch();route();setTimeout(loadAllLaws,1500);if(SYNC)SYNC.restore().then(()=>{if($('syncbox'))syncUI();}).catch(()=>{});setTimeout(syncNudge,2500);introShow();if(!location.hash||location.hash==='#/')playWeave();else wovenOnce=true;
 document.body.insertAdjacentHTML('beforeend',`<button class="totop" id="totop" hidden aria-label="العودة إلى الأعلى">${svg('back').replace('<svg','<svg style="transform:rotate(-90deg)"')}</button>`);
 $('totop').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
+// الأشرطة الأفقية (الموضوعات، الكتب، «تابع من حيث توقفت») على الحاسوب: أزرار تمرير، وسحب بالفأرة، وعجلة الفأرة
+{const FINE=matchMedia('(hover:hover) and (pointer:fine)');
+  const upd=w=>{const s=w.querySelector('.fstrip,.hsc'),m=s.scrollWidth-s.clientWidth,x=Math.abs(s.scrollLeft);
+    w.classList.toggle('ovf',m>4);w.querySelector('.hsb.st').disabled=x<=2;w.querySelector('.hsb.en').disabled=x>=m-2;};
+  const wrap=s=>{if(s.dataset.hs)return;s.dataset.hs=1;const w=document.createElement('div');w.className='hswrap';s.before(w);w.append(s);
+    // في الاتجاه من اليمين إلى اليسار: البداية يمينًا والنهاية يسارًا
+    w.insertAdjacentHTML('beforeend',`<button class="hsb st" type="button" aria-label="السابق">›</button><button class="hsb en" type="button" aria-label="التالي">‹</button>`);
+    const step=d=>s.scrollBy({left:d*-Math.max(200,s.clientWidth*.8),behavior:'smooth'});
+    w.querySelector('.hsb.st').onclick=()=>step(-1);w.querySelector('.hsb.en').onclick=()=>step(1);
+    s.addEventListener('scroll',()=>upd(w),{passive:true});
+    s.addEventListener('wheel',e=>{const m=s.scrollWidth-s.clientWidth;if(m<=4||e.shiftKey||Math.abs(e.deltaX)>Math.abs(e.deltaY))return;
+      const x=Math.abs(s.scrollLeft);if((e.deltaY>0&&x>=m-2)||(e.deltaY<0&&x<=2))return;e.preventDefault();s.scrollLeft-=e.deltaY;},{passive:false});
+    let sx=0,sl=0,drag=false,moved=false;
+    s.addEventListener('pointerdown',e=>{if(e.pointerType!=='mouse'||e.button!==0)return;drag=true;moved=false;sx=e.clientX;sl=s.scrollLeft;});
+    addEventListener('pointermove',e=>{if(!drag)return;const dx=e.clientX-sx;if(!moved&&Math.abs(dx)>5){moved=true;s.classList.add('drag');}if(moved)s.scrollLeft=sl-dx;});
+    addEventListener('pointerup',()=>{if(!drag)return;drag=false;setTimeout(()=>s.classList.remove('drag'),0);});
+    s.addEventListener('click',e=>{if(moved){e.preventDefault();e.stopPropagation();moved=false;}},true);
+    upd(w);};
+  const scan=()=>{if(!FINE.matches)return;document.querySelectorAll('.fstrip,.hsc').forEach(wrap);document.querySelectorAll('.hswrap').forEach(upd);};
+  new MutationObserver(()=>{clearTimeout(scan.t);scan.t=setTimeout(scan,60);}).observe(document.body,{childList:true,subtree:true});
+  addEventListener('resize',scan);scan();}
+
 {let lastY=0,tt=0;addEventListener('scroll',()=>{const b=$('totop'),y=scrollY;b.hidden=false;const up=y<lastY-4;
   if(y<900||!up){if(y>lastY+4||y<900)b.classList.remove('on');}else{b.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>b.classList.remove('on'),2500);}
   lastY=y;},{passive:true});}
