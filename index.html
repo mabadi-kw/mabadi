@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>مبادئ التمييز</title>
+<meta name="description" content="مكتبة مبادئ محكمة التمييز الكويتية: بحث في نصوص المبادئ حرفيًا كما في مصادرها، مع صورة الصفحة الأصلية، ويعمل دون اتصال.">
+<meta name="theme-color" content="#0b1f3b">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="مبادئ التمييز">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="icons/icon-180.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="مبادئ التمييز">
+<meta property="og:title" content="مبادئ التمييز — مكتبة مبادئ محكمة التمييز الكويتية">
+<meta property="og:description" content="33,650 مبدأً بنصها الحرفي، مع صورة الصفحة الأصلية. بحث ونسخ وطباعة، ويعمل دون اتصال.">
+<meta property="og:url" content="https://mabadi-kw.github.io/mabadi/">
+<meta property="og:image" content="https://mabadi-kw.github.io/mabadi/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="شعار مبادئ التمييز: كتب متراكمة ذهبية على كحلي">
+<meta property="og:locale" content="ar_KW">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="مبادئ التمييز">
+<meta name="twitter:description" content="مكتبة مبادئ محكمة التمييز الكويتية — 33,650 مبدأً بنصها الحرفي.">
+<meta name="twitter:image" content="https://mabadi-kw.github.io/mabadi/og.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@700&family=Cairo:wght@400;500;600;700;800&family=Noto+Naskh+Arabic:wght@400;600&display=swap">
+<link id="xfont" rel="stylesheet" href="data:text/css,">
+<link rel="stylesheet" href="app.css">
+<script>try{const s=JSON.parse(localStorage.getItem('mabadi:settings')||'{}');if(s.theme&&s.theme!=='auto')document.documentElement.dataset.theme=s.theme;}catch(_){}</script>
+</head>
+<body>
+<header class="appbar">
+  <div class="in">
+    <button class="hback" id="hback" data-back aria-label="رجوع" hidden></button>
+    <a class="logo" href="#/"><img src="icons/icon.svg" alt="" width="40" height="40"><div><b>مبادئ التمييز</b><small id="sub">مكتبة مبادئ محكمة التمييز الكويتية</small></div></a>
+    <nav class="topnav" id="topnav">
+      <button data-nav="home">الرئيسية</button>
+      <button data-nav="search">المبادئ</button>
+      <button data-nav="laws">التشريعات</button>
+      <button data-nav="saved">المحفوظات</button>
+      <button data-nav="more">المزيد</button>
+    </nav>
+    <button class="pal" id="pal" aria-label="انتقال سريع" title="انتقال سريع (Ctrl+K)"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg><kbd>⌘K</kbd></button>
+    <button class="me" id="me" aria-label="الإعدادات"><span id="mename">الإعدادات</span><i class="avatar" id="meav"></i></button>
+  </div>
+</header>
+
+<main id="main"><div class="loadbox"><span id="loading">جارٍ تحميل المكتبة…</span><div class="bar-p"><i id="loadbar"></i></div></div></main>
+
+<nav class="botnav" id="botnav">
+  <button data-nav="home"><svg class="i" viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>الرئيسية</button>
+  <button data-nav="search"><svg class="i" viewBox="0 0 24 24"><path d="M12 3v18M6 21h12M5 7h14M7 7l-3 6a3 3 0 0 0 6 0zM17 7l-3 6a3 3 0 0 0 6 0z"/></svg>المبادئ</button>
+  <button data-nav="laws"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h11a3 3 0 0 1 0 6H6zM6 3a3 3 0 0 0 0 6v9a3 3 0 0 0 3 3h9V9"/></svg>التشريعات</button>
+  <button data-nav="saved"><svg class="i" viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>المحفوظات</button>
+  <button data-nav="more"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>المزيد</button>
+</nav>
+
+<div id="layer"></div>
+<div class="toast" id="toast" hidden role="status"></div>
+<script src="sync-core.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

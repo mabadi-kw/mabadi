@@ -1,0 +1,31 @@
+// اختبار واجهة التشريعات الجديدة من الجريدة الرسمية: شارات «جديد/ملغى/معدّل»، شريط الإلغاء والتعديل، صندوق التعديل في المادة
+import {serve,browser,context} from './lib.mjs';
+let ok=0,bad=0;const ck=(n,c,x='')=>{if(c){ok++;console.log('✔',n);}else{bad++;console.log('✘',n,x);}};
+const {server,url}=await serve();const b=await browser();
+try{const c=await context(b,{viewport:{width:390,height:844},isMobile:true,hasTouch:true},url);
+  await c.addInitScript(()=>{localStorage.setItem('mabadi:bknudge','9999999999999');localStorage.setItem('mabadi:iosnudge','9999999999999');localStorage.setItem('mabadi:intro','1');});
+  const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(String(e)));
+  const go=async h=>{await p.evaluate(h=>{location.hash=h;},h);await p.waitForTimeout(1800);};
+  await p.goto(url+'index.html#/');await p.waitForTimeout(3000);
+  await go('#/laws');const txt=await p.locator('#v-laws').innerText().catch(()=>p.locator('body').innerText());
+  ck('قائمة التشريعات تعرض «صدر حديثًا»',txt.includes('صدر حديثًا'));
+  ck('قانون المخدرات الجديد في القائمة',txt.includes('مكافحة المخدرات والمؤثرات العقلية'));
+  ck('شارة «ملغى» ظاهرة',txt.includes('ملغى'));
+  await go('#/law/LAW-74-1983');let t=await p.locator('body').innerText();
+  ck('قانون 74/1983 عليه شريط الإلغاء بالمرسوم 159/2025',/ملغ/.test(t)&&t.includes('159')&&t.includes('2025'));
+  await go('#/law/LAW-159-2025');t=await p.locator('body').innerText();
+  ck('القانون 159/2025 يفتح ويذكر ما يلغيه',t.includes('يلغي')||t.includes('74'));
+  await go('#/a/LAW-16-1960-A0044');await p.waitForTimeout(1500);t=await p.locator('body').innerText();
+  ck('المادة 44 جزاء تعرض صندوق التعديل',await p.locator('#aev .amendbox').count()>0,t.slice(0,200));
+  await go('#/a/LAW-159-2025-A0001');t=await p.locator('body').innerText();
+  ck('مادة من القانون الجديد تعرض مع حاشية العدد',t.includes('الكويت اليوم'));
+  await go('#/m/LAW-159-2025');t=await p.locator('body').innerText();
+  ck('المذكرة الإيضاحية للقانون الجديد',t.includes('المذكرة')&&t.includes('الفصل الثامن'));
+  await go('#/a/LAW-38-1980-A0128');await p.waitForTimeout(1500);
+  ck('المادة 128 مرافعات تعرض تعديل المرسوم 6/2025',await p.locator('#aev .amendbox').count()>0&&(await p.locator('#aev').innerText()).includes('6/2025'));
+  await go('#/law/LAW-11-2026');t=await p.locator('body').innerText();
+  ck('قانون العنف الأسري الجديد يذكر إلغاء 16/2020',t.includes('العنف')&&t.includes('يلغي')&&t.includes('رقم 16 لسنة 2020'));
+  ck('لا أخطاء في الصفحة',errs.length===0,errs.join(' | '));
+  const w=await p.evaluate(()=>document.documentElement.scrollWidth-innerWidth);ck('لا تمرير أفقي',w<=1,w);
+}finally{await b.close();server.close();}
+console.log(`\n${ok} ✔ / ${bad} ✘`);process.exit(bad?1:0);

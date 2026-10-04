@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>مبادئ التمييز</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Reem+Kufi:wght@700&family=Cairo:wght@400;600;700&family=Noto+Naskh+Arabic:wght@400;600&display=swap">
+<link rel="stylesheet" href="app.css">
+<style>
+body{background:var(--bg)}
+.wrap{max-width:760px;margin:0 auto;padding:12px 14px 16px}
+.ebar{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.ebar a{text-decoration:none}
+.ebar .brandmini{margin-inline-start:auto;font-size:.8rem;color:var(--muted);display:flex;gap:6px;align-items:center;font-family:"Reem Kufi",sans-serif}
+.ebar .brandmini img{width:20px;height:20px;border-radius:5px}
+#pgs{margin-top:10px;padding:10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div id="card" class="list" style="margin-top:0"><div class="empty">جارٍ التحميل…</div></div>
+  <div class="ebar"><button class="btn" id="copy" hidden>نسخ</button><a class="btn" id="open" href="index.html" target="_blank" rel="noopener">افتح في المكتبة</a>
+    <span class="brandmini"><img src="icons/icon.svg" alt="">مبادئ التمييز</span></div>
+  <details id="pgs" class="card inline-src" hidden><summary class="btn">صورة الصفحة في المصدر</summary><div id="pages" style="margin-top:10px"></div></details>
+</div>
+<script>try{const s=JSON.parse(localStorage.getItem('mabadi:settings')||'{}');const r=document.documentElement;if(s.theme&&s.theme!=='auto')r.dataset.theme=s.theme;if(s.fs)r.style.setProperty('--fs',s.fs);}catch(_){}</script>
+<script src="embed.js"></script>
+</body>
+</html>
