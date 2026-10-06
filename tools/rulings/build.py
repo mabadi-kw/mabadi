@@ -26,8 +26,11 @@ def key(r):
     d=''
     if r['date']:
         yy,mm,dd=r['date'].split('-'); d=f' جلسة {int(dd)}/{int(mm)}/{yy}'
-    lab='الطعنان' if len(prs)>1 else 'الطعن'
-    return (k if r['date'] else None),f'({lab} {nums}/{y} {r["circuit"]}{d})'
+    lab='الطعنان' if len(prs)==2 else ('الطعون' if len(prs)>2 else 'الطعن')
+    if len({yy for _,yy in prs})>1:
+        nums='، '.join(f'{n}/{yy}' for n,yy in prs[:-1])+'، '+str(prs[-1][0])
+    kk={'مشورة':' — قرار غرفة المشورة','فحص':' — قرار لجنة فحص الطعون'}.get(r.get('kind'),'')
+    return (k if r['date'] else None),f'({lab} {nums}/{y} {r["circuit"]}{d}{kk})'
 RK=collections.defaultdict(set); OLD={}
 for c in META['order']:
     if c==CODE: continue

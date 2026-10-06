@@ -1,0 +1,141 @@
+#!/usr/bin/env python3
+"""تحليل أحكام وقرارات التمييز الحديثة (نسخ عمل Word 2025–2026) إلى JSON.
+parse26.py <txt_dir> <map.tsv> <out.json>
+map.tsv: <id>\t<المسار النسبي للملف الأصلي>\t<mtimeMs اختياري>
+- الأنواع: حكم (نهائي/تمهيدي) · قرار غرفة مشورة · قرار لجنة فحص الطعون.
+- رقم الطعن وسنته والدائرة من سطر «في الطعن رقم … لسنة … عمالي/3» أو «والمقيد بالجدول رقم»،
+  ويُطابق بالرقم المرمّز في اسم الملف (<3 أرقام الدائرة><سنتان><الرقم>).
+- تاريخ الجلسة من «الموافق d/m/yyyy».
+- القاعدة: فقرة «المقرر…» حرفيًا (بعد حجب أسماء الأطراف فقط)، حتى بدء التطبيق على الواقعة.
+- لا يُحفظ اسم أي قاضٍ أو أمين سر أو مجلد عمل."""
+import sys,re,json,os,glob,collections
+sys.path.insert(0,os.path.dirname(__file__))
+import parse as P
+CMAP={'تجاري':'تجاري','مدني':'مدني','عمالي':'عمالي','جزائي':'جزائي','إداري':'إداري','اداري':'إداري','أحوال':'أحوال شخصية','احوال':'أحوال شخصية'}
+PFX={'400':'جزائي','401':'جزائي','402':'تجاري','403':'عمالي','405':'مدني','407':'إداري','404':'أحوال شخصية','406':'إداري'}
+ORD={'الأولى':1,'الاولى':1,'الثانية':2,'الثالثة':3,'الرابعة':4,'الخامسة':5,'السادسة':6,'السابعة':7,'الثامنة':8,'التاسعة':9,'العاشرة':10}
+def norm(s): return P.nt(P.nd(s)).replace('٫','.').replace('۲','2').replace('۳','3').replace('۱','1').replace('۰','0').replace('۴','4').replace('۵','5').replace('۶','6').replace('۷','7').replace('۸','8').replace('۹','9')
+def file_code(name):
+    m=re.search(r'(\d{9,11})(?=\D*\.doc)',name)
+    if not m: return None
+    c=m.group(1)
+    if len(c)>=10: yy,num=c[-7:-4],c[-4:]
+    else: yy,num=c[3:6],c[6:]
+    return {'pfx':c[:3],'yy':int(yy)%100,'num':int(num),'raw':c}
+APPRE=re.compile(r'(?:الطعو?ن(?:ين)?\s+بالتمييز\s+|الطعو?ن(?:ين)?\s+|بالجدول\s+)(?:رقم(?:ي)?|برقم(?:ي)?|[اأ]رقام|بأرقام)\s*:?\s*((?:\d+\s*(?:،|,|و|-|/)?\s*)+?)\s*(?:لسنة|/)\s*(\d{4})\s*(?:م\s*)?([ء-ي]+)?\s*/?\s*(\d{1,2})?')
+def parse(t,relpath):
+    L=P.lines(t); T=norm('\n'.join(L)); r={'flags':[]}
+    head=T[:T.find('المرفوع')] if 'المرفوع' in T[:4000] else T[:2500]
+    if 'لجنة فحص الطعون' in head: kind='فحص'
+    elif re.search(r'غرف[ةه]\s+(?:ال)?مشورة',head) and 'قرار' in head: kind='مشورة'
+    elif 'صدر الحكم' in head or 'صـ' in head or 'الحكم' in head: kind='حكم'
+    else: kind='؟'
+    r['kind']=kind
+    d=re.search(r'الموافق\s*:?\s*(\d{1,2})\s*[/\-.]\s*(\d{1,2})\s*[/\-.]\s*(\d{4})',head)
+    r['date']=None
+    if d:
+        dd,mm,yy=map(int,d.groups())
+        if 1<=mm<=12 and 1<=dd<=31 and 2024<=yy<=2026: r['date']=f'{yy:04d}-{mm:02d}-{dd:02d}'
+    if not r['date']: r['flags'].append('تاريخ الجلسة غير مقروء')
+    # الدائرة
+    lab=re.search(r'الدائرة\s+(التجارية|المدنية|العمالية|الجزائية|الإدارية|الادارية|الأحوال الشخصية|أحوال شخصية)\s*(?:\(?\s*([ء-ي]+|\d+)\s*\)?)?',head)
+    circ=None;cno=None
+    if lab:
+        circ={'التجارية':'تجاري','المدنية':'مدني','العمالية':'عمالي','الجزائية':'جزائي','الإدارية':'إداري','الادارية':'إداري'}.get(lab.group(1),'أحوال شخصية')
+        g=lab.group(2); cno=ORD.get(g) or (int(g) if g and g.isdigit() else None)
+    # الطعن
+    zone=T[:T.find('المحكم',T.find('المرفوع')+1)+20] if 'المرفوع' in T else T[:4000]
+    ms=list(APPRE.finditer(zone))
+    ap=None
+    if ms:
+        m=ms[-1] if 'بالجدول' in ms[-1].group(0) else ms[0]
+        yr=int(m.group(2)); w=(m.group(3) or '')
+        ap_pairs=[]
+        for seg in re.split(r'[،,]|\sو',m.group(1)):
+            q=re.match(r'\s*(\d+)\s*(?:/\s*(\d{4}))?',seg)
+            if q and int(q.group(1))>0: ap_pairs.append((int(q.group(1)),int(q.group(2)) if q.group(2) else yr))
+        nums=[n for n,y in ap_pairs]
+        c2=next((v for k,v in CMAP.items() if w.startswith(k)),None)
+        if c2 and circ and c2!=circ: r['bench']=circ
+        if c2: circ=c2
+        if m.group(4) and not cno: cno=int(m.group(4))
+        ap={'nums':nums,'year':yr,'pairs':ap_pairs}
+        r['appeal_raw']=m.group(0).strip()
+    fc=file_code(relpath)
+    if fc and fc['pfx'] in PFX and not circ: circ=PFX[fc['pfx']]
+    if ap:
+        if fc and not any(n==fc['num'] and y%100==fc['yy'] for n,y in ap.get('pairs',[(x,ap['year']) for x in ap['nums']])):
+            r['flags'].append('رقم الطعن في النص لا يطابق اسم الملف (%s)'%fc['raw'])
+        if fc and fc['pfx'] in PFX and circ and PFX[fc['pfx']]!=circ and 'bench' not in r:
+            r['flags'].append('رمز الدائرة في اسم الملف (%s) يخالف النص'%PFX[fc['pfx']])
+    elif fc and fc['num']:
+        ap={'nums':[fc['num']],'year':2000+fc['yy'],'pairs':[(fc['num'],2000+fc['yy'])]}; r['flags'].append('رقم الطعن من اسم الملف فقط')
+    else: r['flags'].append('رقم الطعن غير معروف')
+    r['appeal']=ap; r['circuit']=circ; r['cno']=cno
+    if not circ: r['flags'].append('الدائرة غير معروفة')
+    # الأطراف → متغيرات الحجب
+    i=T.find('المرفوع'); j=T.find('المحكم',i) if i>=0 else -1
+    blk=T[i:j] if i>=0 and j>i else ''
+    blk=re.sub(r'و?المرفوع(?:ين)?\s*(?:أولهما|ثانيهما|آخرهما)?\s*من\s*:?-?','|',blk)
+    blk=re.sub(r'والمقيد[^\n]*','',blk)
+    blk=re.sub(r'(?m)^[\s"“”]*ضـ*د(?:\s+كل\s+من)?[\s"“”:]*$','|',blk)
+    blk=re.sub(r'(?m)^\s*\d+\s*[-–.)]\s*','|',blk)
+    blk=re.sub(r'(?m)^\s*(?:أولا|ثانيا|ثالثا|رابعا|خامسا|سادسا)ً?\s*[:/-]?\s*','|',blk)
+    blk=re.sub(r'ورثة\s+(?:المرحوم|المرحومة|الشيخ|الشيخة)?\s*/?\s*([ء-ي ]+?)\s+وهم\s*:?','|\\1|',blk)
+    blk=blk.replace('\n','|')
+    names=P.party_names(blk); vars_=set()
+    for n in names: vars_|=P.name_variants(n)
+    if not names: r['flags'].append('لم تُستخرج أسماء الأطراف')
+    k=T.find('المحكم',j) if j>0 else -1
+    body=T[k:] if k>=0 else T
+    body=re.sub(r'^[" ]*المحكمـ*ة[" ]*\n','',body)
+    cut=re.search(r'\n\s*(?:ف?له(?:ذه)?\s*الأسباب|لذلك)\s*[:.]?\s*\n',body)
+    main=body[:cut.start()] if cut else body; disp=body[cut.end():] if cut else ''
+    dl=disp[:600]
+    if kind=='حكم':
+        if not dl.strip(): r['final']=None; r['flags'].append('منطوق الحكم غير مقروء')
+        elif re.search(r'حجز|للمرافعة|بندب|تأجيل|باستجواب|بإعادة الطعن',dl) and not re.search(r'بتمييز|برفض',dl): r['final']=False
+        else:
+            r['final']=True
+            if re.search(r'بإحالة|بندب|وقبل الفصل',dl): r['partial']=True
+    else:
+        r['final']=bool(re.search(r'عدم قبول|بعدم قبول',dl))
+        if not r['final']: r['flags'].append('قرار ليس بعدم القبول — راجع المنطوق')
+    # تحقق ثلاثي: رأس الحكم · المنطوق · اسم الملف
+    dm=APPRE.search(disp[:800])
+    if dm and ap:
+        dn=[int(x) for x in re.findall(r'\d+',dm.group(1))]
+        if not set(dn)&set(ap['nums']):
+            hdr_ok=fc and fc['num'] in ap['nums']; dsp_ok=fc and fc['num'] in dn
+            r['flags'].append('رقم الطعن في المنطوق (%s) يخالف الرأس (%s)'%('،'.join(map(str,dn)),'،'.join(map(str,ap['nums']))))
+            if dsp_ok and not hdr_ok:
+                ap={'nums':dn,'year':int(dm.group(2)),'pairs':[(n,int(dm.group(2))) for n in dn]}; r['appeal']=ap
+                r['flags'].append('اعتُمد رقم المنطوق لمطابقته اسم الملف')
+            r['suspect']=True
+    vars_={v for v in vars_ if 'الكويت' not in v and 'الخطوط' not in v}
+    rs=P.rules(main); R=[];nred=0
+    for rule,whole,plen in rs:
+        x,c=P.redact(rule,vars_); nred+=c
+        R.append({'t':x,'whole':whole,**({'redacted':c} if c else {})})
+    r['rules']=R; r['n_redacted']=nred; r['n_names']=len(names)
+    r['_disp']=P.redact(dl.split('\n')[0],vars_)[0][:300]
+    return r
+def main():
+    txtdir,mp,outp=sys.argv[1:4]
+    M={}
+    for ln in open(mp,encoding='utf8'):
+        p=ln.rstrip('\n').split('\t'); M[p[0]]={'rel':p[1],'mtime':int(p[2]) if len(p)>2 and p[2] else None}
+    fs=sorted(glob.glob(txtdir+'/*.txt'))
+    df=collections.Counter()
+    for f in fs: df.update(set(re.findall(r'[ء-ي]{3,}',P.nt(open(f,encoding='utf8').read()))))
+    P.COMMON.update(w for w,c in df.items() if c>=max(20,len(fs)//4))
+    out=[]
+    for f in fs:
+        key=os.path.basename(f)[:-4]
+        r=parse(open(f,encoding='utf8').read(),M[key]['rel'])
+        r['id']=key; r['rel']=M[key]['rel']; r['mtime']=M[key]['mtime']
+        out.append(r)
+    json.dump(out,open(outp,'w'),ensure_ascii=False,indent=0)
+    c=collections.Counter((r['kind'],r['final']) for r in out)
+    print(len(out),'docs',dict(c),'rules',sum(len(r['rules']) for r in out))
+if __name__=='__main__': main()
