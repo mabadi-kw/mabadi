@@ -777,7 +777,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610061054';
+const APP_BUILD='202610061106';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -980,9 +980,10 @@ function timelineHTML(){const B=TLB||[];if(B.length<8)return '';const by={};let 
   Object.entries(lc).sort((a,b)=>b[1]-a[1]).slice(0,3).forEach(([l])=>{const L=LAWBYKEY[l];const iy=+(L.issued||'').slice(0,4)||+l.split('/')[1];if(iy)add(iy,'lw','صدور '+L.short+' ('+l+')');
     (AMEND.laws[l]||[]).forEach(e=>{const ed=evDate(e);if(ed)add(+ed.slice(0,4),e.what==='إلغاء'?'rp':'lw',(e.what==='إلغاء'?(e.pending?'صدر ما يلغي ':'إلغاء '):'تعديل ')+L.short+' بـ'+e.by);});});
   let h='';for(let y=mn;y<=mx;y++){const n=(by[y]||[]).length,ht=n?Math.max(6,Math.round(n/top*64)):0,m=mk[y]||[];
-    h+=`<button class="tlc${F.yr===String(y)?' on':''}" ${n?`data-yr="${y}"`:'disabled'} title="${y}: ${n} ${mbW(n)}${m.length?' — '+esc(m.map(x=>x[1]).join('؛ ')):''}"><span class="tlm">${m.map(x=>`<i class="${x[0]}"></i>`).join('')}</span><span class="tlb" style="height:${ht}px"></span><span class="tly">${(y%5===0||(y===mn&&(5-mn%5)%5>=3)||(y===mx&&mx%5>=3))?y:''}</span></button>`;}
+    h+=`<button class="tlc${F.yr===String(y)?' on':''}" ${n?`data-yr="${y}"`:'disabled'} title="${y}: ${n} ${mbW(n)}${m.length?' — '+esc(m.map(x=>x[1]).join('؛ ')):''}"><span class="tlm">${m.map(x=>`<i class="${x[0]}"></i>`).join('')}</span><span class="tlb" style="height:${ht}px"></span><span class="tly">${(F.yr===String(y)||y%5===0||(y===mn&&(5-mn%5)%5>=3)||(y===mx&&mx%5>=3))?y:''}</span></button>`;}
   const legend=`<span><i class="ga"></i>عدول من الهيئة العامة</span><span><i class="lw"></i>صدور أو تعديل قانون</span><span><i class="rp"></i>إلغاء</span>`;
-  return `<details class="card tline fold" open><summary>${svg('clock')} المسار عبر الزمن <small class="muted">${mn}–${mx} · اضغط سنة لعرض مبادئها</small></summary><div class="tlw"><div class="tlg">${h}</div></div><div class="tll">${legend}${F.yr?`<button class="lnk" data-clr="yr">✕ كل السنوات</button>`:''}</div></details>`;}
+  const sel=F.yr&&by[F.yr]?`<b class="tlsel">معروض الآن: مبادئ جلسات ${F.yr} فقط (${nf(by[F.yr].length)})</b>`:'';
+  return `<details class="card tline fold${F.yr?' has':''}" open><summary>${svg('clock')} المسار عبر الزمن <small class="muted">${mn}–${mx} · اضغط عمود سنة لعرض مبادئها وحدها، واضغطه ثانية للعودة</small></summary><div class="tlw"><div class="tlg">${h}</div></div><div class="tll">${sel}${legend}${F.yr?`<button class="lnk" data-clr="yr">✕ كل السنوات</button>`:''}</div></details>`;}
 function renderList(){const re=hlRe(qalts(F.q).flat());const ah=artHits();$('list').innerHTML=(F.q?jumpHTML(smartJump(F.q)):'')+timelineHTML()+(ah.length?`<details class="arthits card fold"><summary>${svg('scroll')} في نصوص التشريعات: ${nf(ah.length)} ${ah.length===1?'مادة':ah.length<11?'مواد':'مادة'} <small>${esc(ah.slice(0,2).map(([L,a])=>a.label+' · '+L.short).join(' — '))}${ah.length>2?' …':''}</small></summary>${ah.slice(0,8).map(([L,a])=>`<button class="arow" data-go="#/a/${a.id}"><b>${esc(a.label)} · ${esc(L.short)}</b><span>${hl(a.paras.join(' ').slice(0,220),re)}${a.paras.join(' ').length>220?'…':''}</span></button>`).join('')}${ah.length>8?`<button class="btn sm" data-scope-l="1">كل المواد في نطاق «التشريعات» (${nf(ah.length)})</button>`:''}</details>`:'')+(cur.length?cur.slice(0,shown).map(p=>card(p,re)).join(''):'<div class="empty">لا توجد نتائج. جرّب كلمة أقصر أو أزل أحد المرشحات.</div>');$('more').hidden=cur.length<=shown;prefetchRules(cur.slice(0,shown));}
 function setFilter(k,v){Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:'',ap:'',ay:'',yr:''});SCOPE='p';F[k]=v;go('#/search');}
 // ---------- INDEX
