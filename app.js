@@ -559,12 +559,16 @@ function sugItems(q){const nq=norm(q.trim()),G=[];if(!nq){
   if(nq.split(' ').length>=2)G.push({h:'',it:[{k:'ask',v:q.trim(),ic:'askq',t:`اسأل المكتبة: «${q.trim()}»`,s:'أقرب المبادئ ولو لم ترد كل الكلمات'}]});
   return G;}
 function attachSug(inp,mode){const form=inp.closest('form');if(!form||form.dataset.sug)return;form.dataset.sug=1;form.classList.add('sughost');
-  const box=document.createElement('div');box.className='sugbox';box.hidden=true;box.setAttribute('role','listbox');form.appendChild(box);let sel=-1,items=[];
+  // القائمة تُلحق بالصفحة نفسها بموضع ثابت تحت المربع، حتى لا يقصّها إطار الواجهة (الرئيسية) ولا تختفي خلف البطاقات
+  const box=document.createElement('div');box.className='sugbox';box.hidden=true;box.setAttribute('role','listbox');document.body.appendChild(box);let sel=-1,items=[];
+  const place=()=>{const r=form.getBoundingClientRect();box.style.top=(r.bottom+6)+'px';box.style.left=r.left+'px';box.style.width=r.width+'px';box.style.maxHeight=Math.max(160,Math.min(460,(window.visualViewport?visualViewport.height:innerHeight)-r.bottom-16))+'px';};
+  addEventListener('resize',()=>{if(!box.hidden)place();});
+  box._form=form;
   const close=()=>{box.hidden=true;sel=-1;};
   const render=()=>{if(mode==='search'&&SCOPE!=='p'){close();return;}const G=sugItems(inp.value);items=[];
     if(!G.length){close();return;}
     box.innerHTML=G.map(g=>`${g.h?`<div class="sugh"><span>${g.h}</span>${g.clr?'<button type="button" class="lnk" data-sugclr>مسح</button>':''}</div>`:''}${g.it.map(it=>{items.push(it);const i=items.length-1;return `<div class="sugi" role="option" data-i="${i}">${svg(it.ic)}<span><b>${esc(it.t)}</b>${it.s?`<small>${esc(it.s)}</small>`:''}</span>${it.rm?`<button type="button" class="sugx" data-sugrm="${i}" aria-label="احذف من السجل">×</button>`:''}</div>`;}).join('')}`).join('');
-    box.hidden=false;sel=-1;};
+    place();box.hidden=false;sel=-1;};
   const pick=it=>{close();inp.blur();
     if(it.k==='q'){QH=[it.v,...QH.filter(x=>x!==it.v)].slice(0,8);LS.set('qhist',QH);if(mode==='home')doSearch(it.v);else{inp.value=it.v;F.q=it.v;runSearch();}}
     else if(it.k==='tp'||it.k==='lw'){if(mode==='search')inp.value='';setFilter(it.k,it.v);}
@@ -572,7 +576,7 @@ function attachSug(inp,mode){const form=inp.closest('form');if(!form||form.datas
     else if(it.k==='ask')go('#/ask/'+encodeURIComponent(it.v));};
   // في صفحة البحث تظهر النتائج أثناء الكتابة: تُطوى القائمة بعد توقف الكتابة قليلًا حتى لا تحجب النتائج (وتعود بالضغط على المربع)
   let idle;inp.addEventListener('focus',render);inp.addEventListener('input',()=>{render();clearTimeout(idle);if(mode==='search')idle=setTimeout(close,inp.value.trim()?1600:4000);});
-  window.addEventListener('scroll',()=>{if(!box.hidden&&mode==='search'&&inp.value.trim())close();},{passive:true});
+  window.addEventListener('scroll',()=>{if(box.hidden)return;if(mode==='search'&&inp.value.trim())close();else place();},{passive:true});
   inp.addEventListener('blur',()=>setTimeout(()=>{if(!box.contains(document.activeElement))close();},180));
   inp.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close();inp.blur();return;}if(box.hidden)return;const n=items.length;
     if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();sel=(sel+(e.key==='ArrowDown'?1:-1)+n)%n;box.querySelectorAll('.sugi').forEach((x,i)=>x.classList.toggle('on',i===sel));box.querySelector('.sugi.on')?.scrollIntoView({block:'nearest'});}
@@ -1049,7 +1053,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610061619';
+const APP_BUILD='202610061658';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1698,7 +1702,7 @@ function feedbackScreen(){closeDlg();let st=fbLoad();const save=()=>LS.set('fb2'
 const NAVMAP={ask:'#/ask',laws:'#/laws',home:'#/',search:'#/search',index:'#/index/topics',saved:'#/saved',more:'#/more',report:'#/report',about:'#/about'};
 function show(v,nav){['home','search','index','saved','more','item','report','about','laws','review'].forEach(x=>$('v-'+x).hidden=x!==v);guideLink(v);
   document.querySelectorAll('[data-nav]').forEach(b=>b.setAttribute('aria-current',b.dataset.nav===nav));}
-function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));closeDlg();if(ARR&&h!=='search')ARR=null;if(TTS.id)ttsStop();if($('hback'))$('hback').hidden=!h;
+function route(){document.querySelectorAll('.sugbox').forEach(b=>{b.hidden=true;if(!document.body.contains(b._form))b.remove();});const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));closeDlg();if(ARR&&h!=='search')ARR=null;if(TTS.id)ttsStop();if($('hback'))$('hback').hidden=!h;
   document.title='مبادئ التمييز';
   if(h.startsWith('p/')){viewItem(h.slice(2));show('item','');}
   else if(h.startsWith('r/')){viewRuling(h.slice(2));show('item','');}

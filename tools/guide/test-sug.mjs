@@ -24,7 +24,8 @@ try{for(const [nm,vp] of [['جوال',{viewport:{width:390,height:844},isMobile:
   await p.click('#sq');await p.waitForTimeout(200);await p.keyboard.press('Escape');await p.waitForTimeout(200);ck(nm+': Escape يغلق',await p.locator('.sugbox:visible').count()===0);
   // الرئيسية
   await p.evaluate(()=>{location.hash='#/';});await p.waitForTimeout(1200);await p.click('#hq');await p.waitForTimeout(300);
-  ck(nm+': القائمة في الرئيسية أيضًا',await p.locator('.hero .sugbox:visible').count()===1);
+  const vis=await p.evaluate(()=>{const b=[...document.querySelectorAll('.sugbox')].find(x=>!x.hidden);if(!b)return 0;const r=b.getBoundingClientRect();const e=document.elementFromPoint(r.left+r.width/2,r.top+Math.min(60,r.height/2));return r.height>100&&b.contains(e)?1:0;});
+  ck(nm+': القائمة في الرئيسية ظاهرة كاملة فوق البطاقات',vis===1);
   // عن المكتبة
   await p.evaluate(()=>{location.hash='#/about';});await p.waitForTimeout(1200);
   ck(nm+': تبويبات «عن المكتبة»',await p.locator('.atabs [data-go]').count()===5);
