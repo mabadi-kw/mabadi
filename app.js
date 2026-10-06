@@ -131,13 +131,25 @@ let hiddenAt=0;document.addEventListener('visibilitychange',()=>{if(document.hid
 // ---------- data
 const META=await fetch('data/meta.json').then(r=>r.json());
 const ORDER=META.order,COLS=META.cols,TL=META.toplab,LL=META.lawlab;
+// التحميل على مرحلتين: المجموعات الأساسية تُجهَّز أولًا فتظهر الواجهة، والأحكام غير المنشورة تُنزَّل معها وتُضاف بعد ظهورها
+const LATE=ORDER.filter(c=>COLS[c].unpub),CORE=ORDER.filter(c=>!COLS[c].unpub),COLARR={};
+let LATEDONE=!LATE.length,lateRes;const LATEP=new Promise(r=>lateRes=r);if(LATEDONE)lateRes();
+const getJ=(u,d)=>fetch(u).then(r=>r.ok?r.json():d).catch(()=>d);
+const AUX={alias:getJ('data/alias.json',{}),laws:getJ('data/laws/index.json',null),amend:getJ('data/laws/amend.json',null),stat:getJ('data/status.json',null)};
 let done=0;
-const arrs=await Promise.all(ORDER.map(c=>fetch('data/'+c+'.json').then(r=>r.json()).then(a=>{done++;const l=$('loading');if(l)l.textContent=`جارٍ تحميل المكتبة… ${done} من ${ORDER.length}`;const lb=$('loadbar');if(lb)lb.style.width=(done/ORDER.length*100)+'%';return a;})));
-const PR=arrs.flat(),BYID={},RUL={},POS={};PR.forEach((p,i)=>{BYID[p.id]=p;POS[p.id]=i;});
-PR.forEach(p=>{p.ns=norm(p.p.join(' ')+' '+(p.rule||'')+' '+(p.ttl||'')+' '+p.c.map(c=>c.raw).join(' ')+' '+p.fn.join(' '));p.sk=p.sec.join('›');
-  new Set(p.c.map(c=>c.k).filter(Boolean)).forEach(k=>(RUL[k]=RUL[k]||[]).push(p.id));});
+const LATET=LATE.map(c=>fetch('data/'+c+'.json').then(r=>r.ok?r.text():'[]').catch(()=>'[]'));
+const arrs=await Promise.all(CORE.map(c=>fetch('data/'+c+'.json').then(r=>r.json()).then(a=>{done++;const l=$('loading');if(l)l.textContent=`جارٍ تحميل المكتبة… ${done} من ${CORE.length}`;const lb=$('loadbar');if(lb)lb.style.width=(done/CORE.length*100)+'%';return a;})));
+CORE.forEach((c,k)=>COLARR[c]=arrs[k]);
+const PR=[],BYID={},RUL={},POS={};
+function ingestBase(list){list.forEach(p=>{BYID[p.id]=p;POS[p.id]=PR.length;PR.push(p);p.sk=p.sec.join('›');
+  new Set(p.c.map(c=>c.k).filter(Boolean)).forEach(k=>(RUL[k]=RUL[k]||[]).push(p.id));});}
+ingestBase(arrs.flat());
+// نص البحث المطبَّع يُجهَّز في أوقات الفراغ بعد ظهور الواجهة، ويُستكمل فورًا عند أول بحث
+let NSI=0;const nsOf=p=>norm(p.p.join(' ')+' '+(p.rule||'')+' '+(p.ttl||'')+' '+p.c.map(c=>c.raw).join(' ')+' '+p.fn.join(' '));
+function ensureNS(){for(;NSI<PR.length;NSI++){const p=PR[NSI];if(p.ns===undefined)p.ns=nsOf(p);}}
+function nsIdle(){const t=performance.now();for(;NSI<PR.length&&performance.now()-t<12;NSI++){const p=PR[NSI];if(p.ns===undefined)p.ns=nsOf(p);}if(NSI<PR.length)setTimeout(nsIdle,30);}
 // المواضع المحذوفة لورودها بنصها في مجموعة القواعد أو المجلة (tools/prune_dups.py): تُحوَّل إلى الموضع الباقي
-const ALIAS=await fetch('data/alias.json').then(r=>r.ok?r.json():{}).catch(()=>({}));
+const ALIAS=await AUX.alias;
 const pid=id=>BYID[id]?id:(ALIAS[id]||id);
 function migrateIds(){let ch=false;const n=Date.now();
   for(const id of Object.keys(FAV)){const t=ALIAS[id];if(!t||BYID[id])continue;if(!FAV[t])FAV[t]=Object.assign({},FAV[id],{updated:n});delete FAV[id];DEL.favs[id]=n;ch=true;}
@@ -147,21 +159,23 @@ function migrateIds(){let ch=false;const n=Date.now();
 migrateIds();
 // المبدأ نفسه منشورًا في أكثر من موضع (tools/dedup.py): يُعرض مرة واحدة في النتائج، ومعه «ورد أيضًا في»
 const DG={};let DUPALL=LS.get('dupall','')==='1';
-fetch('data/dups.json').then(r=>r.ok?r.json():[]).catch(()=>[]).then(G=>{G.forEach(g=>g.forEach(i=>{if(BYID[i])DG[i]=g;}));
+let DUPG=[];const dgIn=()=>DUPG.forEach(g=>g.forEach(i=>{if(BYID[i])DG[i]=g;}));
+fetch('data/dups.json').then(r=>r.ok?r.json():[]).catch(()=>[]).then(G=>{DUPG=G;dgIn();
   const l=$('list');if(G.length&&l&&!l.hidden&&location.hash.startsWith('#/search'))runSearch();});
 function collapse(list){if(DUPALL)return list;const have=new Set(list.map(p=>p.id)),seen=new Set(),out=[];
   for(const p of list){const g=DG[p.id];if(!g){out.push(p);continue;}if(seen.has(g[0]))continue;seen.add(g[0]);out.push(BYID[g.find(i=>have.has(i))]);}return out;}
 const alsoOf=p=>(DG[p.id]||[]).filter(i=>i!==p.id&&BYID[i]);
 $('sub').textContent=`${nf(PR.length)} مبدأً · ${ORDER.length} مجموعة`;
 const famOf=t=>TL[t]?TL[t][0]:'';
-const tcount={},lcount={},acount={},famcount={};
-PR.forEach(p=>{new Set(p.tp.map(x=>x[0])).forEach(t=>tcount[t]=(tcount[t]||0)+1);new Set(p.tp.map(x=>famOf(x[0])).filter(Boolean)).forEach(f=>famcount[f]=(famcount[f]||0)+1);
-  p.lw.forEach(([l,as])=>{lcount[l]=(lcount[l]||0)+1;as.forEach(a=>{const k=l+'|'+a;acount[k]=(acount[k]||0)+1})})});
-const FORD='PLVCSRAFGHJT';
-const TORD=Object.keys(tcount).filter(t=>TL[t]).sort((a,b)=>FORD.indexOf(a[0])-FORD.indexOf(b[0])||tcount[b]-tcount[a]);
-const FAMS=[...new Set(TORD.map(famOf))];const famLetter={};TORD.forEach(t=>famLetter[famOf(t)]=famLetter[famOf(t)]||t[0]);
-const LORD=Object.keys(lcount).sort((a,b)=>lcount[b]-lcount[a]);
-const CHS=[...new Set(PR.flatMap(p=>p.c.map(c=>c.ch)).filter(Boolean))];const chcount={};PR.forEach(p=>new Set(p.c.map(c=>c.ch).filter(Boolean)).forEach(c=>chcount[c]=(chcount[c]||0)+1));
+const tcount={},lcount={},acount={},famcount={},chcount={};
+const FORD='PLVCSRAFGHJT',TORD=[],FAMS=[],famLetter={},LORD=[],CHS=[];
+function countIn(list){list.forEach(p=>{new Set(p.tp.map(x=>x[0])).forEach(t=>tcount[t]=(tcount[t]||0)+1);new Set(p.tp.map(x=>famOf(x[0])).filter(Boolean)).forEach(f=>famcount[f]=(famcount[f]||0)+1);
+  p.lw.forEach(([l,as])=>{lcount[l]=(lcount[l]||0)+1;as.forEach(a=>{const k=l+'|'+a;acount[k]=(acount[k]||0)+1})});
+  new Set(p.c.map(c=>c.ch).filter(Boolean)).forEach(c=>{chcount[c]=(chcount[c]||0)+1;if(!CHS.includes(c))CHS.push(c);});});
+  TORD.splice(0,TORD.length,...Object.keys(tcount).filter(t=>TL[t]).sort((a,b)=>FORD.indexOf(a[0])-FORD.indexOf(b[0])||tcount[b]-tcount[a]));
+  FAMS.splice(0,FAMS.length,...new Set(TORD.map(famOf)));TORD.forEach(t=>famLetter[famOf(t)]=famLetter[famOf(t)]||t[0]);
+  LORD.splice(0,LORD.length,...Object.keys(lcount).sort((a,b)=>lcount[b]-lcount[a]));}
+countIn(PR);
 const CHIC={'تجاري':'building','مدني':'contract','جزائي':'gavel','عمالي':'briefcase','أحوال شخصية':'people','إداري':'landmark','طلبات رجال القضاء':'scale','تظلمات':'report'};
 // رقم الصفحة المعروض: في الكتب رقم الصفحة المطبوع (الإزاحة off)؛ وفي مجموعات الملفات (المجلة) رقم الصفحة داخل ملف العدد
 const pageDoc=(col,g)=>(COLS[col].docs||[]).find(d=>g>=d.first&&g<=d.last);
@@ -179,11 +193,11 @@ document.addEventListener('toggle',e=>{const d=e.target;if(d.matches&&d.matches(
 const printed=p=>p.pg.length?[...new Set([pageNo(p.col,p.pg[0]),pageNo(p.col,p.pg[p.pg.length-1])])]:[];
 // ---------- legislation
 const LAWIX=[],LAWBYKEY={},LAWBYID={},ARTBYID={},ARTMAP={},LAWDATA={},MEMO={};
-try{const LI=await fetch('data/laws/index.json').then(r=>r.json());LI.laws.forEach(x=>{LAWIX.push(x);LAWBYKEY[x.key]=x;LAWBYID[x.id]=x;});}catch(_){}
+try{const LI=await AUX.laws;LI.laws.forEach(x=>{LAWIX.push(x);LAWBYKEY[x.key]=x;LAWBYID[x.id]=x;});}catch(_){}
 // سجل التعديلات والإلغاءات اللاحقة (من الجريدة الرسمية) على القوانين والمواد الموجودة في المكتبة
-let AMEND={laws:{},arts:{},added:{}};try{AMEND=await fetch('data/laws/amend.json').then(r=>r.ok?r.json():AMEND);}catch(_){}
+let AMEND={laws:{},arts:{},added:{}};AMEND=(await AUX.amend)||AMEND;
 // حالة المبدأ (على طريقة «المدقّق»): عُدل عنه (مقرّر يدويًا في data/status.json) · حكم عدول من الهيئة العامة · صدر بعده تعديل أو إلغاء للنص الذي طبّقه · متواتر
-let STAT={ga:{},over:{}};try{STAT=await fetch('data/status.json').then(r=>r.ok?r.json():STAT);}catch(_){}
+let STAT={ga:{},over:{}};STAT=(await AUX.stat)||STAT;
 const pDate=p=>p.c.map(c=>(c.k||'').split('@')[1]).filter(Boolean).sort().pop()||'';
 const evDate=e=>e.date||((LAWBYKEY[e.by]||{}).issued)||'';
 function pChanges(p){if(p._chg)return p._chg;const d=pDate(p),out=[];if(!d)return p._chg=out;
@@ -204,7 +218,7 @@ function statusHTML(p,ntw){const o=[],d=pDate(p);
   return o.length?`<div class="status">${o.join('')}</div>`:'';}
 const AMBY={};Object.entries(AMEND.arts||{}).forEach(([k,v])=>v.forEach(e=>{const [lid,n]=k.split('#');(AMBY[e.by_art]=AMBY[e.by_art]||[]).push({...e,lid,n});}));
 Object.entries(AMEND.added||{}).forEach(([key,v])=>v.forEach(e=>{const x=LAWBYKEY[key];(AMBY[e.by_art]=AMBY[e.by_art]||[]).push({...e,lid:x&&x.id,n:e.n,key});}));
-PR.forEach(p=>p.lw.forEach(([l,as])=>{if(!LAWBYKEY[l])return;new Set(as.map(a=>parseInt(west(a).split('/')[0]))).forEach(n=>{if(!n)return;const k=l+'#'+n;(ARTMAP[k]=ARTMAP[k]||[]).push(p.id);});}));
+const artIn=list=>list.forEach(p=>p.lw.forEach(([l,as])=>{if(!LAWBYKEY[l])return;new Set(as.map(a=>parseInt(west(a).split('/')[0]))).forEach(n=>{if(!n)return;const k=l+'#'+n;(ARTMAP[k]=ARTMAP[k]||[]).push(p.id);});}));artIn(PR);
 const pad4=n=>String(n).padStart(4,'0');
 function normToc(L){if(!L.toc||!L.toc.length||L.toc[0].level!=null)return;const out=[];const idxOf=n=>L.articles.findIndex(a=>a.n===n);
   L.toc.forEach(b=>{out.push({kind:'part',level:0,title:b.head+' — '+b.title,frm:b.from,to:b.to,i0:idxOf(b.from),i1:idxOf(b.to)+1});(b.children||[]).forEach(c=>out.push({kind:'chapter',level:1,title:c.head+' — '+c.title,frm:c.from,to:c.to,i0:idxOf(c.from),i1:idxOf(c.to)+1}));});L.toc=out;}
@@ -450,7 +464,7 @@ const CLS={'ا':'[اأإآ]','ي':'[يىئ]','ه':'[هة]','و':'[وؤ]'};
 function hlRe(ts){if(!ts.length)return null;return new RegExp('('+ts.map(t=>[...t].map(ch=>ch===' '?'\\s+':(CLS[ch]||ch.replace(/[.*+?^${}()|[\]\\\/]/g,'\\$&'))+'[\\u064B-\\u0652\\u0640]*').join('')).join('|')+')','g');}
 const hl=(s,re)=>{s=esc(s);return re?s.replace(re,'<mark>$1</mark>'):s;};
 let cur=[],shown=30;
-function filterPR(){const qa=qalts(F.q),art=west(F.art).replace(/\s+/g,'');
+function filterPR(){if(F.q)ensureNS();const qa=qalts(F.q),art=west(F.art).replace(/\s+/g,'');
   return PR.filter(p=>qa.every(al=>p.ns.includes(al.lit)||al.slice(1).some(t=>synHit(p.ns,t)))&&(!F.col||p.col===F.col)&&(!F.tp||p.tp.some(x=>x[0]===F.tp))&&(!F.ch||p.c.some(x=>x.ch===F.ch))&&(!F.st||stOk(p,F.st))&&(!F.rv||p.rv.length)&&(!F.sec||p.sk===F.sec||p.sk.startsWith(F.sec+'›'))
    &&(!F.lw&&!art||p.lw.some(([l,as])=>(!F.lw||l===F.lw)&&(!art||as.some(a=>a===art||a.split('/')[0]===art))))
    &&(!F.ap&&!F.ay||p.c.some(c=>c.k&&apMatch(c.k)))&&(!F.yr||pDate(p).startsWith(F.yr)));}
@@ -516,11 +530,11 @@ function scopeLabel(){const L={col:v=>COLS[v]?.name,tp:v=>TL[v]?.[1],ch:v=>v,lw:
 // ---------- المتابعة: موضوع أو دائرة أو مادة أو بحث، وتنبيه بما يُضاف في الدفعات الجديدة
 const FKEYS=['q','col','tp','ch','lw','art','sec','st'],FBLANK={q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:'',ap:'',ay:'',yr:'',st:'',all:false};
 let FOL=LS.get('follow',[]);
-const CIX={};ORDER.forEach((c,k)=>arrs[k].forEach((p,i)=>CIX[p.id]=i));
-const colN=()=>Object.fromEntries(ORDER.map((c,k)=>[c,arrs[k].length]));
+const CIX={};const cixIn=c=>(COLARR[c]||[]).forEach((p,i)=>CIX[p.id]=i);CORE.forEach(cixIn);
+const colN=()=>Object.fromEntries(ORDER.map(c=>[c,COLS[c].n]));
 let KNOWN=LS.get('known',null);if(!KNOWN||!FOL.length){KNOWN=colN();LS.set('known',KNOWN);}
 const isNew=p=>!(p.col in KNOWN)||CIX[p.id]>=KNOWN[p.col];
-const NEWPR=PR.filter(isNew);
+const NEWPR=PR.filter(isNew);const newIn=list=>list.forEach(p=>{if(isNew(p))NEWPR.push(p);});
 const curF=()=>Object.fromEntries(FKEYS.filter(k=>F[k]).map(k=>[k,F[k]]));
 const fkey=f=>FKEYS.filter(k=>f[k]).map(k=>k+'='+f[k]).join('&');
 function fname(f){return withF(Object.assign({},FBLANK,f),()=>scopeLabel()+(F.st?' · '+STL[F.st]:''));}
@@ -786,7 +800,8 @@ function quoteText(p){const t=blocks(p).filter(b=>b[0]==='t').map(b=>b[1]).join(
 // المعرّف الثابت (tools/refs/build.py): <رقم الطعن>-<سنته>-<رمز الدائرة>/<ترتيب المبدأ في الحكم>، مثل 523-2020-L/1
 const REF={},REFIX={};const CHCODE={'تجاري':'C','مدني':'V','جزائي':'P','عمالي':'L','أحوال شخصية':'F','إداري':'A','طلبات رجال القضاء':'J','تظلمات':'G','هيئة عامة':'H'};
 const CHNAME=Object.fromEntries(Object.entries(CHCODE).map(([a,b])=>[b,a]));
-const REFP=fetch('data/ref.json').then(r=>r.ok?r.json():{cols:{}}).catch(()=>({cols:{}})).then(j=>{ORDER.forEach((c,k)=>(j.cols[c]||[]).forEach((r,i)=>{const p=arrs[k][i];if(r&&p){REF[p.id]=r;(REFIX[r]=REFIX[r]||[]).push(p.id);}}));});
+let REFJ={cols:{}};const refIn=cs=>cs.forEach(c=>(REFJ.cols[c]||[]).forEach((r,i)=>{const p=(COLARR[c]||[])[i];if(r&&p&&REF[p.id]!==r){REF[p.id]=r;(REFIX[r]=REFIX[r]||[]).push(p.id);}}));
+const REFP=fetch('data/ref.json').then(r=>r.ok?r.json():{cols:{}}).catch(()=>({cols:{}})).then(j=>{REFJ=j;refIn(CORE);});
 const plink=p=>BASE+(REF[p.id]?'#/t/'+REF[p.id]:'#/p/'+p.id);
 const refLabel=r=>{const m=/^(\d+)-(\d{4})-([A-Z])(?:\/(\d+))?$/.exec(r||'');return m?`الطعن ${m[1]}/${m[2]}${CHNAME[m[3]]?' '+CHNAME[m[3]]:''}${m[4]?' — المبدأ '+m[4]:''}`:'';};
 // الاستشهاد: يُبنى من رقم الطعن وسنته والدائرة وتاريخ الجلسة كما استُخرجت من إسناد المصدر؛ والنص لا يُمس
@@ -815,7 +830,7 @@ function citeDlg(ps){ps=ps.filter(Boolean);if(!ps.length)return;let f=LS.get('ci
   d.querySelector('#citecp').onclick=()=>clip(body(),()=>{toast('نُسخ الاستشهاد');closeDlg();});
   const lk=d.querySelector('#citelk');if(lk)lk.onclick=()=>clip(plink(ps[0]),()=>{toast('نُسخ الرابط الثابت');closeDlg();});}
 // فتح المعرّف الثابت: #/t/523-2020-L/1 مبدأ، و#/t/523-2020-L الحكم
-async function viewRef(r){await REFP;const el=$('v-item');r=decodeURIComponent(r).replace(/^\/+|\/+$/g,'');
+async function viewRef(r){await REFP;if(!LATEDONE){const r0=decodeURIComponent(r).replace(/^\/+|\/+$/g,'');if(!(REFIX[r0]||[]).length){$('v-item').innerHTML=LOADMSG;await LATEP;await REFP;}}const el=$('v-item');r=decodeURIComponent(r).replace(/^\/+|\/+$/g,'');
   if(r.includes('/')){const ids=(REFIX[r]||[]).filter(i=>BYID[i]);if(!ids.length){el.innerHTML=`<div class="empty">لم يُعثر على المبدأ ${esc(r)}. <button class="linkbtn" data-go="#/search">إلى البحث</button></div>`;return;}
     const keep=collapse(ids.map(i=>BYID[i]))[0]||BYID[ids[0]];viewItem(keep.id);return;}
   const ids=Object.keys(REFIX).filter(x=>x.startsWith(r+'/')).flatMap(x=>REFIX[x]).filter(i=>BYID[i]);
@@ -1057,7 +1072,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610062305';
+const APP_BUILD='202610070004';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1254,7 +1269,7 @@ function runSearch(){shown=30;if(F.yr){const y=F.yr;F.yr='';TLB=collapse(filterP
   const PK={col:1,tp:1,ch:1,lw:1};
   $('actf').innerHTML=Object.keys(L).filter(k=>F[k]&&!(k==='all'&&Object.keys(L).some(j=>j!=='all'&&F[j]))).map(k=>PK[k]?`<span class="achip"><button class="chip ap" data-pick="${k}" title="غيّر الاختيار">${esc(L[k](F[k]))}<svg class="i dn" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button><button class="chip ax" data-clr="${k}" aria-label="إزالة ${esc(L[k](F[k]))}">×</button></span>`:`<button class="chip" data-clr="${k}">${esc(L[k](F[k]))}</button>`).join('');
   const dn=RAWN-cur.length;
-  const syn=qalts(F.q).filter(a=>a.length>1);const fk=curF();$('count').innerHTML=(idle?`${nf(PR.length)} مبدأ في ${ORDER.length} مجموعة`:`${nf(cur.length)} ${mbW(cur.length)}`+(SYNN?` <small class="muted" title="${esc(syn.map(a=>a.join('، ')).join(' | '))}">(تشمل المرادفات)</small>`:'')+(dn>0?` <button class="lnk" data-dupall title="المبدأ نفسه في أكثر من موضع (كتاب آخر أو حكم آخر) يُعرض مرة واحدة يتصدرها أحدث حكم">دُمج ${nf(dn)} متكرر</button>`:DUPALL&&Object.keys(DG).length?` <button class="lnk" data-dupall>دمج المكرر</button>`:''))+(!idle&&Object.keys(fk).length?' '+folBtn(fk):'');}
+  const syn=qalts(F.q).filter(a=>a.length>1);const fk=curF();$('count').innerHTML=(idle?`${nf(PR.length)} مبدأ في ${ORDER.length} مجموعة`:`${nf(cur.length)} ${mbW(cur.length)}`+(LATEDONE?'':' <small class="muted latewait">· تُضاف نتائج الأحكام غير المنشورة بعد اكتمال تحميلها</small>')+(SYNN?` <small class="muted" title="${esc(syn.map(a=>a.join('، ')).join(' | '))}">(تشمل المرادفات)</small>`:'')+(dn>0?` <button class="lnk" data-dupall title="المبدأ نفسه في أكثر من موضع (كتاب آخر أو حكم آخر) يُعرض مرة واحدة يتصدرها أحدث حكم">دُمج ${nf(dn)} متكرر</button>`:DUPALL&&Object.keys(DG).length?` <button class="lnk" data-dupall>دمج المكرر</button>`:''))+(!idle&&Object.keys(fk).length?' '+folBtn(fk):'');}
 // ---------- التصفح ووضع الترتيب (سحب وإفلات من المقبض، والأسهم بديلًا)
 let ARR=null;   // نوع البطاقات الجاري ترتيبها: fams | cols | null
 function renderBrowse(){const b=$('browse');if(!b)return;
@@ -1343,6 +1358,7 @@ function bookPage(el,c){const C=COLS[c];if(!C){el.innerHTML='<div class="empty">
 function pnav(p){const i=POS[p.id],a=PR[i-1],b=PR[i+1];const ok=q=>q&&q.col===p.col;
   return `<div class="pn no-print">${ok(a)?`<button class="btn" data-go="#/p/${a.id}">${svg('back')}<span>السابق: ${a.n}</span></button>`:'<span></span>'}${ok(b)?`<button class="btn" data-go="#/p/${b.id}"><span>التالي: ${b.n}</span><svg class="i" viewBox="0 0 24 24" style="transform:scaleX(-1)"><path d="${IC.back}"/></svg></button>`:''}</div>`;}
 function viewItem(id){if(!BYID[id]&&ALIAS[id]){location.replace('#/p/'+ALIAS[id]);return;}const el=$('v-item'),p=BYID[id];
+  if(!p&&!LATEDONE){el.innerHTML=LOADMSG;LATEP.then(()=>{if(location.hash==='#/p/'+id||location.hash.startsWith('#/t/'))viewItem(id);});return;}
   if(!p){el.innerHTML=`<div class="empty">لا يوجد مبدأ بالمعرّف ${esc(id)}.</div>`;return;}
   if(p.rx!==undefined&&p.rule===undefined){el.innerHTML=LOADMSG;ensureRule(p).then(()=>{if(location.hash==='#/p/'+id||location.hash.startsWith('#/t/'))viewItem(id);});return;}
   HIST=[id,...HIST.filter(x=>x!==id)].slice(0,30);LS.set('hist',HIST);
@@ -1356,7 +1372,7 @@ function viewItem(id){if(!BYID[id]&&ALIAS[id]){location.replace('#/p/'+ALIAS[id]
    ${rs.length?`<h2>المبدأ نفسه في مواضع أخرى (${rs.length})</h2><p class="muted">النص نفسه — كاملًا أو بعضه — منشور في مجموعة أو باب آخر.</p><div class="list">${rs.map(q=>card(q,null)).join('')}</div>`:''}
    ${ro.length?`<h2>مبادئ أخرى من الحكم نفسه (${ro.length})</h2><p class="muted">قررها الحكم ذاته (رقم الطعن والدائرة وتاريخ الجلسة واحدة) في مسائل أخرى، فوردت في أبواب أخرى.</p><div class="list">${ro.map(q=>card(q,null)).join('')}</div>`:''}`;
   wirePages(el);}
-function viewRuling(key){const el=$('v-item'),all=RUL[key]||[],ids=collapse(all.map(i=>BYID[i])).map(p=>p.id),[ap,ses]=key.split('@');
+function viewRuling(key){if(!LATEDONE){$('v-item').innerHTML=LOADMSG;LATEP.then(()=>{if(decodeURIComponent(location.hash).includes(key))viewRuling(key);});if(!(RUL[key]||[]).length)return;}const el=$('v-item'),all=RUL[key]||[],ids=collapse(all.map(i=>BYID[i])).map(p=>p.id),[ap,ses]=key.split('@');
   const chs=[...new Set(all.flatMap(i=>BYID[i].c.filter(c=>c.k===key).map(c=>c.ch)).filter(Boolean))],srcs=[...new Set(all.map(i=>COLS[BYID[i].col].name))];
   const cit=ids.length?BYID[ids[0]].c.find(c=>c.k===key):null;document.title=`الطعن ${ap} — مبادئ التمييز`;
   el.innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>بطاقة الحكم</h2><button class="btn" data-print>${svg('print')}طباعة</button></div>
@@ -1877,4 +1893,14 @@ $('totop').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 {let lastY=0,tt=0;addEventListener('scroll',()=>{const b=$('totop'),y=scrollY;b.hidden=false;const up=y<lastY-4;
   if(y<900||!up){if(y>lastY+4||y<900)b.classList.remove('on');}else{b.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>b.classList.remove('on'),2500);}
   lastY=y;},{passive:true});}
+// ---------- المرحلة الثانية من التحميل: الأحكام غير المنشورة
+(async()=>{if(LATEDONE){nsIdle();return;}const sub=$('sub'),base=()=>`${nf(PR.length)} مبدأً · ${ORDER.length} مجموعة`;
+  if(sub)sub.textContent=base()+' · جارٍ تحميل الأحكام غير المنشورة…';
+  await new Promise(r=>setTimeout(r,400));
+  for(let k=0;k<LATE.length;k++){const c=LATE[k];let a=[];try{a=JSON.parse(await LATET[k]);}catch(_){}
+    await new Promise(r=>setTimeout(r,0));COLARR[c]=a;ingestBase(a);cixIn(c);countIn(a);artIn(a);newIn(a);}
+  dgIn();await REFP;refIn(LATE);ASKIX=null;FOLNEW=null;LATEDONE=true;lateRes();if(sub)sub.textContent=base();
+  const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));
+  if(h==='search'){if(!$('list').hidden||F.q||!idleF())runSearch();else route();}else if(!h||h.startsWith('index')||h==='follow'||h==='more'||h==='review')route();
+  nsIdle();})().catch(e=>console.error(e));
 })().catch(e=>{const m=document.getElementById('main');if(m)m.innerHTML='<div class="empty">تعذّر تحميل المكتبة. أعد تحميل الصفحة.</div>';console.error(e);});
