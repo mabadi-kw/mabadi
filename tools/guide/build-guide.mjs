@@ -22,6 +22,7 @@ async function act(p,a,dev){
   if(a==='ga'){await p.click('#browse [data-f="st"][data-v="ga"]');await p.waitForTimeout(1500);}
   if(a==='follow'){await p.evaluate(()=>{localStorage.setItem('mabadi:follow',JSON.stringify([{f:{ch:'عمالي'},t:1},{f:{q:'مكافأة نهاية الخدمة'},t:2}]));localStorage.removeItem('mabadi:known');});await p.reload();await ready(p);
     await p.evaluate(()=>{const k=JSON.parse(localStorage.getItem('mabadi:known'));for(const c in k)k[c]=Math.max(0,k[c]-15);localStorage.setItem('mabadi:known',JSON.stringify(k));});await p.reload();await ready(p);await p.waitForTimeout(800);}
+  if(a==='cite'){await p.evaluate(()=>{localStorage.setItem('mabadi:citefmt','"full"');document.querySelector('#v-item article.pr[data-id="MRJ-0476"] [data-a="citedlg"]').click();});await p.waitForSelector('.citedlg');await p.waitForTimeout(400);}
   if(a==='changes'){await p.evaluate(()=>document.querySelector('#v-more [data-a2="changes"]').click());await p.waitForSelector('.chgdlg',{timeout:15000});await p.waitForTimeout(400);}
   if(a==='filters'){await p.click('#ftog');await p.selectOption('#flw','6/2010');await p.fill('#fart','41');await p.waitForTimeout(900);}
   if(a==='share'){await p.evaluate(d=>document.querySelector(`article.pr[data-id="${d}"] [data-a="more"]`).click(),DEMO);await p.waitForTimeout(300);await p.evaluate(()=>document.querySelector('.ashs [data-a="share"]').click());await p.waitForTimeout(400);}

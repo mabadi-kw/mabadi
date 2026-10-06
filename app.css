@@ -980,3 +980,15 @@ mark.dif{background:var(--gold-soft);color:inherit;border-radius:3px;box-shadow:
 .askbox .btn.aib .sm{display:none}
 @media (max-width:760px){.askbox .btn.aib .sm{display:inline}.askbox .btn.aib{padding-inline:10px}}
 @media (max-width:760px){.askbox{flex-wrap:wrap;row-gap:8px}.askbox input{flex:1 1 calc(100% - 90px);min-width:0}.askbox .btn.primary,.askbox .btn.aib{flex:1 1 40%;justify-content:center}.askbox .btn.aib .sm{display:none}.askbox .btn.aib .lg{display:inline}}
+/* الاستشهاد والمعرّف الثابت */
+.refln{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font:.85rem var(--f-ui);color:var(--muted);margin:-4px 4px 14px}
+.refln>.i{width:16px;height:16px;color:var(--gold)}.refln code{background:var(--blue-soft);color:var(--navy2);padding:1px 8px;border-radius:6px;font-size:.85rem}
+[data-theme="dark"] .refln code{color:var(--blue)}
+.citeseg{margin:4px 0 10px;flex-wrap:wrap}
+.citepv{white-space:pre-wrap;background:var(--bg);border:1px solid var(--rule);border-radius:12px;padding:12px 14px;font:calc(.95rem*var(--fs))/1.9 var(--f-text);max-height:46vh;overflow:auto;margin:0 0 6px;direction:rtl;text-align:start}
+.citedlg .acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+@media (max-width:760px){.acts .citeb{display:none}}
+.dataint{padding:14px 18px;line-height:1.9}.dataint ul{margin:6px 0 0;padding-inline-start:20px}.dataint code{background:var(--blue-soft);padding:0 6px;border-radius:5px}
+.datafm{padding:14px 18px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}.datafm label{display:flex;flex-direction:column;gap:4px;font:600 .85rem var(--f-ui);width:100%;max-width:420px}
+.datafm select{padding:8px 10px;border-radius:10px;border:1px solid var(--rule);font:1rem var(--f-ui);background:var(--sheet);color:var(--ink)}
+.dchg{padding:10px 16px}.dchg .chg{border-top:1px solid var(--rule);padding:6px 0}.dchg .chg:first-child{border-top:0}.dchg h4{margin:4px 0;font:700 .92rem var(--f-ui)}.dchg ul{margin:0;padding-inline-start:20px;font-size:.88rem;line-height:1.8}
