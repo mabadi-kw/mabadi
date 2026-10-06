@@ -571,10 +571,10 @@ function viewAsk(q){const el=$('v-item');document.title='اسأل المكتبة
       <p>${strong?`${nf(strong)} ${mbW(strong)} ${strong===1?'يجمع':'تجمع'} أغلب عناصر سؤالك`:'لم أجد مبدأً يجمع أغلب عناصر سؤالك؛ هذه أقرب النتائج'}. في أقرب ${nf(top.length)}: ${Object.entries(chc).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`${esc(c)} (${n})`).join('، ')||'—'}${ds.length?` · الجلسات ${ds[0].slice(0,4)}–${ds[ds.length-1].slice(0,4)} · أحدثها ${fdate(ds[ds.length-1])}`:''}.</p>
       ${arts.length?`<div class="aarts"><span>أكثر المواد ورودًا فيها:</span>${arts.join('')}</div>`:''}
       <div class="acts"><button class="btn" id="askcp">${svg('copy')}نسخ أقرب خمسة بنصها وإسنادها</button><button class="btn" data-q="${esc(q)}">${svg('search')}البحث العادي بالعبارة</button></div></div>
-      <details class="card fold askext"><summary>${svg('spark')} استعن بمساعد ذكاء اصطناعي خارجي <small>اختياري — يكتب خلاصة من هذه المبادئ وحدها</small></summary>
+      <div class="card askext"><h3>${svg('spark')} اطلب خلاصة من مساعد ذكاء اصطناعي <small>اختياري</small></h3>
        <p>يُجهَّز سؤالك مع أقرب <b>${Math.min(8,R.length)}</b> مبادئ بنصها وإسنادها، مع تعليمات بأن يجيب منها وحدها ويحيل إلى رقم كل مبدأ، ويصرّح إن لم تكفِ. لا تتضمن المبادئ أسماء الخصوم.</p>
        <p class="muted small">${svg('info')} عند الضغط فقط يغادر السؤال ونصوص المبادئ جهازك إلى الخدمة التي تختارها. ما يكتبه المساعد صياغته هو لا نص المحكمة؛ فارجع إلى المبدأ نفسه قبل الاعتماد عليه.</p>
-       <div class="acts"><button class="btn" data-ext="copy">${svg('copy')}نسخ السؤال مع المبادئ</button><button class="btn" data-ext="claude">${svg('open')}افتح في Claude</button><button class="btn" data-ext="chatgpt">${svg('open')}افتح في ChatGPT</button></div></details>`;
+       <div class="acts"><button class="btn" data-ext="copy">${svg('copy')}نسخ السؤال مع المبادئ</button><button class="btn" data-ext="claude">${svg('open')}افتح في Claude</button><button class="btn" data-ext="chatgpt">${svg('open')}افتح في ChatGPT</button></div></div>`;
     const list=()=>R.slice(0,ASKN).map(x=>`<div class="askit"><div class="askm"><span class="amb" style="--v:${Math.round(x.c*100)}%" title="نسبة عناصر السؤال الواردة في المبدأ"><i></i></span>${x.c>=.75?'يجمع أغلب عناصر السؤال':x.c>=.4?'يتصل ببعض عناصر السؤال':'صلة بعيدة'}</div>${card(x.p,re)}</div>`).join('');
     box.outerHTML=facts+`<h2 class="csec">${svg('scale')}أقرب المبادئ إلى سؤالك</h2><div id="askl" class="list">${list()}</div><div class="more"><button class="btn" id="askmore"${R.length>ASKN?'':' hidden'}>عرض المزيد</button></div>
       <p class="hint">${svg('info')} الترتيب آلي بحسب تقارب الألفاظ، والنصوص منقولة حرفيًا من مصادرها. اقرأ المبدأ وإسناده قبل الاعتماد عليه.</p>`;
@@ -915,7 +915,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610061247';
+const APP_BUILD='202610061345';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -976,7 +976,7 @@ function viewHome(){
     <button class="gate pr" data-go="#/search"><span class="gk">${svg('scale')}</span><span class="gnum">${nf(PR.length)}</span><span class="glab">مبدأ</span><b>المبادئ</b><small>${ORDER.length} مجموعة · ${nf(Object.keys(RUL).length)} حكمًا مفهرسًا</small><span class="garr">${svg('back')}</span></button>
     <button class="gate lw" data-go="#/laws"><span class="gk">${svg('scroll')}</span><span class="gnum">${nf(LAWIX.length)}</span><span class="glab">تشريعًا</span><b>التشريعات</b><small>${nf(arts)} مادة${lastG?` · آخر ما نُشر: ${esc(lastG.short)}`:''}</small><span class="garr">${svg('back')}</span></button>
    </div>
-   <form class="askcta" id="hask"><span class="ak">${svg('spark')}</span><span class="at"><b>اسأل المكتبة</b><small>اكتب سؤالًا كاملًا بلغتك، فتعرض لك أقرب المبادئ إليه بنصها وإسنادها — على جهازك ودون اتصال</small></span><span class="ain"><input id="haskq" type="search" placeholder="مثل: هل يستحق العامل المكافأة إذا استقال؟" autocomplete="off" enterkeyhint="search"><button class="btn gold" type="submit">اسأل</button></span></form>
+   <form class="askcta" id="hask"><span class="ak" role="button" tabindex="0" aria-label="اسأل المكتبة" data-hak>${svg('spark')}</span><span class="at"><b>اسأل المكتبة</b><small>اكتب سؤالًا كاملًا بلغتك، فتعرض لك أقرب المبادئ إليه بنصها وإسنادها — على جهازك ودون اتصال</small></span><span class="ain"><input id="haskq" type="search" placeholder="مثل: هل يستحق العامل المكافأة إذا استقال؟" autocomplete="off" enterkeyhint="search"><button class="btn gold" type="submit">اسأل</button></span></form>
    ${(()=>{const n=folNewCount();return n?`<button class="folban card" data-go="#/follow">${svg('bell')}<span><b>جديد فيما تتابعه: ${nf(n)} ${mbW(n)}</b><small>أضيفت إلى المكتبة مبادئ تخص ما تتابعه — اضغط للاطلاع</small></span><span class="garr">${svg('back')}</span></button>`:'';})()}
    <div>
    ${recent.length?`<div class="sech"><h2>تابع من حيث توقفت</h2><button class="lnk" data-hist>عرض السجل ‹</button></div><div class="hsc">${recent.map(mini).join('')}</div>`:''}
@@ -986,6 +986,7 @@ function viewHome(){
    </div>`;
   weave(el.querySelector('.hero'),8);el.querySelectorAll('.gate').forEach(g=>weave(g,7));
   $('hsf').onsubmit=e=>{e.preventDefault();doSearch($('hq').value);};
+  el.querySelectorAll('[data-hak],.askcta .at').forEach(x=>x.onclick=()=>{const v=$('haskq').value.trim();if(v)$('hask').requestSubmit();else go('#/ask');});
   $('hask').onsubmit=e=>{e.preventDefault();const v=$('haskq').value.trim();go(v?'#/ask/'+encodeURIComponent(v):'#/ask');};
 }
 // «صدر حديثًا»: آخر ما أضيف من الجريدة الرسمية ومن المساهمات، بالأحدث إصدارًا

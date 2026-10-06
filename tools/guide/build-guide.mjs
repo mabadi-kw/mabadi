@@ -16,7 +16,7 @@ async function act(p,a,dev){
   if(a==='search'){await p.fill('#sq',QUERY);await p.waitForTimeout(1200);}
   if(a==='facets'){await p.fill('#sq',QUERY);await p.waitForTimeout(1500);await p.click('.facets [data-fset="ch"][data-v="عمالي"]');await p.waitForTimeout(1500);}
   if(a==='pick'){await p.fill('#sq',QUERY);await p.waitForTimeout(1500);await p.click('.facets [data-fset="tp"][data-tog]');await p.waitForTimeout(1500);await p.click('#actf [data-pick="tp"]');await p.waitForTimeout(600);}
-  if(a==='ask'||a==='askext'){await p.waitForSelector('#askl',{timeout:30000});if(a==='askext'){await p.click('details.askext summary');await p.waitForTimeout(300);await p.evaluate(()=>document.querySelector('details.askext').scrollIntoView({block:'start'}));await p.evaluate(()=>scrollBy(0,-80));}await p.waitForTimeout(400);}
+  if(a==='ask'||a==='askext'){await p.waitForSelector('#askl',{timeout:30000});if(a==='askext'){await p.evaluate(()=>document.querySelector('.askext').scrollIntoView({block:'start'}));await p.evaluate(()=>scrollBy(0,-80));}await p.waitForTimeout(400);}
   if(a==='tline'){await p.fill('#sq',QUERY);await p.waitForTimeout(1500);await p.click('.tlc[data-yr="2014"]');await p.waitForTimeout(1200);await p.evaluate(()=>{const e=document.querySelector('.tline');scrollTo(0,e.getBoundingClientRect().top+scrollY-(innerWidth<700?70:90));});await p.waitForTimeout(300);}
   if(a==='cmp'){await p.fill('#sq',QUERY);await p.waitForTimeout(1500);await p.click('.facets [data-go="#/cmp"]');await p.waitForSelector('.ctile',{timeout:30000});await p.waitForTimeout(800);}
   if(a==='ga'){await p.click('#browse [data-f="st"][data-v="ga"]');await p.waitForTimeout(1500);}

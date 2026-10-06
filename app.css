@@ -966,3 +966,6 @@ mark.dif{background:var(--gold-soft);color:inherit;border-radius:3px;box-shadow:
 .chgdlg h4{margin:4px 0;font:700 .95rem var(--f-ui)}.chgdlg h4 small{color:var(--muted);font-weight:400}
 .chgdlg ul{margin:4px 0;padding-inline-start:20px;line-height:1.9;font-size:.9rem}
 .chgdlg .acts{margin:8px 0}
+.askext{border:1px solid #c9a24b;background:linear-gradient(180deg,var(--gold-soft),var(--sheet) 60%);padding:12px 16px}
+.askext h3{display:flex;align-items:center;gap:6px;margin:0 0 4px;font-size:1rem}.askext h3 small{font:400 .75rem var(--f-ui);color:var(--muted)}
+.askcta .ak,.askcta .at{cursor:pointer}
