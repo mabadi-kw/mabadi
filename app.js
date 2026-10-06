@@ -179,6 +179,25 @@ const LAWIX=[],LAWBYKEY={},LAWBYID={},ARTBYID={},ARTMAP={},LAWDATA={},MEMO={};
 try{const LI=await fetch('data/laws/index.json').then(r=>r.json());LI.laws.forEach(x=>{LAWIX.push(x);LAWBYKEY[x.key]=x;LAWBYID[x.id]=x;});}catch(_){}
 // سجل التعديلات والإلغاءات اللاحقة (من الجريدة الرسمية) على القوانين والمواد الموجودة في المكتبة
 let AMEND={laws:{},arts:{},added:{}};try{AMEND=await fetch('data/laws/amend.json').then(r=>r.ok?r.json():AMEND);}catch(_){}
+// حالة المبدأ (على طريقة «المدقّق»): عُدل عنه (مقرّر يدويًا في data/status.json) · حكم عدول من الهيئة العامة · صدر بعده تعديل أو إلغاء للنص الذي طبّقه · متواتر
+let STAT={ga:{},over:{}};try{STAT=await fetch('data/status.json').then(r=>r.ok?r.json():STAT);}catch(_){}
+const pDate=p=>p.c.map(c=>(c.k||'').split('@')[1]).filter(Boolean).sort().pop()||'';
+const evDate=e=>e.date||((LAWBYKEY[e.by]||{}).issued)||'';
+function pChanges(p){if(p._chg)return p._chg;const d=pDate(p),out=[];if(!d)return p._chg=out;
+  p.lw.forEach(([l,as])=>{const L=LAWBYKEY[l];if(!L)return;
+    new Set(as.map(a=>parseInt(west(String(a)).split('/')[0])).filter(Boolean)).forEach(n=>(AMEND.arts[L.id+'#'+n]||[]).forEach(e=>{const ed=evDate(e);if(ed&&ed>d)out.push({k:'art',l,n,L,e,ed});}));
+    (AMEND.laws[l]||[]).forEach(e=>{if(e.what!=='إلغاء')return;const ed=evDate(e);if(ed&&ed>d)out.push({k:e.pending?'pend':'law',l,L,e,ed});});});
+  return p._chg=out;}
+function statusHTML(p,ntw){const o=[],d=pDate(p);
+  if(STAT.over[p.id]){const g=BYID[STAT.over[p.id]];o.push(`<button class="stb red" data-go="#/p/${esc(STAT.over[p.id])}" title="ثبت أن الهيئة العامة عدلت عن هذا المبدأ">${svg('info')}عُدل عنه${g&&pDate(g)?' — الهيئة العامة '+fdate(pDate(g)):''}</button>`);}
+  if(STAT.ga[p.id])o.push(`<span class="stb ga" title="نصّ حكم الهيئة العامة على العدول عن رأي سابق">${svg('scale')}حكم عدول من الهيئة العامة</span>`);
+  const ch=pChanges(p);if(ch.length){const art=ch.filter(x=>x.k==='art'),law=ch.filter(x=>x.k==='law'),pend=ch.filter(x=>x.k==='pend');
+    const li=[...art.map(x=>`<li>المادة ${x.n} من ${esc(x.L.short)}: <b>${esc(x.e.how)}${x.e.part?' — '+esc(x.e.part):''}</b> بـ${lawLink(x.e.by)} الصادر في ${fdate(x.ed)} — <button class="linkbtn" data-go="#/a/${x.L.id}-A${pad4(x.n)}@${d}">النص يوم الجلسة</button> · <button class="linkbtn" data-go="#/a/${x.L.id}-A${pad4(x.n)}">النص بعد التعديل</button></li>`),
+      ...law.map(x=>`<li>${esc(x.L.short)} (${esc(x.l)}): <b>أُلغي</b> بـ${lawLink(x.e.by)} الصادر في ${fdate(x.ed)}</li>`),
+      ...pend.map(x=>`<li>${esc(x.L.short)} (${esc(x.l)}): صدر ما يلغيه (${lawLink(x.e.by)})، ولم يُعمل بالإلغاء بعد</li>`)];
+    o.push(`<details class="stb yel"><summary>${svg('info')}صدر بعده ${law.length?'إلغاء':art.some(x=>x.e.how==='إلغاء')?'إلغاء':'تعديل'} للنص الذي طبّقه (${ch.length})</summary><p class="hint">المبدأ صادر في ${fdate(d)}، وما يلي صدر بعده في الجريدة الرسمية. التاريخ تاريخ صدور التشريع اللاحق، فتحقّق من تاريخ العمل به. وما عُدّل قبل طبعة 2011 لا يظهر هنا.</p><ul>${li.join('')}</ul></details>`);}
+  if(ntw>0)o.push(`<span class="stb grn" title="المبدأ نفسه بنصه في أحكام أخرى">${svg('check')}متواتر · ${ntw+1===2?'حكمان':ntw+1<=10?(ntw+1)+' أحكام':(ntw+1)+' حكمًا'}</span>`);
+  return o.length?`<div class="status">${o.join('')}</div>`:'';}
 const AMBY={};Object.entries(AMEND.arts||{}).forEach(([k,v])=>v.forEach(e=>{const [lid,n]=k.split('#');(AMBY[e.by_art]=AMBY[e.by_art]||[]).push({...e,lid,n});}));
 Object.entries(AMEND.added||{}).forEach(([key,v])=>v.forEach(e=>{const x=LAWBYKEY[key];(AMBY[e.by_art]=AMBY[e.by_art]||[]).push({...e,lid:x&&x.id,n:e.n,key});}));
 PR.forEach(p=>p.lw.forEach(([l,as])=>{if(!LAWBYKEY[l])return;new Set(as.map(a=>parseInt(west(a).split('/')[0]))).forEach(n=>{if(!n)return;const k=l+'#'+n;(ARTMAP[k]=ARTMAP[k]||[]).push(p.id);});}));
@@ -201,7 +220,6 @@ function artHits(){const ts=terms(F.q);if(!ts.length||F.col||F.tp||F.ch||F.rv||F
   return o.sort((a,b)=>b[2]-a[2]);}   // الصلة: العبارة متصلة أولًا، ثم القانون الأكثر إحالةً في المبادئ
 const artPR=a=>a.issue?[]:(ARTMAP[a.law.key+'#'+a.n]||[]).map(i=>BYID[i]).filter(Boolean);
 // قضاء التمييز في المادة: سطر خلاصة، ثم المسائل (إن تعددت)، ثم المبادئ الأحدث أولًا، والمكرر والمتواتر بطاقة واحدة
-const pDate=p=>p.c.map(c=>(c.k||'').split('@')[1]).filter(Boolean).sort().pop()||'';
 const AJ={};
 function artJur(a,ps){const box=$('ajur');if(!box)return;const st=AJ[a.id]||(AJ[a.id]={tp:'',old:false,n:20});
   const cards=collapse(ps.slice().sort((x,y)=>pDate(y).localeCompare(pDate(x))));
@@ -317,7 +335,7 @@ function palette(){const d=dlg(`${svg('search')} انتقال سريع`,`<input 
   inp.onkeydown=e=>{if(e.key==='ArrowDown'){sel=Math.min(sel+1,items.length-1);render();e.preventDefault();}else if(e.key==='ArrowUp'){sel=Math.max(sel-1,0);render();e.preventDefault();}else if(e.key==='Enter'){e.preventDefault();open(sel);}};
   $('pres').onclick=e=>{const b=e.target.closest('[data-pi]');if(b)open(+b.dataset.pi);};render();setTimeout(()=>inp.focus(),40);}
 document.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&(e.key==='k'||e.key==='K'||e.key==='ك')){e.preventDefault();palette();}});
-function viewArt(id){const el=$('v-item');el.innerHTML=LOADMSG;const lid=lawOfArt(id);
+function viewArt(id0){const el=$('v-item');el.innerHTML=LOADMSG;const [id,atD]=String(id0).split('@');const lid=lawOfArt(id);
   loadLaw(lid).then(L=>{let a=ARTBYID[id];if(!a){const m=id.match(/-A0*(\d+)$/);if(m&&L.byN)a=L.byN[+m[1]];}
   if(!a){el.innerHTML=`<div class="empty">هذه المادة غير موجودة في نص الطبعة المتاح. <button class="linkbtn" data-go="#/law/${lid}">افتح القانون</button></div>`;return;}
   const pv=L.articles.slice(0,a.i).reverse().find(x=>!!x.issue===!!a.issue),nx=L.articles.slice(a.i+1).find(x=>!!x.issue===!!a.issue),ps=artPR(a);document.title=`${a.label} — ${L.short}`;
@@ -325,6 +343,7 @@ function viewArt(id){const el=$('v-item');el.innerHTML=LOADMSG;const lid=lawOfAr
   el.innerHTML=`<div class="crumbs no-print"><button data-go="#/laws">التشريعات</button>›<button data-go="#/law/${L.id}">${esc(L.short)}</button>${trail.length?'›<span>'+trail.map(esc).join(' › ')+'</span>':''}</div>
    <div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>${esc(a.label)}${a.issue?' (من مواد الإصدار)':''} — ${esc(L.short)}</h2><button class="btn" data-print>${svg('print')}طباعة</button></div>
    ${!a.issue&&ps.length?`<div class="ajump no-print"><button class="lnk" data-jump="aprs">${svg('scale')}قضاء التمييز في هذه المادة (${collapse(ps).length}) ↓</button></div>`:''}
+   <div id="apit" class="no-print"></div>
    <article class="card artcard"><div class="ltxt${a.paras.length>4?' folded':''}">${a.paras.length?a.paras.map(x=>`<p>${esc(x)}</p>`).join(''):'<p class="muted">لا يوجد نص لهذه المادة في الطبعة، وقد تبيّن الحاشية سبب ذلك.</p>'}</div>${a.paras.length>4?`<button class="btn sm unfold no-print" data-unfoldtxt>${svg('dots')}بقية نص المادة (${a.paras.length-2} فقرات)</button>`:''}
     ${a.notes&&a.notes.length?`<div class="lnotes"><b>حاشية الطبعة</b>${a.notes.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}
     <div class="verban small">${svg('info')}<span>${esc(L.text_version)}.</span></div>
@@ -335,6 +354,7 @@ function viewArt(id){const el=$('v-item');el.innerHTML=LOADMSG;const lid=lawOfAr
    <div id="amemo"></div>
    ${a.issue?'':`<h2 id="aprs">قضاء التمييز في هذه المادة</h2>${ps.length?'<div id="ajur"></div>':'<p class="muted">لا توجد في المكتبة مبادئ تحيل إلى هذه المادة بعد.</p>'}`}`;
   if(!a.issue&&ps.length)artJur(a,ps);
+  artTimeline(L,a,atD);
   const url=location.href.split('#')[0]+'#/a/'+a.id;
   const uf=el.querySelector('[data-unfoldtxt]');if(uf)uf.onclick=()=>{el.querySelector('.ltxt').classList.remove('folded');uf.remove();};
   const jp=el.querySelector('[data-jump]');if(jp)jp.onclick=()=>{const h=$('aprs');if(h)window.scrollTo({top:h.getBoundingClientRect().top+scrollY-70,behavior:'smooth'});};
@@ -359,6 +379,34 @@ function viewArt(id){const el=$('v-item');el.innerHTML=LOADMSG;const lid=lawOfAr
   if(LAWBYID[L.id]&&LAWBYID[L.id].memo&&!a.issue&&a.n)loadMemo(L.id).then(M=>{const ks=(M.mentions[a.n]||[]);if(!ks.length||!$('amemo'))return;
     $('amemo').innerHTML=`<details class="card mref"><summary><b>في ${esc(M.title.split(' — ')[0])}</b> <span class="muted">${ks.length} فقرة تذكر رقم هذه المادة</span></summary><p class="hint">${esc(M.note)}</p>${ks.slice(0,30).map(k=>`<button class="arow" data-go="#/m/${L.id}/${k}"><b>${esc(pgCaption(M.page_meta,M.paras[k].pg))}</b><span>${esc(M.paras[k].t.slice(0,260))}${M.paras[k].t.length>260?'…':''}</span></button>`).join('')}</details>`;}).catch(()=>{});
   }).catch(()=>{el.innerHTML='<div class="empty">تعذّر تحميل القانون.</div>';});}
+// النص في تاريخ معيّن: إصدارات المادة من سجل التعديلات (الاستبدال الكامل فقط يُكوِّن نصًا؛ التعديل الجزئي يُذكر ولا يُدمج)
+async function artVersions(L,a){const ev=artEv(L,a).map(e=>({...e,dt:evDate(e)})).filter(e=>e.dt).sort((x,y)=>x.dt.localeCompare(y.dt));
+  const V=[{from:'',paras:a.paras,base:true}];
+  for(const e of ev){await loadLaw(e.by_id).catch(()=>null);const t=ARTBYID[e.by_art];
+    if(e.how==='إلغاء'){V.push({from:e.dt,paras:[],rep:true,e});continue;}
+    const sg=t?amSeg(t.paras,a.n,a.bis):null,full=sg&&sg.seg.length&&e.how==='استبدال'&&!e.part&&!(sg.lab&&/فقرة|بند/.test(sg.lab));
+    V.push(full?{from:e.dt,paras:sg.seg,e}:{from:e.dt,partial:true,e,paras:null});}
+  const lr=((AMEND.laws||{})[L.key]||[]).find(e=>e.what==='إلغاء'&&!e.pending);if(lr&&evDate(lr))V.push({from:evDate(lr),paras:[],lawrep:true,e:lr});
+  V.sort((x,y)=>x.from.localeCompare(y.from));return V;}
+function verAt(V,d){let i=0;V.forEach((v,k)=>{if(!v.from||v.from<=d)i=k;});return i;}
+async function artTimeline(L,a,atD){const box=$('apit');if(!box||a.issue)return;const V=await artVersions(L,a);if(V.length<2&&!atD){return;}
+  const lab=(v,k)=>v.base?`حتى ${V[k+1]?fdate(V[k+1].from):'الآن'}`:`${v.rep?'أُلغيت':v.lawrep?'أُلغي القانون':v.partial?'عُدّلت جزئيًا':'من'} ${fdate(v.from)}`;
+  const today=new Date().toISOString().slice(0,10);
+  box.innerHTML=`<div class="card pit"><div class="pith"><b>${svg('clock')}النص في تاريخ معيّن</b><label>التاريخ <input type="date" id="pitd" value="${atD||''}" max="${today}"></label><button class="btn sm" id="pitnow">الأحدث</button><button class="btn sm" id="pitsrc">نص المصدر</button></div>
+    <div class="pitl">${V.map((v,k)=>`<button class="chip${v.rep||v.lawrep?' rep':''}" data-v="${k}">${esc(lab(v,k))}</button>`).join('')}</div><div class="pitn hint" id="pitn"></div></div>`;
+  const txt=document.querySelector('.artcard .ltxt'),orig=txt?txt.innerHTML:'';
+  const show=(k,why)=>{box.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',+b.dataset.v===k));const v=V[k];let note='',paras=null;
+    if(v.base){paras=a.paras;note=`نص المصدر (${esc(L.ver||L.text_version||'')}).`+(why&&why<'2011-02'&&/طبعة/.test(L.ver||'')?' تاريخك أقدم من الطبعة؛ قد يكون للنص صيغة أسبق تذكرها حاشية الطبعة.':'');}
+    else if(v.rep||v.lawrep){paras=[];note=`${v.lawrep?'أُلغي القانون كله':'أُلغيت هذه المادة'} بـ${lawLink(v.e.by)} الصادر في ${fdate(v.from)}.`;}
+    else if(v.partial){let j=k-1;while(j>0&&V[j].partial)j--;paras=V[j].paras;note=`عُدّلت جزئيًا بـ${lawLink(v.e.by)} الصادر في ${fdate(v.from)}${v.e.part?' ('+esc(v.e.part)+')':''}؛ النص المعروض هو السابق للتعديل الجزئي، ونص التعديل في الصندوق أدناه، ولم يُدمج.`;}
+    else{paras=v.paras;note=`النص بعد ${esc(v.e.how)} بـ${lawLink(v.e.by)} الصادر في ${fdate(v.from)}، منقول من نص التعديل كما نُشر.`;}
+    if(txt){txt.classList.remove('folded');txt.innerHTML=paras&&paras.length?paras.map(x=>`<p>${esc(x)}</p>`).join(''):`<p class="muted">لا نص نافذ لهذه المادة في هذا التاريخ.</p>`;const uf=document.querySelector('[data-unfoldtxt]');if(uf)uf.remove();}
+    $('pitn').innerHTML=(why?`في ${fdate(why)}: `:'')+note+' <span class="muted">تاريخ التعديل هو تاريخ صدور التشريع المعدِّل؛ تحقّق من تاريخ العمل به.</span>';};
+  box.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{$('pitd').value='';show(+b.dataset.v);});
+  $('pitd').onchange=e=>{const d=e.target.value;if(d)show(verAt(V,d),d);};
+  $('pitnow').onclick=()=>{$('pitd').value='';show(V.length-1);};
+  $('pitsrc').onclick=()=>{$('pitd').value='';if(txt)txt.innerHTML=orig;box.querySelectorAll('[data-v]').forEach(b=>b.classList.remove('on'));$('pitn').textContent='';};
+  if(atD)show(verAt(V,atD),atD);}
 function viewMemo(lid,k){const el=$('v-item');el.innerHTML=LOADMSG;k=k==null?null:+k;
   Promise.all([loadLaw(lid),loadMemo(lid)]).then(([L,M])=>{document.title=M.title+' — مبادئ التمييز';
    const W=150;let lo=k==null?0:Math.max(0,k-40),hi=Math.min(M.paras.length,(k==null?0:k)+W);
@@ -471,6 +519,7 @@ function card(p,re,o={}){
    <div class="num">${p.n}${p.np!==p.n?`<small>طُبع ${p.np}</small>`:''}<div class="idchip">${p.id}</div></div>
    <div class="body">
     <div class="crumb"><span>${esc(COLS[p.col].name)}</span>${COLS[p.col].unpub?'<span class="abadge">من حكم غير منشور</span>':''}${p.sec.map(x=>`<span>${esc(x)}</span>`).join('')}</div>
+    ${statusHTML(p,tw.length)}
     ${p.ttl?`<div class="ttl">${hl(p.ttl,re)}</div>`:''}<div class="text">${h.join('')}</div>
     ${p.rule===undefined&&p.rx!==undefined?`<details class="rule" data-rx="${p.id}"${o.open?' open':''}><summary>القاعدة — نص الحكم</summary><div class="text">جارٍ التحميل…</div></details>`:''}
     ${p.rule?`<details class="rule"${o.open||(re&&(re.lastIndex=0,re.test(p.rule)))?' open':''}><summary>القاعدة — نص الحكم</summary><div class="text">${hl(p.rule,re)}</div></details>`:''}
@@ -728,7 +777,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610051841';
+const APP_BUILD='202610061039';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1075,7 +1124,7 @@ function viewAbout(){setTimeout(aboutVer,0);$('v-about').innerHTML=`<div class="
    <li><b>مساهمة «مداولة»</b>: ${nf(LAWIX.filter(x=>x.src==='amali').length)} وثيقة في مجال العمل نقلها تطبيق «مداولة» بصريًا، ولم تُطابَق بعد مع صفحات الجريدة؛ تحمل تنبيهًا بذلك.</li></ul>
    <ul><li>نص المادة منقول حرفيًا. التعديل اللاحق لا يُدمج في النص آليًا، بل يظهر إلى جانبه بنصه المنشور، مع إمكان مقارنة النصين.</li><li>ما لم يُراجع على الجريدة الرسمية يُعلَّم، وما كان التعديل فيه جزئيًا يبقى «يحتاج مراجعة».</li><li>التشريعات تخضع للتعديل باستمرار؛ قبل الاعتماد في حكم ارجع إلى الجريدة الرسمية.</li></ul>
   <h3>التطبيق الشقيق</h3></div>${amaliCard()}<div class="prose"><p class="muted">كل من التطبيقين مستقل ويعمل دون اتصال، ولا يطلب شيئًا من الآخر؛ الرابط يفتحه المستخدم بنفسه. على الآيفون والآيباد يُفتح في Safari لا في التطبيق المثبّت.</p>
-  <h3>روابط ثابتة</h3><ul><li>لكل مبدأ رابط ثابت بمعرّفه: <code>#/p/V09L-0001</code></li><li>ولكل حكم رابط يجمع ما ورد عنه: <code>#/r/69/1977@1979-03-12</code></li><li>ولكل تشريع ومادة رابط: <code>#/law/LAW-6-2010</code> و<code>#/a/LAW-6-2010-A0041</code></li></ul>
+  <h3>حالة المبدأ</h3><ul><li><b>متواتر</b>: المبدأ نفسه بنصه في أحكام أخرى.</li><li><b>صدر بعده تعديل أو إلغاء</b>: المادة التي طبّقها المبدأ عُدّلت أو أُلغيت، أو أُلغي قانونها، بتشريع منشور في الجريدة الرسمية بعد تاريخ جلسته. ومنه رابط «النص يوم الجلسة».</li><li><b>حكم عدول من الهيئة العامة</b>: حكم نصّت فيه الهيئة العامة على العدول عن رأي سابق.</li><li><b>عُدل عنه</b>: لا يُعلَّم به مبدأ إلا بعد مراجعة بشرية تثبت أن الهيئة العامة عدلت عنه، ولا يُضاف آليًا.</li></ul><p class="muted">وفي صفحة كل مادة عُدّلت: «النص في تاريخ معيّن». الاستبدال الكامل يُكوِّن نصًا جديدًا، والتعديل الجزئي يُذكر ولا يُدمج، وما عُدّل قبل طبعة 2011 لا يظهر.</p><h3>روابط ثابتة</h3><ul><li>لكل مبدأ رابط ثابت بمعرّفه: <code>#/p/V09L-0001</code></li><li>ولكل حكم رابط يجمع ما ورد عنه: <code>#/r/69/1977@1979-03-12</code></li><li>ولكل تشريع ومادة رابط: <code>#/law/LAW-6-2010</code> و<code>#/a/LAW-6-2010-A0041</code></li></ul>
 </div>`;}
 // ---------- SETTINGS
 function settingsDlg(toSync){
