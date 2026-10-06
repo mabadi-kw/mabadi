@@ -7,6 +7,7 @@ try{for(const [nm,vp] of [['جوال',{viewport:{width:390,height:844},isMobile:
   await c.addInitScript(()=>{localStorage.setItem('mabadi:bknudge','9999999999999');localStorage.setItem('mabadi:iosnudge','9999999999999');localStorage.setItem('mabadi:intro','1');});
   const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(String(e)));
   await p.goto(url+'index.html#/');await p.waitForTimeout(3500);
+  await p.waitForSelector('.askcta',{timeout:15000}).catch(()=>{});
   ck(nm+': بطاقة «اسأل المكتبة» في الرئيسية',await p.locator('form.askcta #haskq').count()===1);
   await p.locator('.askcta .ak').click();await p.waitForTimeout(800);
   ck(nm+': صفحة السؤال بأمثلة',await p.locator('.askex .chip').count()>=3);
@@ -33,6 +34,17 @@ try{for(const [nm,vp] of [['جوال',{viewport:{width:390,height:844},isMobile:
   const labs=await p.evaluate(()=>[...document.querySelectorAll('.tlc .tly')].filter(e=>e.textContent).map(e=>{const r=e.getBoundingClientRect();return [e.textContent,r.left,r.right];}));
   let ov=0;labs.sort((a,b)=>a[1]-b[1]);for(let i=1;i<labs.length;i++)if(labs[i][1]<labs[i-1][2]+2)ov++;
   ck(nm+': لا تتداخل أرقام السنوات بعد الاختيار',ov===0,JSON.stringify(labs.map(x=>x[0])));
+  // زر «مع الذكاء الاصطناعي»
+  await p.evaluate(()=>{localStorage.removeItem('mabadi:aisvc');location.hash='#/';});await p.waitForTimeout(1200);
+  ck(nm+': علامة صندوق «اسأل المكتبة» ليست علامة الذكاء الاصطناعي',await p.evaluate(()=>!document.querySelector('.askcta .ak').innerHTML.includes('M12 3l1.8')));
+  await p.fill('#haskq','تقادم دعوى العامل');await p.locator('.askcta [data-askai]').click();await p.waitForTimeout(500);
+  ck(nm+': أول مرة يسأل عن المساعد',await p.locator('.dlg.aidlg [data-aisv]').count()===3);
+  await p.context().route(/claude\.ai|chatgpt\.com/,r=>r.fulfill({contentType:'text/html',body:'<p>ok</p>'}));
+  const pop=p.context().waitForEvent('page',{timeout:8000}).catch(()=>null);
+  await p.locator('[data-aisv="claude"]').click();const np=await pop;if(np)await np.waitForLoadState().catch(()=>{});
+  ck(nm+': يفتح Claude ومعه السؤال',!!np&&/claude\.ai/.test(np.url()),np&&np.url().slice(0,60));if(np)await np.close();
+  await p.waitForSelector('#askl',{timeout:20000});ck(nm+': وتبقى صفحة المبادئ للتحقق',(await p.inputValue('#askq')).includes('تقادم'));
+  ck(nm+': الاختيار محفوظ ويظهر في البطاقة',(await p.locator('.askext h3').innerText()).includes('Claude'));
   ck(nm+': لا أخطاء',errs.length===0,errs.join(' | '));
   const w=await p.evaluate(()=>document.documentElement.scrollWidth-innerWidth);ck(nm+': لا تمرير أفقي',w<=1,w);
   if(nm==='مكتب'){await p.evaluate(()=>{location.hash='#/ask/'+encodeURIComponent('هل يستحق العامل مكافأة نهاية الخدمة إذا استقال قبل خمس سنوات');});await p.waitForSelector('#askl');await p.screenshot({path:'out/ask.png'});}

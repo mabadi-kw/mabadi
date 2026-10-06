@@ -22,7 +22,7 @@ function saveUser(){LS.set('favs',FAV);LS.set('folders',FOLD);LS.set('notes',NOT
 const saveS=()=>LS.set('settings',S);
 // نموذج التقييم: يُملأ عند إنشاء نموذج Google الخاص بالمكتبة
 // ---------- icons
-const IC={spark:'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z', bell:'M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 0 0 4 0', cols:'M4 5h6v14H4zM14 5h6v14h-6', tag:'M3 12V4h8l10 10-8 8zM7.5 7.5h.01', swap:'M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7', dots:'M5 12h.01M12 12h.01M19 12h.01', check:'M5 12l5 5L20 7', grip:'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01',
+const IC={askq:'M4 5h16v11H10l-5 4v-4H4zM10 9.2a2 2 0 1 1 3 1.7c-.6.4-1 .8-1 1.4M12 13.8h.01', spark:'M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8zM19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z', bell:'M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9M10 21a2 2 0 0 0 4 0', cols:'M4 5h6v14H4zM14 5h6v14h-6', tag:'M3 12V4h8l10 10-8 8zM7.5 7.5h.01', swap:'M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7', dots:'M5 12h.01M12 12h.01M19 12h.01', check:'M5 12l5 5L20 7', grip:'M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01',
  gavel:'M14 3l7 7-3 3-7-7zM11 6l-7 7 3 3 7-7M3 21h10', briefcase:'M3 8h18v11H3zM8 8V5h8v3M3 13h18',
  scroll:'M6 3h11a3 3 0 0 1 0 6H6zM6 3a3 3 0 0 0 0 6v9a3 3 0 0 0 3 3h9V9', contract:'M6 3h8l4 4v14H6zM9 11h6M9 15h4',
  building:'M4 21V5l8-2v18M12 8l8 2v11M2 21h20M8 9h.01M8 13h.01M8 17h.01M16 13h.01M16 17h.01', house:'M3 11l9-7 9 7M5 10v10h14V10M10 20v-5h4v5',
@@ -422,7 +422,7 @@ function viewMemo(lid,k){const el=$('v-item');el.innerHTML=LOADMSG;k=k==null?nul
   }).catch(()=>{el.innerHTML='<div class="empty">تعذّر تحميل المذكرة.</div>';});}
 // ---------- views scaffold
 const main=$('main');
-const SNAV=[['home','home','الرئيسية','ما فتحته مؤخرًا والموضوعات'],['search','scale','المبادئ',`${nf(PR.length)} مبدأ · بحث وتصفح`],['ask','spark','اسأل المكتبة','سؤال كامل، والجواب مبادئ بنصها'],['laws','scroll','التشريعات','نصوص القوانين مادةً مادة'],['index','book','الفهرس','الموضوعات والقوانين والكتب'],['saved','star','المحفوظات','مجلداتك وملاحظاتك'],['about','info','عن المكتبة','المصادر وقواعد النزاهة'],['report','report','التقارير','طريقة الاستخراج والتحقق']];
+const SNAV=[['home','home','الرئيسية','ما فتحته مؤخرًا والموضوعات'],['search','scale','المبادئ',`${nf(PR.length)} مبدأ · بحث وتصفح`],['ask','askq','اسأل المكتبة','سؤال كامل، والجواب مبادئ بنصها'],['laws','scroll','التشريعات','نصوص القوانين مادةً مادة'],['index','book','الفهرس','الموضوعات والقوانين والكتب'],['saved','star','المحفوظات','مجلداتك وملاحظاتك'],['about','info','عن المكتبة','المصادر وقواعد النزاهة'],['report','report','التقارير','طريقة الاستخراج والتحقق']];
 IC.home='M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z';
 main.innerHTML=`<div class="shell"><aside class="sidenav" aria-label="الأقسام">${SNAV.map(([k,i,t,d])=>`<button class="navcard" data-nav="${k}"><span class="ic">${svg(i)}</span><span><b>${t}</b><small>${d}</small></span></button>`).join('')}
  <button class="navcard" data-a2="settings"><span class="ic">${svg('gear')}</span><span><b>الإعدادات</b><small>الخط والمظهر والقفل</small></span></button>
@@ -551,9 +551,23 @@ function askRun(q){const X=askIndex(),{ws,T}=askTerms(q);if(!T.size)return {ws,R
   return {ws,R,miss,main};}
 const ASKEX=['هل يستحق العامل مكافأة نهاية الخدمة إذا استقال قبل خمس سنوات؟','متى يبدأ تقادم دعوى العامل بعد انتهاء العقد؟','هل يجوز الطعن بالتمييز في الحكم الصادر في الشق المستعجل؟','التعويض عن الضرر الأدبي للشخص الاعتباري','أثر عدم إعلان صحيفة الاستئناف في الميعاد'];
 let ASKN=8;
+// المساعد الخارجي: النص المرسَل = السؤال + أقرب المبادئ بنصها، مع تعليمات بالإجابة منها وحدها
+function aiPrompt(q,R){return 'أجب عن السؤال التالي معتمدًا فقط على مبادئ محكمة التمييز الكويتية المرفقة بنصها الحرفي. لا تضف مبدأً من عندك، ولا تنسب إلى المحكمة ما لم يرد فيها. بعد كل جملة اذكر رقم المبدأ الذي تستند إليه بين معقوفين مثل [م1]. إن اختلفت المبادئ فبيّن ذلك مع دوائرها وتواريخها، وإن لم تكفِ للإجابة فقل ذلك صراحة. اكتب بالعربية.\n\nالسؤال: '+q+'\n\nالمبادئ:\n'+R.slice(0,8).map((x,i)=>{const P=x.p,d=pDate(P),k=((P.c.find(c=>c.k)||{}).k||'').split('@')[0];return `[م${i+1}] (${pCh(P).join('، ')||'—'}${d?' — جلسة '+fdate(d):''}${k?' — الطعن '+k.replace(/\+/g,' و'):''})\n${P.p.join('\n')}`;}).join('\n\n');}
+function aiSend(k,t){if(k==='copy'){clip(t,()=>toast('نُسخ السؤال مع المبادئ؛ الصقه في المساعد الذي تختاره'));return;}
+  const base=k==='claude'?'https://claude.ai/new':'https://chatgpt.com/',enc=encodeURIComponent(t);
+  if(enc.length<7000)window.open(base+'?q='+enc,'_blank','noopener');
+  else{clip(t,()=>toast('نُسخ السؤال مع المبادئ — الصقه في المحادثة التي فُتحت'));window.open(base,'_blank','noopener');}}
+const AISN={claude:'Claude',chatgpt:'ChatGPT',copy:'النسخ فقط'};
+// زر «مع الذكاء الاصطناعي»: يحسب المبادئ فورًا (داخل الضغطة نفسها حتى لا يمنع المتصفح فتح النافذة)، ثم يعرض صفحة المبادئ للتحقق
+function askAI(q,svc){q=(q||'').trim();if(!q){toast('اكتب سؤالك أولًا');return;}
+  const run=k=>{const {R}=askRun(q);if(!R.length){go('#/ask/'+encodeURIComponent(q));return;}aiSend(k,aiPrompt(q,R));go('#/ask/'+encodeURIComponent(q));};
+  const k=svc||LS.get('aisvc','');if(k)return run(k);
+  const d=dlg('اختر المساعد',`<p>يُرسَل سؤالك مع أقرب المبادئ إليه بنصها إلى المساعد الذي تختاره، مع تعليمات بأن يجيب منها وحدها ويحيل إلى رقم كل مبدأ. لا يُرسل أي شيء آخر. ويُحفظ اختيارك، وتغيّره من بطاقة المساعد في صفحة الجواب.</p>
+    <div class="aich">${['claude','chatgpt','copy'].map(x=>`<button class="btn${x==='claude'?' primary':''}" data-aisv="${x}">${x==='copy'?svg('copy')+'انسخ فقط وألصقه بنفسي':svg('open')+AISN[x]}</button>`).join('')}</div>`,'aidlg');
+  d.querySelectorAll('[data-aisv]').forEach(b=>b.onclick=()=>{LS.set('aisvc',b.dataset.aisv);closeDlg();run(b.dataset.aisv);});}
 function viewAsk(q){const el=$('v-item');document.title='اسأل المكتبة';q=(q||'').trim();ASKN=8;
   const head=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>اسأل المكتبة</h2>${q?`<button class="btn" data-print>${svg('print')}طباعة</button>`:'<span></span>'}</div>
-   <form class="sbox askbox" id="askf">${svg('search')}<input id="askq" type="search" value="${esc(q)}" placeholder="اكتب سؤالك كما تكتبه لزميل…" autocomplete="off" enterkeyhint="search">${micBtn('askq')}<button class="btn primary" type="submit">اسأل</button></form>`;
+   <form class="sbox askbox" id="askf">${svg('search')}<input id="askq" type="search" value="${esc(q)}" placeholder="اكتب سؤالك كما تكتبه لزميل…" autocomplete="off" enterkeyhint="search">${micBtn('askq')}<button class="btn primary" type="submit">اسأل</button><button class="btn aib" type="button" data-askai="askq" title="يجمع المبادئ على جهازك ثم يفتح المساعد الذي تختاره ومعه سؤالك والمبادئ">${svg('spark')}<span class="lg">مع الذكاء الاصطناعي</span><span class="sm">بالذكاء</span></button></form>`;
   const wire=()=>{$('askf').onsubmit=e=>{e.preventDefault();const v=$('askq').value.trim();if(v)go('#/ask/'+encodeURIComponent(v));};};
   if(!q){el.innerHTML=head+`<div class="askintro card"><p>اكتب سؤالًا كاملًا بلغتك، فتعرض لك المكتبة أقرب المبادئ إليه <b>بنصها كما ورد في المصدر</b> مع إسنادها، والمواد المتصلة بها، ودوائرها وتواريخها.</p>
      <ul><li>يعمل على جهازك ودون اتصال؛ لا يُرسل سؤالك إلى أي جهة.</li><li>لا يكتب جوابًا من عنده ولا يعيد صياغة مبدأ؛ يرتّب ما في المكتبة بحسب قربه من سؤالك.</li><li>لا يشترط أن ترد كل كلماتك في المبدأ، بخلاف البحث العادي.</li></ul></div>
@@ -571,7 +585,7 @@ function viewAsk(q){const el=$('v-item');document.title='اسأل المكتبة
       <p>${strong?`${nf(strong)} ${mbW(strong)} ${strong===1?'يجمع':'تجمع'} أغلب عناصر سؤالك`:'لم أجد مبدأً يجمع أغلب عناصر سؤالك؛ هذه أقرب النتائج'}. في أقرب ${nf(top.length)}: ${Object.entries(chc).sort((a,b)=>b[1]-a[1]).map(([c,n])=>`${esc(c)} (${n})`).join('، ')||'—'}${ds.length?` · الجلسات ${ds[0].slice(0,4)}–${ds[ds.length-1].slice(0,4)} · أحدثها ${fdate(ds[ds.length-1])}`:''}.</p>
       ${arts.length?`<div class="aarts"><span>أكثر المواد ورودًا فيها:</span>${arts.join('')}</div>`:''}
       <div class="acts"><button class="btn" id="askcp">${svg('copy')}نسخ أقرب خمسة بنصها وإسنادها</button><button class="btn" data-q="${esc(q)}">${svg('search')}البحث العادي بالعبارة</button></div></div>
-      <div class="card askext"><h3>${svg('spark')} اطلب خلاصة من مساعد ذكاء اصطناعي <small>اختياري</small></h3>
+      <div class="card askext"><h3>${svg('spark')} اطلب خلاصة من مساعد ذكاء اصطناعي <small>اختياري${LS.get('aisvc','')?' · المفضّل: '+AISN[LS.get('aisvc','')]:''}</small></h3>
        <p>يُجهَّز سؤالك مع أقرب <b>${Math.min(8,R.length)}</b> مبادئ بنصها وإسنادها، مع تعليمات بأن يجيب منها وحدها ويحيل إلى رقم كل مبدأ، ويصرّح إن لم تكفِ. لا تتضمن المبادئ أسماء الخصوم.</p>
        <p class="muted small">${svg('info')} عند الضغط فقط يغادر السؤال ونصوص المبادئ جهازك إلى الخدمة التي تختارها. ما يكتبه المساعد صياغته هو لا نص المحكمة؛ فارجع إلى المبدأ نفسه قبل الاعتماد عليه.</p>
        <div class="acts"><button class="btn" data-ext="copy">${svg('copy')}نسخ السؤال مع المبادئ</button><button class="btn" data-ext="claude">${svg('open')}افتح في Claude</button><button class="btn" data-ext="chatgpt">${svg('open')}افتح في ChatGPT</button></div></div>`;
@@ -579,11 +593,8 @@ function viewAsk(q){const el=$('v-item');document.title='اسأل المكتبة
     box.outerHTML=facts+`<h2 class="csec">${svg('scale')}أقرب المبادئ إلى سؤالك</h2><div id="askl" class="list">${list()}</div><div class="more"><button class="btn" id="askmore"${R.length>ASKN?'':' hidden'}>عرض المزيد</button></div>
       <p class="hint">${svg('info')} الترتيب آلي بحسب تقارب الألفاظ، والنصوص منقولة حرفيًا من مصادرها. اقرأ المبدأ وإسناده قبل الاعتماد عليه.</p>`;
     $('askmore').onclick=()=>{ASKN+=10;$('askl').innerHTML=list();$('askmore').hidden=R.length<=ASKN;};
-    const extP=()=>'أجب عن السؤال التالي معتمدًا فقط على مبادئ محكمة التمييز الكويتية المرفقة بنصها الحرفي. لا تضف مبدأً من عندك، ولا تنسب إلى المحكمة ما لم يرد فيها. بعد كل جملة اذكر رقم المبدأ الذي تستند إليه بين معقوفين مثل [م1]. إن اختلفت المبادئ فبيّن ذلك مع دوائرها وتواريخها، وإن لم تكفِ للإجابة فقل ذلك صراحة. اكتب بالعربية.\n\nالسؤال: '+q+'\n\nالمبادئ:\n'+R.slice(0,8).map((x,i)=>{const P=x.p,d=pDate(P),k=((P.c.find(c=>c.k)||{}).k||'').split('@')[0];return `[م${i+1}] (${pCh(P).join('، ')||'—'}${d?' — جلسة '+fdate(d):''}${k?' — الطعن '+k.replace(/\+/g,' و'):''})\n${P.p.join('\n')}`;}).join('\n\n');
-    el.querySelectorAll('[data-ext]').forEach(b=>b.onclick=()=>{const t=extP(),k=b.dataset.ext;
-      if(k==='copy'){clip(t,()=>toast('نُسخ السؤال مع المبادئ؛ الصقه في المساعد الذي تختاره'));return;}
-      const base=k==='claude'?'https://claude.ai/new':'https://chatgpt.com/',enc=encodeURIComponent(t);
-      if(enc.length<7000){window.open(base+'?q='+enc,'_blank','noopener');}else clip(t,()=>{toast('نُسخ النص — الصقه في المحادثة التي ستفتح');window.open(base,'_blank','noopener');});});
+    const extP=()=>aiPrompt(q,R);
+    el.querySelectorAll('[data-ext]').forEach(b=>b.onclick=()=>{const k=b.dataset.ext;if(k!=='copy')LS.set('aisvc',k);aiSend(k,extP());});
     $('askcp').onclick=()=>{const t='سؤال: '+q+'\n\n'+R.slice(0,5).map((x,i)=>`${i+1}- ${x.p.p.join('\n')}\n${x.p.c.map(c=>c.raw).join('\n')}`).join('\n\n')+'\n\n— من «مكتبة مبادئ التمييز»';clip(t,()=>toast('نُسخت أقرب خمسة مبادئ'));};
   },30);}
 let CTAB='';
@@ -915,7 +926,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610061345';
+const APP_BUILD='202610061427';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -976,7 +987,7 @@ function viewHome(){
     <button class="gate pr" data-go="#/search"><span class="gk">${svg('scale')}</span><span class="gnum">${nf(PR.length)}</span><span class="glab">مبدأ</span><b>المبادئ</b><small>${ORDER.length} مجموعة · ${nf(Object.keys(RUL).length)} حكمًا مفهرسًا</small><span class="garr">${svg('back')}</span></button>
     <button class="gate lw" data-go="#/laws"><span class="gk">${svg('scroll')}</span><span class="gnum">${nf(LAWIX.length)}</span><span class="glab">تشريعًا</span><b>التشريعات</b><small>${nf(arts)} مادة${lastG?` · آخر ما نُشر: ${esc(lastG.short)}`:''}</small><span class="garr">${svg('back')}</span></button>
    </div>
-   <form class="askcta" id="hask"><span class="ak" role="button" tabindex="0" aria-label="اسأل المكتبة" data-hak>${svg('spark')}</span><span class="at"><b>اسأل المكتبة</b><small>اكتب سؤالًا كاملًا بلغتك، فتعرض لك أقرب المبادئ إليه بنصها وإسنادها — على جهازك ودون اتصال</small></span><span class="ain"><input id="haskq" type="search" placeholder="مثل: هل يستحق العامل المكافأة إذا استقال؟" autocomplete="off" enterkeyhint="search"><button class="btn gold" type="submit">اسأل</button></span></form>
+   <form class="askcta" id="hask"><span class="ak" role="button" tabindex="0" aria-label="اسأل المكتبة" data-hak>${svg('askq')}</span><span class="at"><b>اسأل المكتبة</b><small>اكتب سؤالًا كاملًا بلغتك، فتعرض لك أقرب المبادئ إليه بنصها وإسنادها — على جهازك ودون اتصال</small></span><span class="ain"><input id="haskq" type="search" placeholder="مثل: هل يستحق العامل المكافأة إذا استقال؟" autocomplete="off" enterkeyhint="search"><button class="btn gold" type="submit">اسأل</button><button class="btn aib" type="button" data-askai="haskq" title="يجمع المبادئ على جهازك ثم يفتح المساعد الذي تختاره ومعه سؤالك والمبادئ">${svg('spark')}مع الذكاء الاصطناعي</button></span></form>
    ${(()=>{const n=folNewCount();return n?`<button class="folban card" data-go="#/follow">${svg('bell')}<span><b>جديد فيما تتابعه: ${nf(n)} ${mbW(n)}</b><small>أضيفت إلى المكتبة مبادئ تخص ما تتابعه — اضغط للاطلاع</small></span><span class="garr">${svg('back')}</span></button>`:'';})()}
    <div>
    ${recent.length?`<div class="sech"><h2>تابع من حيث توقفت</h2><button class="lnk" data-hist>عرض السجل ‹</button></div><div class="hsc">${recent.map(mini).join('')}</div>`:''}
@@ -1008,7 +1019,7 @@ function listen(target,btn){const r=new SR();r.lang='ar-KW';r.interimResults=fal
 function buildSearch(){
   const el=$('v-search');
   el.innerHTML=`<div class="searchbar"><form class="sbox" id="ssf">${svg('search')}<input id="sq" type="search" placeholder="ابحث في نص المبدأ أو الإسناد: مكافأة نهاية الخدمة، 423/2003، «الفصل التعسفي»" autocomplete="off" enterkeyhint="search">${micBtn('sq')}<button class="btn" type="button" id="ftog">${svg('filter')}تصفية</button></form></div>
-   <div class="scoperow"><div class="scope" id="scope" role="tablist"><button data-scope="p" role="tab">المبادئ</button><button data-scope="l" role="tab">التشريعات</button></div><button class="askbtn" data-go="#/ask">${svg('spark')}اسأل المكتبة</button></div>
+   <div class="scoperow"><div class="scope" id="scope" role="tablist"><button data-scope="p" role="tab">المبادئ</button><button data-scope="l" role="tab">التشريعات</button></div><button class="askbtn" data-go="#/ask">${svg('askq')}اسأل المكتبة</button></div>
    <div class="sfields" id="sfp"><label>رقم الطعن<input id="fap" inputmode="numeric" placeholder="مثل 730" autocomplete="off"></label><label>السنة<input id="fay" inputmode="numeric" placeholder="مثل 2012" autocomplete="off"></label></div>
    <div class="sfields" id="sfl" hidden><label>رقم التشريع<input id="lnum" inputmode="numeric" placeholder="مثل 6" autocomplete="off"></label><label>السنة<input id="lyr" inputmode="numeric" placeholder="مثل 2010" autocomplete="off"></label></div>
    <div class="quick" id="sqk"></div>
@@ -1157,7 +1168,7 @@ function timelineHTML(){const B=TLB||[];if(B.length<8)return '';const by={};let 
   const legend=`<button class="lgb${F.st==='ga'?' on':''}" data-fset="st" data-v="ga" data-tog title="اعرض أحكام العدول وحدها"><i class="ga"></i>عدول من الهيئة العامة</button><span><i class="lw"></i>صدور أو تعديل قانون</span><span><i class="rp"></i>إلغاء</span>`;
   const sel=F.yr&&by[F.yr]?`<b class="tlsel">معروض الآن: مبادئ جلسات ${F.yr} فقط (${nf(by[F.yr].length)})</b>`:'';
   return `<details class="card tline fold${F.yr?' has':''}" open><summary>${svg('clock')} المسار عبر الزمن <small class="muted">${mn}–${mx} · اضغط عمود سنة لعرض مبادئها وحدها، واضغطه ثانية للعودة</small></summary><div class="tlw"><div class="tlg">${h}</div></div><div class="tll">${sel}${legend}${F.yr?`<button class="lnk" data-clr="yr">✕ كل السنوات</button>`:''}</div></details>`;}
-function renderList(){const re=hlRe(qalts(F.q).flat());const ah=artHits();$('list').innerHTML=(F.q?jumpHTML(smartJump(F.q)):'')+(F.q&&txn(F.q).split(' ').filter(w=>w.length>1).length>=3?`<button class="askjump card${cur.length<3?' strong':''}" data-ask="${esc(F.q)}">${svg('spark')}<span><b>اسأل المكتبة بهذه العبارة</b><small>${cur.length<3?'نتائج قليلة لأن البحث يشترط ورود كل الكلمات — «اسأل المكتبة» يرتّب الأقرب ولو لم ترد كلها':'يرتّب المبادئ بقربها من عبارتك ولو لم ترد كل كلماتها'}</small></span><span class="garr">${svg('back')}</span></button>`:'')+facetsHTML()+timelineHTML()+(ah.length?`<details class="arthits card fold"><summary>${svg('scroll')} في نصوص التشريعات: ${nf(ah.length)} ${ah.length===1?'مادة':ah.length<11?'مواد':'مادة'} <small>${esc(ah.slice(0,2).map(([L,a])=>a.label+' · '+L.short).join(' — '))}${ah.length>2?' …':''}</small></summary>${ah.slice(0,8).map(([L,a])=>`<button class="arow" data-go="#/a/${a.id}"><b>${esc(a.label)} · ${esc(L.short)}</b><span>${hl(a.paras.join(' ').slice(0,220),re)}${a.paras.join(' ').length>220?'…':''}</span></button>`).join('')}${ah.length>8?`<button class="btn sm" data-scope-l="1">كل المواد في نطاق «التشريعات» (${nf(ah.length)})</button>`:''}</details>`:'')+(cur.length?cur.slice(0,shown).map(p=>card(p,re)).join(''):'<div class="empty">لا توجد نتائج. جرّب كلمة أقصر أو أزل أحد المرشحات.</div>');$('more').hidden=cur.length<=shown;prefetchRules(cur.slice(0,shown));}
+function renderList(){const re=hlRe(qalts(F.q).flat());const ah=artHits();$('list').innerHTML=(F.q?jumpHTML(smartJump(F.q)):'')+(F.q&&txn(F.q).split(' ').filter(w=>w.length>1).length>=3?`<button class="askjump card${cur.length<3?' strong':''}" data-ask="${esc(F.q)}">${svg('askq')}<span><b>اسأل المكتبة بهذه العبارة</b><small>${cur.length<3?'نتائج قليلة لأن البحث يشترط ورود كل الكلمات — «اسأل المكتبة» يرتّب الأقرب ولو لم ترد كلها':'يرتّب المبادئ بقربها من عبارتك ولو لم ترد كل كلماتها'}</small></span><span class="garr">${svg('back')}</span></button>`:'')+facetsHTML()+timelineHTML()+(ah.length?`<details class="arthits card fold"><summary>${svg('scroll')} في نصوص التشريعات: ${nf(ah.length)} ${ah.length===1?'مادة':ah.length<11?'مواد':'مادة'} <small>${esc(ah.slice(0,2).map(([L,a])=>a.label+' · '+L.short).join(' — '))}${ah.length>2?' …':''}</small></summary>${ah.slice(0,8).map(([L,a])=>`<button class="arow" data-go="#/a/${a.id}"><b>${esc(a.label)} · ${esc(L.short)}</b><span>${hl(a.paras.join(' ').slice(0,220),re)}${a.paras.join(' ').length>220?'…':''}</span></button>`).join('')}${ah.length>8?`<button class="btn sm" data-scope-l="1">كل المواد في نطاق «التشريعات» (${nf(ah.length)})</button>`:''}</details>`:'')+(cur.length?cur.slice(0,shown).map(p=>card(p,re)).join(''):'<div class="empty">لا توجد نتائج. جرّب كلمة أقصر أو أزل أحد المرشحات.</div>');$('more').hidden=cur.length<=shown;prefetchRules(cur.slice(0,shown));}
 function setFilter(k,v){Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:'',ap:'',ay:'',yr:'',st:'',all:false});SCOPE='p';F[k]=v;go('#/search');}
 // ---------- INDEX
 let idxTab='topics';
@@ -1242,7 +1253,7 @@ function printSaved(){const favs=Object.entries(FAV).filter(([id,v])=>BYID[id]&&
 function viewMore(){const inst=navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
   const T=(attr,ic,b,n)=>`<button class="tile" ${attr}><span class="ic">${svg(ic)}</span><b>${b}</b><span class="n">${n}</span></button>`;
   $('v-more').innerHTML=`<h2>أدواتك</h2><div class="grid g3">
-  ${T('data-go="#/ask"','search','اسأل المكتبة','سؤال كامل بلغتك، والجواب مبادئ بنصها')}
+  ${T('data-go="#/ask"','askq','اسأل المكتبة','سؤال كامل بلغتك، والجواب مبادئ بنصها')}
   ${T('data-a2="changes"','spark','ما الجديد','سجل تحديثات التطبيق والمكتبة')}
   ${T('data-go="#/follow"','bell','ما تتابعه',FOL.length?`${FOL.length} ${FOL.length<=2?'متابعة':'متابعات'}${folNewCount()?' · '+folNewCount()+' جديد':''}`:'تنبيه بما يُضاف في موضوع أو مادة')}
   ${T('data-go="#/index/topics"','book','الفهرس','الموضوعات والقوانين والكتب')}
@@ -1623,6 +1634,7 @@ document.addEventListener('click',e=>{const t=e.target;
   const fg=t.closest('[data-fgo]');if(fg){F[fg.dataset.fgo]=fg.dataset.v;go('#/search');return;}
   const fo=t.closest('[data-fol]');if(fo){toggleFollow(JSON.parse(fo.dataset.fol));const on=following(JSON.parse(fo.dataset.fol));document.querySelectorAll('[data-fol]').forEach(b=>{if(b.dataset.fol===fo.dataset.fol){b.classList.toggle('on',on);b.setAttribute('aria-pressed',on);b.innerHTML=svg('bell')+(on?'تتابعه':'تابِع');}});return;}
   const fgo=t.closest('[data-folgo]');if(fgo){Object.assign(F,FBLANK,JSON.parse(fgo.dataset.folgo));SCOPE='p';go('#/search');return;}
+  const ai=t.closest('[data-askai]');if(ai){askAI(($(ai.dataset.askai)||{}).value);return;}
   const ak=t.closest('[data-ask]');if(ak){go('#/ask/'+encodeURIComponent(ak.dataset.ask));return;}
   const pk=t.closest('[data-pick]');if(pk){pickDlg(pk.dataset.pick);return;}
   const ct=t.closest('[data-ctab]');if(ct){CTAB=ct.dataset.ctab;document.querySelectorAll('[data-ctab]').forEach(b=>b.classList.toggle('on',b.dataset.ctab===CTAB));document.querySelectorAll('.ccol').forEach(c=>c.classList.toggle('on',c.dataset.ch===CTAB));if(innerWidth<761){const c=document.querySelector('.ccol.on');if(c)window.scrollTo({top:c.getBoundingClientRect().top+scrollY-80,behavior:'smooth'});}return;}

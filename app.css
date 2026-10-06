@@ -969,3 +969,14 @@ mark.dif{background:var(--gold-soft);color:inherit;border-radius:3px;box-shadow:
 .askext{border:1px solid #c9a24b;background:linear-gradient(180deg,var(--gold-soft),var(--sheet) 60%);padding:12px 16px}
 .askext h3{display:flex;align-items:center;gap:6px;margin:0 0 4px;font-size:1rem}.askext h3 small{font:400 .75rem var(--f-ui);color:var(--muted)}
 .askcta .ak,.askcta .at{cursor:pointer}
+/* زر «مع الذكاء الاصطناعي» */
+.btn.aib{background:#1d1640;color:#fff;border-color:#4b3b8f;font-weight:700;gap:6px;white-space:nowrap}
+.btn.aib .i{color:#c9b8ff}
+.askcta .btn.aib{background:rgba(20,14,48,.85);border-color:rgba(201,184,255,.5)}
+.askbox .btn.aib{margin-inline-start:6px}
+@media (max-width:760px){.askcta .ain{flex-wrap:wrap}.askcta input{flex:1 1 100%}.askcta .ain .btn{flex:1}.askbox .btn.aib .lg{display:none}}
+.aich{display:flex;flex-direction:column;gap:8px;margin-top:10px}
+.sbox .btn.aib,.askbox .btn.aib{background:#1d1640;color:#fff;border-color:#4b3b8f}
+.askbox .btn.aib .sm{display:none}
+@media (max-width:760px){.askbox .btn.aib .sm{display:inline}.askbox .btn.aib{padding-inline:10px}}
+@media (max-width:760px){.askbox{flex-wrap:wrap;row-gap:8px}.askbox input{flex:1 1 calc(100% - 90px);min-width:0}.askbox .btn.primary,.askbox .btn.aib{flex:1 1 40%;justify-content:center}.askbox .btn.aib .sm{display:none}.askbox .btn.aib .lg{display:inline}}
