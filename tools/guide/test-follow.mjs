@@ -35,7 +35,7 @@ try{for(const [nm,vp] of [['جوال',{viewport:{width:390,height:844},isMobile:
   await p.evaluate(()=>{location.hash='#/a/LAW-6-2010-A0051';});await p.waitForTimeout(2500);
   ck(nm+': «تابِع» في صفحة المادة',await p.locator('.ajump [data-fol]').count()===1);
   // ما الجديد بعد التحديث
-  await p.evaluate(()=>{localStorage.setItem('mabadi:seenbuild','"202601010000"');location.hash='#/';});await p.reload();await p.waitForTimeout(5000);
+  await p.evaluate(()=>{localStorage.setItem('mabadi:seenbuild','"202601010000"');location.hash='#/';});await p.reload();await p.waitForSelector('.dlg.chgdlg',{timeout:20000}).catch(()=>{});await p.waitForTimeout(500);
   ck(nm+': شاشة «تم التحديث — ما الجديد»',await p.locator('.dlg.chgdlg li').count()>3);
   await p.keyboard.press('Escape');await p.waitForTimeout(300);
   ck(nm+': لا أخطاء',errs.length===0,errs.join(' | '));
