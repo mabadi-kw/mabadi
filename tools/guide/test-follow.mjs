@@ -20,7 +20,7 @@ try{for(const [nm,vp] of [['جوال',{viewport:{width:390,height:844},isMobile:
   await p.locator('#actf [data-clr="st"]').click();await p.waitForTimeout(800);
   await p.fill('#sq','مكافأة نهاية الخدمة');await p.waitForTimeout(1500);
   await p.locator('.facets [data-fset="ch"][data-v="عمالي"]').click();await p.waitForTimeout(1200);
-  await p.fill('#sq','');await p.waitForTimeout(1500);
+  await p.fill('#sq','');await p.keyboard.press('Escape');await p.waitForTimeout(1500);
   await p.locator('.facets [data-fset="ch"][data-v=""]').click();await p.waitForTimeout(2500);
   ck(nm+': «كل الدوائر» بلا بحث يبقى في القائمة',await p.locator('#browse').isHidden()&&await p.locator('#list article.pr').count()>0);
   // المتابعة

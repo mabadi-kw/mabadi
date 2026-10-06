@@ -992,3 +992,23 @@ mark.dif{background:var(--gold-soft);color:inherit;border-radius:3px;box-shadow:
 .datafm{padding:14px 18px;display:flex;flex-direction:column;gap:12px;align-items:flex-start}.datafm label{display:flex;flex-direction:column;gap:4px;font:600 .85rem var(--f-ui);width:100%;max-width:420px}
 .datafm select{padding:8px 10px;border-radius:10px;border:1px solid var(--rule);font:1rem var(--f-ui);background:var(--sheet);color:var(--ink)}
 .dchg{padding:10px 16px}.dchg .chg{border-top:1px solid var(--rule);padding:6px 0}.dchg .chg:first-child{border-top:0}.dchg h4{margin:4px 0;font:700 .92rem var(--f-ui)}.dchg ul{margin:0;padding-inline-start:20px;font-size:.88rem;line-height:1.8}
+/* أسفل القائمة الجانبية: روابط صغيرة */
+.navmini{display:flex;flex-direction:column;gap:2px;margin-top:10px;padding-top:10px;border-top:1px solid var(--rule)}
+.navmini button{all:unset;display:flex;align-items:center;gap:10px;padding:8px 14px;border-radius:12px;cursor:pointer;font:600 .88rem var(--f-ui);color:var(--muted)}
+.navmini button .i{width:18px;height:18px;color:var(--gold)}
+.navmini button:hover{background:var(--sheet);color:var(--ink)}
+.navmini button[aria-current="true"]{background:var(--navy2);color:#fff}.navmini button[aria-current="true"] .i{color:#ffd978}
+.navmini button:focus-visible{outline:2px solid var(--blue)}
+/* تبويبات «عن المكتبة» */
+.atabs{margin:0 0 14px}
+/* قائمة اقتراحات البحث */
+.sughost{position:relative}
+.sugbox{position:absolute;z-index:30;top:calc(100% + 6px);inset-inline:0;background:var(--sheet);border:1px solid var(--rule);border-radius:16px;box-shadow:0 14px 40px rgba(11,31,59,.18);padding:6px;max-height:min(60vh,460px);overflow:auto;text-align:start;color:var(--ink)}
+.sugbox[hidden]{display:none}
+.sugh{display:flex;justify-content:space-between;align-items:center;padding:8px 10px 4px;font:700 .74rem var(--f-ui);color:var(--muted)}
+.sugi{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:10px;cursor:pointer;font-family:var(--f-ui)}
+.sugi>.i{width:17px;height:17px;color:var(--gold);flex:none}
+.sugi span{display:flex;flex-direction:column;flex:1;min-width:0}.sugi b{font-weight:600;font-size:.92rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sugi small{color:var(--muted);font-size:.74rem}
+.sugi:hover,.sugi.on{background:var(--blue-soft)}
+.sugx{border:0;background:none;color:var(--muted);font-size:1.1rem;cursor:pointer;padding:2px 8px;border-radius:8px}.sugx:hover{background:var(--rule)}
+.hero .sugbox{color:var(--ink)}

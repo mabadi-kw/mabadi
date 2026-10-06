@@ -422,19 +422,18 @@ function viewMemo(lid,k){const el=$('v-item');el.innerHTML=LOADMSG;k=k==null?nul
   }).catch(()=>{el.innerHTML='<div class="empty">تعذّر تحميل المذكرة.</div>';});}
 // ---------- views scaffold
 const main=$('main');
-const SNAV=[['home','home','الرئيسية','ما فتحته مؤخرًا والموضوعات'],['search','scale','المبادئ',`${nf(PR.length)} مبدأ · بحث وتصفح`],['ask','askq','اسأل المكتبة','سؤال كامل، والجواب مبادئ بنصها'],['laws','scroll','التشريعات','نصوص القوانين مادةً مادة'],['index','book','الفهرس','الموضوعات والقوانين والكتب'],['saved','star','المحفوظات','مجلداتك وملاحظاتك'],['about','info','عن المكتبة','المصادر وقواعد النزاهة'],['report','report','التقارير','طريقة الاستخراج والتحقق']];
+const SNAV=[['home','home','الرئيسية','ما فتحته مؤخرًا والموضوعات'],['search','scale','المبادئ',`${nf(PR.length)} مبدأ · بحث وتصفح`],['ask','askq','اسأل المكتبة','سؤال كامل، والجواب مبادئ بنصها'],['laws','scroll','التشريعات','نصوص القوانين مادةً مادة'],['index','book','الفهرس','الموضوعات والقوانين والكتب'],['saved','star','المحفوظات','مجلداتك وملاحظاتك']];
 IC.home='M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z';
 main.innerHTML=`<div class="shell"><aside class="sidenav" aria-label="الأقسام">${SNAV.map(([k,i,t,d])=>`<button class="navcard" data-nav="${k}"><span class="ic">${svg(i)}</span><span><b>${t}</b><small>${d}</small></span></button>`).join('')}
- <button class="navcard" data-a2="settings"><span class="ic">${svg('gear')}</span><span><b>الإعدادات</b><small>الخط والمظهر والقفل</small></span></button>
- <button class="navcard" data-a2="rate"><span class="ic">${svg('star')}</span><span><b>ملاحظاتك واقتراحاتك</b><small>قيّم الأقسام وأرسل رأيك</small></span></button></aside>
+ <div class="navmini"><button data-nav="about">${svg('info')}عن المكتبة</button><button data-a2="settings">${svg('gear')}الإعدادات</button><button data-a2="rate">${svg('star')}ملاحظاتك واقتراحاتك</button></div></aside>
  <div class="views">${['home','search','index','saved','more','item','report','about','laws','review'].map(v=>`<section id="v-${v}" hidden></section>`).join('')}</div></div>`;
 // ---------- search engine
 const F={q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:'',ap:'',ay:'',yr:'',st:'',all:false};let SCOPE='p';
 function terms(q){const o=[];west(q).replace(/"([^"]+)"|«([^»]+)»|(\S+)/g,(m,a,b,c)=>{const t=norm(a||b||c);if(t)o.push(t)});return o;}
 // المرادفات المشتركة مع «مداولة» (data/synonyms.json): كل كلمة في البحث تقبل مرادفاتها، فتعطي العبارة نفسها النتائج نفسها في التطبيقين.
 // العبارة بين علامتي تنصيص تبقى حرفية. والعبارة المركبة («مكافأة نهاية الخدمة») تُطابَق كاملة قبل تقسيمها كلمات.
-const SYN={};let SYNMAX=1;
-fetch('data/synonyms.json').then(r=>r.ok?r.json():{groups:[]}).catch(()=>({groups:[]})).then(j=>{(j.groups||[]).forEach(g=>{const m=[...new Set(g.map(norm))];m.forEach(x=>{SYN[x]=[...new Set([...(SYN[x]||[]),...m])];SYNMAX=Math.max(SYNMAX,x.split(' ').length);});});const l=$('list');if(F.q&&l&&!l.hidden&&location.hash.startsWith('#/search'))runSearch();});
+const SYN={};let SYNMAX=1,SYNRAW=[];
+fetch('data/synonyms.json').then(r=>r.ok?r.json():{groups:[]}).catch(()=>({groups:[]})).then(j=>{SYNRAW=[...new Set((j.groups||[]).flat())];(j.groups||[]).forEach(g=>{const m=[...new Set(g.map(norm))];m.forEach(x=>{SYN[x]=[...new Set([...(SYN[x]||[]),...m])];SYNMAX=Math.max(SYNMAX,x.split(' ').length);});});const l=$('list');if(F.q&&l&&!l.hidden&&location.hash.startsWith('#/search'))runSearch();});
 function qalts(q){const o=[];const parts=[];west(q).replace(/"([^"]+)"|«([^»]+)»|(\S+)/g,(m,a,b,c)=>{const t=norm(a||b||c);if(t)parts.push({t,lit:!!(a||b)});});
   const mk=(t,al)=>{const r=[t,...(al||[]).filter(x=>x!==t)];r.lit=t;return r;};
   for(let i=0;i<parts.length;){if(parts[i].lit){o.push(mk(parts[i].t));i++;continue;}let hit=0;
@@ -539,6 +538,52 @@ function viewFollow(){const el=$('v-item');document.title='ما تتابعه';co
      ${nw.length?`<details class="fold folnew" open><summary>الجديد منذ آخر اطلاع (${nf(nw.length)})</summary><div class="list">${nw.slice(0,20).map(p=>card(p,null)).join('')}</div></details>`:''}</div>`;}).join('')
      +(NEWPR.length?`<div class="acts"><button class="btn" id="folseen">${svg('check')}تم الاطلاع على الجديد</button></div>`:''):`<div class="empty">لا تتابع شيئًا بعد. افتح موضوعًا أو دائرة أو مادة، أو ابحث بعبارة، ثم اضغط «تابِع».</div>`}`;
   const fs=$('folseen');if(fs)fs.onclick=()=>{KNOWN=colN();LS.set('known',KNOWN);toast('سيُنبَّه إلى ما يُضاف بعد الآن');location.reload();};}
+// ---------- اقتراحات البحث: قائمة تنسدل تحت مربع البحث عند الضغط عليه (بدل الوسوم الثابتة)، وإكمال أثناء الكتابة
+function myWork(){const w={},a={};const add=(id,k)=>{const p=BYID[id];if(!p)return;new Set(p.tp.map(t=>t[0]).filter(t=>TL[t])).forEach(t=>w[t]=(w[t]||0)+k);p.lw.forEach(([l,as])=>as.slice(0,2).forEach(x=>{const K=l+'|'+x;a[K]=(a[K]||0)+k;}));};
+  HIST.forEach(i=>add(i,1));Object.keys(FAV).forEach(i=>add(i,2));Object.keys(NOTE).forEach(i=>add(i,2));
+  return {tps:Object.entries(w).sort((x,y)=>y[1]-x[1]).slice(0,6).map(x=>x[0]),arts:Object.entries(a).filter(x=>x[1]>1).sort((x,y)=>y[1]-x[1]).slice(0,4).map(x=>x[0].split('|'))};}
+function sugItems(q){const nq=norm(q.trim()),G=[];if(!nq){
+    const rec=QH.slice(0,6);if(rec.length)G.push({h:'عمليات بحث أخيرة',clr:1,it:rec.map(v=>({k:'q',v,ic:'clock',t:v,rm:1}))});
+    const W=myWork();
+    if(W.tps.length)G.push({h:'موضوعات تعمل فيها',it:W.tps.map(t=>({k:'tp',v:t,ic:'tag',t:TL[t][1],s:nf(tcount[t])+' مبدأ'}))});
+    else G.push({h:'موضوعات كثيرة الورود',it:[...TORD].sort((x,y)=>tcount[y]-tcount[x]).slice(0,6).map(t=>({k:'tp',v:t,ic:'tag',t:TL[t][1],s:nf(tcount[t])+' مبدأ'}))});
+    if(W.arts.length)G.push({h:'مواد ترجع إليها',it:W.arts.map(([l,x])=>({k:'art',l,v:x,ic:'scroll',t:`م ${x} · ${LAWBYKEY[l]?LAWBYKEY[l].short:'ق '+l}`}))});
+    return G;}
+  const has=t=>{const n=norm(t);return n.startsWith(nq)?2:n.split(' ').some(w=>w.startsWith(nq))?1:n.includes(nq)?.5:0;};
+  const rec=QH.filter(v=>has(v)).slice(0,3).map(v=>({k:'q',v,ic:'clock',t:v}));
+  const tps=TORD.filter(t=>has(TL[t][1])).sort((a,b)=>has(TL[b][1])-has(TL[a][1])||tcount[b]-tcount[a]).slice(0,5).map(t=>({k:'tp',v:t,ic:'tag',t:TL[t][1],s:`موضوع في «${famOf(t)}» · ${nf(tcount[t])} مبدأ`}));
+  const seen=new Set([...rec.map(x=>norm(x.v)),...tps.map(x=>norm(x.t))]);
+  const syn=SYNRAW.filter(v=>v.length>2&&has(v)&&norm(v)!==nq&&!seen.has(norm(v))).sort((a,b)=>has(b)-has(a)).slice(0,4).map(v=>({k:'q',v,ic:'search',t:v}));
+  const lws=LORD.filter(l=>LL[l]&&has(LL[l])).slice(0,3).map(l=>({k:'lw',v:l,ic:'scroll',t:LL[l],s:'قانون · '+nf(lcount[l])+' مبدأ'}));
+  if(rec.length)G.push({h:'من بحثك السابق',it:rec});if(syn.length)G.push({h:'عبارات',it:syn});if(tps.length)G.push({h:'موضوعات',it:tps});if(lws.length)G.push({h:'قوانين',it:lws});
+  if(nq.split(' ').length>=2)G.push({h:'',it:[{k:'ask',v:q.trim(),ic:'askq',t:`اسأل المكتبة: «${q.trim()}»`,s:'أقرب المبادئ ولو لم ترد كل الكلمات'}]});
+  return G;}
+function attachSug(inp,mode){const form=inp.closest('form');if(!form||form.dataset.sug)return;form.dataset.sug=1;form.classList.add('sughost');
+  const box=document.createElement('div');box.className='sugbox';box.hidden=true;box.setAttribute('role','listbox');form.appendChild(box);let sel=-1,items=[];
+  const close=()=>{box.hidden=true;sel=-1;};
+  const render=()=>{if(mode==='search'&&SCOPE!=='p'){close();return;}const G=sugItems(inp.value);items=[];
+    if(!G.length){close();return;}
+    box.innerHTML=G.map(g=>`${g.h?`<div class="sugh"><span>${g.h}</span>${g.clr?'<button type="button" class="lnk" data-sugclr>مسح</button>':''}</div>`:''}${g.it.map(it=>{items.push(it);const i=items.length-1;return `<div class="sugi" role="option" data-i="${i}">${svg(it.ic)}<span><b>${esc(it.t)}</b>${it.s?`<small>${esc(it.s)}</small>`:''}</span>${it.rm?`<button type="button" class="sugx" data-sugrm="${i}" aria-label="احذف من السجل">×</button>`:''}</div>`;}).join('')}`).join('');
+    box.hidden=false;sel=-1;};
+  const pick=it=>{close();inp.blur();
+    if(it.k==='q'){QH=[it.v,...QH.filter(x=>x!==it.v)].slice(0,8);LS.set('qhist',QH);if(mode==='home')doSearch(it.v);else{inp.value=it.v;F.q=it.v;runSearch();}}
+    else if(it.k==='tp'||it.k==='lw'){if(mode==='search')inp.value='';setFilter(it.k,it.v);}
+    else if(it.k==='art'){Object.assign(F,FBLANK,{lw:it.l,art:String(it.v)});SCOPE='p';if(mode==='search')inp.value='';go('#/search');if(location.hash==='#/search'){syncInputs();runSearch();}}
+    else if(it.k==='ask')go('#/ask/'+encodeURIComponent(it.v));};
+  // في صفحة البحث تظهر النتائج أثناء الكتابة: تُطوى القائمة بعد توقف الكتابة قليلًا حتى لا تحجب النتائج (وتعود بالضغط على المربع)
+  let idle;inp.addEventListener('focus',render);inp.addEventListener('input',()=>{render();clearTimeout(idle);if(mode==='search')idle=setTimeout(close,inp.value.trim()?1600:4000);});
+  window.addEventListener('scroll',()=>{if(!box.hidden&&mode==='search'&&inp.value.trim())close();},{passive:true});
+  inp.addEventListener('blur',()=>setTimeout(()=>{if(!box.contains(document.activeElement))close();},180));
+  inp.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();close();inp.blur();return;}if(box.hidden)return;const n=items.length;
+    if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();sel=(sel+(e.key==='ArrowDown'?1:-1)+n)%n;box.querySelectorAll('.sugi').forEach((x,i)=>x.classList.toggle('on',i===sel));box.querySelector('.sugi.on')?.scrollIntoView({block:'nearest'});}
+    else if(e.key==='Enter'&&sel>=0){e.preventDefault();pick(items[sel]);}
+    else if(e.key==='Escape'){e.preventDefault();close();inp.blur();}});
+  box.addEventListener('mousedown',e=>e.preventDefault());
+  box.addEventListener('click',e=>{const t=e.target;
+    if(t.closest('[data-sugclr]')){QH=[];LS.set('qhist',QH);render();inp.focus();return;}
+    const rm=t.closest('[data-sugrm]');if(rm){const it=items[+rm.dataset.sugrm];QH=QH.filter(x=>x!==it.v);LS.set('qhist',QH);render();inp.focus();return;}
+    const o=t.closest('.sugi');if(o)pick(items[+o.dataset.i]);});
+  form.addEventListener('submit',close);}
 // ---------- البيانات المفتوحة: تنزيل المكتبة أو جزء منها CSV أو JSON، تُولَّد على الجهاز من البيانات المنشورة نفسها
 let DSC='all',DFMT='csv';
 function dataSet(sc){return sc==='all'?PR:sc.startsWith('ch:')?PR.filter(p=>p.c.some(c=>c.ch===sc.slice(3))):PR.filter(p=>p.col===sc.slice(4));}
@@ -553,7 +598,7 @@ function dataFile(sc,fmt){const L=dataSet(sc).map(dataRow),b=APP_BUILD;
   return new Blob(['﻿'+H.map(q).join(',')+'\r\n'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'});}
 function viewData(){const el=$('v-item');document.title='البيانات المفتوحة';
   const opt=(v,l,n)=>`<option value="${esc(v)}"${DSC===v?' selected':''}>${esc(l)} (${nf(n)})</option>`;
-  el.innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>البيانات المفتوحة</h2><span></span></div>
+  el.innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>عن المكتبة</h2><span></span></div>${aboutTabs('data')}
    <div class="card dataint"><p>نزّل مبادئ المكتبة لتعمل عليها خارج التطبيق: جدول في Excel، أو نسخة احتياطية، أو ربط بتطبيق آخر. الملف يُولَّد على جهازك من البيانات المنشورة نفسها، والنصوص حرفية كما في مصادرها.</p>
     <ul><li><b>المعرّف الثابت</b> (مثل <code dir="ltr">523-2020-L/1</code>: رقم الطعن-سنته-رمز الدائرة/ترتيب المبدأ في الحكم) لا يتغير بين الإصدارات؛ اعتمد عليه في الربط والإحالة.</li>
     <li>رموز الدوائر: ${Object.entries(CHCODE).map(([a,b])=>`<code dir="ltr">${b}</code> ${esc(a)}`).join('، ')}.</li>
@@ -1004,7 +1049,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610061502';
+const APP_BUILD='202610061619';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1074,7 +1119,7 @@ function viewHome(){
    <div class="numline"><span><b>${nf(PR.length)}</b>مبدأ</span><span><b>${ORDER.length}</b>مجموعة</span><span><b>${nf(LAWIX.length)}</b>تشريعًا</span><span><b>${nf(arts)}</b>مادة</span><span><b>${nf(LORD.length)}</b>قانونًا مُحالًا إليه</span>${favN?`<span><b>${nf(favN)}</b>في محفوظاتك</span>`:''}</div>
    </div>`;
   weave(el.querySelector('.hero'),8);el.querySelectorAll('.gate').forEach(g=>weave(g,7));
-  $('hsf').onsubmit=e=>{e.preventDefault();doSearch($('hq').value);};
+  $('hsf').onsubmit=e=>{e.preventDefault();doSearch($('hq').value);};attachSug($('hq'),'home');
   el.querySelectorAll('[data-hak],.askcta .at').forEach(x=>x.onclick=()=>{const v=$('haskq').value.trim();if(v)$('hask').requestSubmit();else go('#/ask');});
   $('hask').onsubmit=e=>{e.preventDefault();const v=$('haskq').value.trim();go(v?'#/ask/'+encodeURIComponent(v):'#/ask');};
 }
@@ -1115,6 +1160,7 @@ function buildSearch(){
    <div id="browse" hidden></div>
    <div class="list" id="list"></div><div class="more"><button class="btn" id="more" hidden>عرض المزيد</button></div>`;
   let t;$('sq').addEventListener('input',()=>{clearTimeout(t);t=setTimeout(()=>{if(SCOPE==='l'){lawScope();return;}F.q=$('sq').value;runSearch();quickChips();},150)});
+  attachSug($('sq'),'search');
   $('ssf').onsubmit=e=>{e.preventDefault();const q=$('sq').value.trim();if(q){QH=[q,...QH.filter(x=>x!==q)].slice(0,8);LS.set('qhist',QH);}$('sq').blur();};
   $('ftog').onclick=()=>{$('fbox').hidden=!$('fbox').hidden;$('sfp').hidden=$('fbox').hidden&&!F.ap&&!F.ay;};
   [['fcol','col'],['ftp','tp'],['fch','ch'],['flw','lw']].forEach(([i,k])=>$(i).onchange=()=>{F[k]=$(i).value;runSearch()});
@@ -1128,7 +1174,7 @@ function buildSearch(){
   setScope(SCOPE);
 }
 const QSUG={p:['مكافأة نهاية الخدمة','الفصل التعسفي','التقادم','التعويض عن الضرر الأدبي','الإعلان','الحضانة','الاختصاص'],l:['قانون العمل','القانون المدني','قانون المرافعات','قانون الجزاء','الإثبات','الأحوال الشخصية','تنظيم القضاء']};
-function quickChips(){const k=$('sqk');if(!k)return;if(($('sq').value||'').trim()){k.innerHTML='';return;}
+function quickChips(){const k=$('sqk');if(!k)return;k.innerHTML='';return;if(($('sq').value||'').trim()){k.innerHTML='';return;}
   const rec=SCOPE==='p'?QH.slice(0,3).map(q=>`<button class="chip" data-q="${esc(q)}">${svg('clock')}${esc(q)}</button>`).join(''):'';
   k.innerHTML=rec+QSUG[SCOPE].map(q=>SCOPE==='l'?`<button class="chip" data-lq="${esc(q)}">${esc(q)}</button>`:`<button class="chip" data-q="${esc(q)}">${esc(q)}</button>`).join('');}
 function setScope(sc){SCOPE=sc;document.querySelectorAll('#scope [data-scope]').forEach(b=>b.setAttribute('aria-selected',b.dataset.scope===sc));
@@ -1333,8 +1379,6 @@ function viewMore(){const inst=navigator.standalone===true||matchMedia('(display
   const T=(attr,ic,b,n)=>`<button class="tile" ${attr}><span class="ic">${svg(ic)}</span><b>${b}</b><span class="n">${n}</span></button>`;
   $('v-more').innerHTML=`<h2>أدواتك</h2><div class="grid g3">
   ${T('data-go="#/ask"','askq','اسأل المكتبة','سؤال كامل بلغتك، والجواب مبادئ بنصها')}
-  ${T('data-a2="changes"','spark','ما الجديد','سجل تحديثات التطبيق والمكتبة')}
-  ${T('data-go="#/data"','download','البيانات المفتوحة','نزّل المبادئ CSV أو JSON بمعرّفاتها الثابتة')}
   ${T('data-go="#/follow"','bell','ما تتابعه',FOL.length?`${FOL.length} ${FOL.length<=2?'متابعة':'متابعات'}${folNewCount()?' · '+folNewCount()+' جديد':''}`:'تنبيه بما يُضاف في موضوع أو مادة')}
   ${T('data-go="#/index/topics"','book','الفهرس','الموضوعات والقوانين والكتب')}
   ${T('data-a2="sync"','link','المزامنة بين أجهزتك','انقل محفوظاتك وملاحظاتك بين الهاتف والحاسوب')}
@@ -1342,9 +1386,10 @@ function viewMore(){const inst=navigator.standalone===true||matchMedia('(display
   ${T('data-a2="settings"','gear','الإعدادات','الخط والحجم والمظهر، واسمك وصورتك، والقفل')}
   ${inst?'':T('data-a2="install"','open','ثبّت التطبيق','أضفه إلى الشاشة الرئيسية أو سطح المكتب')}
  </div><h2>عن المكتبة</h2><div class="grid g3">
+  ${T('data-go="#/about"','info','عن المكتبة','المصادر والنزاهة، والتقارير، وما الجديد، والبيانات المفتوحة')}
   ${T('data-a2="guide"','page','الدليل المصوّر','شرح كل قسم بالصور، خطوة خطوة')}
-  ${T('data-go="#/about"','info','عن المكتبة','المصادر وقواعد النزاهة والروابط')}
-  ${T('data-go="#/report"','report','تقارير الاستخراج','طريقة العمل والفحوص وما يحتاج مراجعة')}
+  ${T('data-go="#/changes"','spark','ما الجديد','سجل تحديثات التطبيق والمكتبة')}
+  ${T('data-go="#/data"','download','البيانات المفتوحة','نزّل المبادئ CSV أو JSON بمعرّفاتها الثابتة')}
   ${T('data-go="#/review"','check',`المراجعة البشرية <span class="abadge">${nf(PR.filter(p=>p.rv.length).length-Object.keys(RVD).filter(i=>BYID[i]&&BYID[i].rv.length).length)}</span>`,'المبادئ المعلَّمة: قرّر فيها واحدًا واحدًا ثم صدّر قراراتك')}
   ${T('data-a2="rate"','star','ملاحظاتك واقتراحاتك','قيّم الأقسام وأرسل رأيك عبر واتساب أو البريد')}
  </div><h2>التطبيق الشقيق</h2><div class="grid g2">${amaliCard()}</div>`;}
@@ -1353,7 +1398,7 @@ let RVD=LS.get('rvdec',{}),rvCol='',rvSt='open',rvN=20;
 function viewReview(){const el=$('v-review');const all=PR.filter(p=>p.rv.length),cols=[...new Set(all.map(p=>p.col))];
   const L=all.filter(p=>(!rvCol||p.col===rvCol)&&(rvSt==='all'||(rvSt==='open'?!RVD[p.id]:!!RVD[p.id]))),done=all.filter(p=>RVD[p.id]).length;
   const DL={ok:['صحيح','okc'],fix:['يُصحَّح','flc'],del:['يُحذف','flc'],later:['لاحقًا','']};
-  el.innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>المراجعة البشرية</h2><span class="muted">${nf(done)} من ${nf(all.length)}</span></div>
+  el.innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>عن المكتبة</h2><span class="muted">${nf(done)} من ${nf(all.length)}</span></div>${aboutTabs('review')}
    <div class="bar-p" style="margin:6px 0 12px"><i style="width:${all.length?done/all.length*100:0}%"></i></div>
    <p class="muted">كل مبدأ هنا عُلّم آليًا لسبب يظهر فوقه. افتح «المصدر» لتقارن مع صورة الصفحة، ثم قرّر: صحيح كما هو، أو يُصحَّح (واكتب التصحيح حرفيًا من الصورة)، أو يُحذف (ليس مبدأً أو مكرر). القرارات تُحفظ في هذا الجهاز؛ صدّرها ملفًا وأرسله ليُدمج في الدفعة التالية.</p>
    <div class="quick"><button class="chip${rvCol?'':' on'}" data-rvc="">الكل (${nf(all.length)})</button>${cols.map(c=>`<button class="chip${rvCol===c?' on':''}" data-rvc="${c}">${esc(COLS[c].name)} (${all.filter(p=>p.col===c).length})</button>`).join('')}</div>
@@ -1376,7 +1421,7 @@ function viewReview(){const el=$('v-review');const all=PR.filter(p=>p.rv.length)
 let repDone=false;
 async function viewReport(){const el=$('v-report');if(repDone)return;repDone=true;el.innerHTML='<div class="empty">جارٍ التحميل…</div>';
   const R=await fetch('data/reports.json').then(r=>r.json()).catch(()=>[]);
-  el.innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>تقارير الاستخراج</h2></div><p class="muted">لكل مجموعة تقرير بطريقة الاستخراج والفحوص التي اجتازتها، والمبادئ المعلَّمة للمراجعة البشرية.</p>`+R.filter(x=>COLS[x.col]).map(R=>{const ps=PR.filter(p=>p.col===R.col&&p.rv.length);
+  el.innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>عن المكتبة</h2></div>${aboutTabs('report')}<p class="muted">لكل مجموعة تقرير بطريقة الاستخراج والفحوص التي اجتازتها، والمبادئ المعلَّمة للمراجعة البشرية.</p>`+R.filter(x=>COLS[x.col]).map(R=>{const ps=PR.filter(p=>p.col===R.col&&p.rv.length);
    return `<details class="card" style="padding:12px 16px;margin-bottom:10px"><summary style="cursor:pointer;font-weight:600">${esc(R.title)}</summary>
     <div class="stats" style="margin-top:12px">${R.stats.map(([v,l])=>`<div class="stat card"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('')}</div>
     <h3>طريقة الاستخراج</h3><div class="prose"><ul>${R.method.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>
@@ -1390,7 +1435,12 @@ async function viewReport(){const el=$('v-report');if(repDone)return;repDone=tru
    <h3>طريقة الاستخراج</h3><div class="prose"><ul><li><b>طبعة وزارة العدل (فبراير 2011):</b> قراءة طبقة النص في ملف الطبعة صفحةً صفحة، وتقطيع المواد بعناوينها، ونقل الحواشي إلى موادها. كل كلمة في المخرَج موجودة في الملف، والتقسيم إلى فقرات اجتهادي.</li><li><b>الجريدة الرسمية:</b> فكّ ترميز الخطوط في ملف العدد بجدول حروف مُراجَع، وإزالة العلامة المائية، ثم مطابقة كل مادة مع صورة صفحتها.</li><li><b>التعديلات:</b> تُسجَّل أحداث التعديل والإلغاء من نص التشريع المعدِّل نفسه، وتُعلَّم المادة الأصلية «معدّلة» أو «ملغاة» مع النص المنشور، دون دمج آلي.</li></ul></div>
    <h3>الفحوص</h3><div class="tbl"><table><thead><tr><th>الفحص</th><th>النتيجة</th></tr></thead><tbody><tr><td>تسلسل أرقام المواد في كل تشريع (بلا فجوة إلا ما نصّت الطبعة على إلغائه)</td><td class="okc">اجتاز</td></tr><tr><td>كل فقرة في حزم التصدير موجودة حرفيًا في نصوص المكتبة</td><td class="okc">اجتاز</td></tr><tr><td>لا حرف غير مقروء (U+FFFD) في نصوص الجريدة</td><td class="okc">اجتاز</td></tr><tr><td>التشريعات غير المطابَقة مع الجريدة موسومة بذلك</td><td class="okc">اجتاز</td></tr></tbody></table></div>
    <h3>مواد تحتاج مراجعة (${rvA.length})</h3><div class="tbl"><table><tbody>${rvA.map(([x,a,rs])=>`<tr><td><button class="btn" data-go="#/a/${a.id}">${esc(a.label)}</button></td><td>${esc(x.short)}</td><td>${rs.map(esc).join('<br>')}</td></tr>`).join('')||'<tr><td>—</td></tr>'}</tbody></table></div>`;}
-function viewAbout(){setTimeout(aboutVer,0);$('v-about').innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>عن المكتبة</h2></div><div class="prose">
+// «عن المكتبة» صفحة واحدة بتبويبات: المصادر والنزاهة، والتقارير، والمراجعة البشرية، وما الجديد، والبيانات المفتوحة، والدليل
+function aboutTabs(cur){const T=[['about','#/about','المصادر والنزاهة'],['report','#/report','التقارير'],['review','#/review','المراجعة البشرية'],['changes','#/changes','ما الجديد'],['data','#/data','البيانات المفتوحة']];
+  return `<div class="atabs fstrip" role="tablist">${T.map(([k,h,l])=>`<button class="chip fc${k===cur?' on':''}" data-go="${h}" role="tab" aria-selected="${k===cur}">${l}</button>`).join('')}<button class="chip fc" data-a2="guide">${svg('page')}دليل الاستخدام</button></div>`;}
+function viewChanges(){const el=$('v-item');document.title='ما الجديد';el.innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>عن المكتبة</h2><span></span></div>${aboutTabs('changes')}<div id="chgp" class="card dchg"><p class="muted">جارٍ التحميل…</p></div>`;
+  loadChanges(true).then(L=>{const b=$('chgp');if(b)b.innerHTML=L.map(x=>`<section class="chg"><h4>${esc(x.title)} <small>${fdate(x.date)}</small></h4><ul>${x.items.map(i=>`<li>${esc(i)}</li>`).join('')}</ul></section>`).join('')||'<p class="muted">—</p>';});}
+function viewAbout(){setTimeout(aboutVer,0);$('v-about').innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>عن المكتبة</h2></div>${aboutTabs('about')}<div class="prose">
   <p>«مبادئ التمييز» مبادرة شخصية مجانية غير تجارية، تجمع مبادئ محكمة التمييز الكويتية من مجموعاتها الرسمية وإصدارات مكتبها الفني في مكان واحد، ليسهل البحث فيها ونسخها وطباعتها، ولو دون اتصال.</p>
   <h3>قواعد النزاهة</h3><ul>
    <li>نص كل مبدأ منقول <b>حرفيًا</b> كما ورد في مصدره. لا يُعاد صياغته ولا يُختصر ولا يُصحَّح إملائيًا.</li>
@@ -1555,7 +1605,7 @@ function installDlg(){if(deferredInstall){deferredInstall.prompt();deferredInsta
   dlg('ثبّت التطبيق',`<div class="prose"><ul><li><b>آيفون وآيباد (Safari):</b> زر المشاركة ← «إضافة إلى الشاشة الرئيسية».</li><li><b>أندرويد (Chrome):</b> القائمة ⋮ ← «تثبيت التطبيق».</li><li><b>الحاسوب (Chrome أو Edge):</b> أيقونة التثبيت في شريط العنوان.</li></ul></div>`);}
 // ---------- التقييم والملاحظات (نموذج Google خاص بصاحب المكتبة)
 // ---------- guide: جدول القسم ← صفحة الدليل (يتحقق منه ويحدّثه tools/guide/build-guide.mjs)
-const GUIDE={home:4,search:5,filters:7,ask:10,timeline:12,compare:13,item:14,status:16,cite:18,source:20,ruling:21,index:22,laws:24,saved:27,follow:28,updates:29,offline:30,settings:31,feedback:33,about:34};
+const GUIDE={home:4,search:6,filters:8,ask:11,timeline:13,compare:14,item:15,status:17,cite:19,source:21,ruling:22,index:23,laws:25,saved:28,follow:29,updates:30,offline:31,settings:32,feedback:34,about:35};
 const GUIDE_PDF='docs/guide.pdf',GUIDE_WEB='docs/guide/index.html';
 // «مداولة» — التطبيق الشقيق: رابط يفتحه المستخدم بنفسه (لا اتصال بين التطبيقين)، وأيقونته محفوظة في هذا المستودع
 const AMALI_URL='https://ommali-app.github.io/',amaliP=id=>AMALI_URL+'#p='+encodeURIComponent(id);
@@ -1656,13 +1706,14 @@ function route(){const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,
   else if(h.startsWith('index')){const [,sub,...rest]=h.split('/');viewIndex(sub||idxTab,rest.join('/'));show('index',innerWidth>=1000?'index':'search');}
   else if(h==='saved'){viewSaved();show('saved','saved');}
   else if(h==='more'){viewMore();show('more','more');}
-  else if(h==='report'){viewReport();show('report',innerWidth>=1000?'report':'more');}
-  else if(h==='review'){viewReview();show('review',innerWidth>=1000?'report':'more');}
+  else if(h==='report'){viewReport();show('report',innerWidth>=1000?'about':'more');}
+  else if(h==='review'){viewReview();show('review',innerWidth>=1000?'about':'more');}
   else if(h==='about'){viewAbout();show('about',innerWidth>=1000?'about':'more');}
   else if(h==='laws'){viewLaws();show('laws','laws');}
   else if(h.startsWith('law/')){viewLaw(h.slice(4));show('item','laws');}
   else if(h.startsWith('a/')){viewArt(h.slice(2));show('item','laws');}
-  else if(h==='data'){viewData();show('item','more');}
+  else if(h==='data'){viewData();show('item',innerWidth>=1000?'about':'more');}
+  else if(h==='changes'){viewChanges();show('item',innerWidth>=1000?'about':'more');}
   else if(h.startsWith('t/')){viewRef(h.slice(2));show('item','search');}
   else if(h==='follow'){viewFollow();show('item','saved');}
   else if(h==='ask'||h.startsWith('ask/')){viewAsk(h.slice(4));show('item','ask');}
