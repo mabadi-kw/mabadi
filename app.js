@@ -13,12 +13,15 @@ const DEF={font:'naskh',fs:1,lh:1.95,theme:'auto',name:'',photo:'',pin:'',lockMi
 let S=Object.assign({},DEF,LS.get('settings',{}));
 let FAV=LS.get('favs',{}), FOLD=LS.get('folders',['عام']), NOTE=LS.get('notes',{}), HIST=LS.get('hist',[]), QH=LS.get('qhist',[]);
 // أوقات التعديل وعلامات الحذف — للمزامنة بين الأجهزة (الأحدث يعلو، والمحذوف لا يعود). السجل والإعدادات لا تُزامَن.
-let DEL=LS.get('del',{favs:{},folders:{},notes:{}}), NOTET=LS.get('notest',{}), FOLDT=LS.get('foldt',{});
+let DEL=LS.get('del',{favs:{},folders:{},notes:{}}), NOTET=LS.get('notest',{}), FOLDT=LS.get('foldt',{});DEL.follows=DEL.follows||{};
+// التفضيلات الصغيرة التي تُزامَن (صيغة الاستشهاد، المساعد المفضل) مع وقت تغييرها
+let PREFT=LS.get('prefT',{});const SYNCPREFS=['citefmt','aisvc'];
+function setPref(k,v){LS.set(k,v);PREFT[k]=Date.now();LS.set('prefT',PREFT);try{if(SYNC)SYNC.markChanged();syncDot();schedAuto();}catch(_){}}
 (()=>{const now=Date.now();let ch=0;for(const id in FAV)if(!FAV[id].updated){FAV[id].updated=FAV[id].t||now;ch=1;}
   for(const id in NOTE)if(!NOTET[id]){NOTET[id]=now;ch=1;}FOLD.forEach(n=>{if(!FOLDT[n]){FOLDT[n]=now;ch=1;}});
   if(ch){LS.set('favs',FAV);LS.set('notest',NOTET);LS.set('foldt',FOLDT);}})();
 // يحفظ بيانات المستخدم ويعلّم أن هناك تغييرًا لم يُزامَن
-function saveUser(){LS.set('favs',FAV);LS.set('folders',FOLD);LS.set('notes',NOTE);LS.set('del',DEL);LS.set('notest',NOTET);LS.set('foldt',FOLDT);try{if(SYNC)SYNC.markChanged();}catch(_){}}
+function saveUser(){LS.set('favs',FAV);LS.set('folders',FOLD);LS.set('notes',NOTE);LS.set('del',DEL);LS.set('notest',NOTET);LS.set('foldt',FOLDT);try{if(SYNC)SYNC.markChanged();syncDot();schedAuto();}catch(_){}}
 const saveS=()=>LS.set('settings',S);
 // نموذج التقييم: يُملأ عند إنشاء نموذج Google الخاص بالمكتبة
 // ---------- icons
@@ -527,8 +530,9 @@ function folNew(){if(FOLNEW)return FOLNEW;FOLNEW={};if(NEWPR.length)FOL.forEach(
 const folNewCount=()=>new Set(Object.values(folNew()).flat().map(p=>p.id)).size;
 const following=f=>FOL.some(o=>fkey(o.f)===fkey(f));
 function toggleFollow(f){const k=fkey(f);if(!k)return;if(following(f)){FOL=FOL.filter(o=>fkey(o.f)!==k);toast('أُلغيت المتابعة');}
-  else{if(!FOL.length){KNOWN=colN();LS.set('known',KNOWN);}FOL.push({f,t:Date.now()});toast('ستُنبَّه في الرئيسية إذا أضيفت مبادئ جديدة هنا');}
-  LS.set('follow',FOL);FOLNEW=null;}
+  else{if(!FOL.length){KNOWN=colN();LS.set('known',KNOWN);}FOL.push({f,t:Date.now()});delete DEL.follows[k];toast('ستُنبَّه في الرئيسية إذا أضيفت مبادئ جديدة هنا');}
+  if(!FOL.some(o=>fkey(o.f)===k))DEL.follows[k]=Date.now();
+  LS.set('follow',FOL);FOLNEW=null;saveUser();}
 function folBtn(f){const on=following(f);return `<button class="lnk folb${on?' on':''}" data-fol="${esc(JSON.stringify(f))}" aria-pressed="${on}" title="${on?'أنت تتابع هذا — اضغط لإلغاء المتابعة':'نبّهني إذا أضيفت مبادئ جديدة هنا'}">${svg('bell')}${on?'تتابعه':'تابِع'}</button>`;}
 function viewFollow(){const el=$('v-item');document.title='ما تتابعه';const N=folNew();
   el.innerHTML=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>ما تتابعه</h2><span></span></div>
@@ -650,7 +654,7 @@ function askAI(q,svc){q=(q||'').trim();if(!q){toast('اكتب سؤالك أول�
   const k=svc||LS.get('aisvc','');if(k)return run(k);
   const d=dlg('اختر المساعد',`<p>يُرسَل سؤالك مع أقرب المبادئ إليه بنصها إلى المساعد الذي تختاره، مع تعليمات بأن يجيب منها وحدها ويحيل إلى رقم كل مبدأ. لا يُرسل أي شيء آخر. ويُحفظ اختيارك، وتغيّره من بطاقة المساعد في صفحة الجواب.</p>
     <div class="aich">${['claude','chatgpt','copy'].map(x=>`<button class="btn${x==='claude'?' primary':''}" data-aisv="${x}">${x==='copy'?svg('copy')+'انسخ فقط وألصقه بنفسي':svg('open')+AISN[x]}</button>`).join('')}</div>`,'aidlg');
-  d.querySelectorAll('[data-aisv]').forEach(b=>b.onclick=()=>{LS.set('aisvc',b.dataset.aisv);closeDlg();run(b.dataset.aisv);});}
+  d.querySelectorAll('[data-aisv]').forEach(b=>b.onclick=()=>{setPref('aisvc',b.dataset.aisv);closeDlg();run(b.dataset.aisv);});}
 function viewAsk(q){const el=$('v-item');document.title='اسأل المكتبة';q=(q||'').trim();ASKN=8;
   const head=`<div class="vh"><button class="btn" data-back>${svg('back')}رجوع</button><h2>اسأل المكتبة</h2>${q?`<button class="btn" data-print>${svg('print')}طباعة</button>`:'<span></span>'}</div>
    <form class="sbox askbox" id="askf">${svg('search')}<input id="askq" type="search" value="${esc(q)}" placeholder="اكتب سؤالك كما تكتبه لزميل…" autocomplete="off" enterkeyhint="search">${micBtn('askq')}<button class="btn primary" type="submit">اسأل</button><button class="btn aib" type="button" data-askai="askq" title="يجمع المبادئ على جهازك ثم يفتح المساعد الذي تختاره ومعه سؤالك والمبادئ">${svg('spark')}<span class="lg">مع الذكاء الاصطناعي</span><span class="sm">بالذكاء</span></button></form>`;
@@ -680,7 +684,7 @@ function viewAsk(q){const el=$('v-item');document.title='اسأل المكتبة
       <p class="hint">${svg('info')} الترتيب آلي بحسب تقارب الألفاظ، والنصوص منقولة حرفيًا من مصادرها. اقرأ المبدأ وإسناده قبل الاعتماد عليه.</p>`;
     $('askmore').onclick=()=>{ASKN+=10;$('askl').innerHTML=list();$('askmore').hidden=R.length<=ASKN;};
     const extP=()=>aiPrompt(q,R);
-    el.querySelectorAll('[data-ext]').forEach(b=>b.onclick=()=>{const k=b.dataset.ext;if(k!=='copy')LS.set('aisvc',k);aiSend(k,extP());});
+    el.querySelectorAll('[data-ext]').forEach(b=>b.onclick=()=>{const k=b.dataset.ext;if(k!=='copy')setPref('aisvc',k);aiSend(k,extP());});
     $('askcp').onclick=()=>{const t='سؤال: '+q+'\n\n'+R.slice(0,5).map((x,i)=>`${i+1}- ${x.p.p.join('\n')}\n${x.p.c.map(c=>c.raw).join('\n')}`).join('\n\n')+'\n\n— من «مكتبة مبادئ التمييز»';clip(t,()=>toast('نُسخت أقرب خمسة مبادئ'));};
   },30);}
 let CTAB='';
@@ -807,7 +811,7 @@ function citeDlg(ps){ps=ps.filter(Boolean);if(!ps.length)return;let f=LS.get('ci
    <pre class="citepv" id="citepv"></pre><p class="muted small">${svg('info')} رقم الطعن وسنته والدائرة والجلسة كما وردت في إسناد المصدر، بصيغة موحدة؛ والنص حرفي. يُحفظ اختيار الصيغة.</p>
    <div class="acts"><button class="btn primary" id="citecp">${svg('copy')}نسخ</button>${ps.length===1&&REF[ps[0].id]?`<button class="btn" id="citelk">${svg('link')}نسخ الرابط الثابت</button>`:''}</div>`,'citedlg');
   const pv=()=>{d.querySelector('#citepv').textContent=body();d.querySelectorAll('[data-cf]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.cf===f));};pv();
-  d.querySelectorAll('[data-cf]').forEach(b=>b.onclick=()=>{f=b.dataset.cf;LS.set('citefmt',f);pv();});
+  d.querySelectorAll('[data-cf]').forEach(b=>b.onclick=()=>{f=b.dataset.cf;setPref('citefmt',f);pv();});
   d.querySelector('#citecp').onclick=()=>clip(body(),()=>{toast('نُسخ الاستشهاد');closeDlg();});
   const lk=d.querySelector('#citelk');if(lk)lk.onclick=()=>clip(plink(ps[0]),()=>{toast('نُسخ الرابط الثابت');closeDlg();});}
 // فتح المعرّف الثابت: #/t/523-2020-L/1 مبدأ، و#/t/523-2020-L الحكم
@@ -1053,7 +1057,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610061658';
+const APP_BUILD='202610061741';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1361,7 +1365,10 @@ function viewRuling(key){const el=$('v-item'),all=RUL[key]||[],ids=collapse(all.
    <div class="list">${ids.length?ids.map(i=>card(BYID[i],null)).join(''):`<div class="empty">لا يوجد في المكتبة حكم بهذا المفتاح.</div>`}</div>`;}
 // ---------- SAVED
 let savedTab='favs',savedFold='';
-function viewSaved(){const el=$('v-saved');setTimeout(()=>{if(!FOL.length||el.querySelector('.folsv'))return;el.insertAdjacentHTML('afterbegin',`<button class="folsv lnk" data-go="#/follow">${svg('bell')}ما تتابعه (${FOL.length})${folNewCount()?' · <b>'+folNewCount()+' جديد</b>':''}</button>`);},0);
+function syncCardHTML(){const st=syncState();if(st.k==='na')return '';const m=SYNC.meta();
+  if(st.k==='local')return hasUserData()?`<div class="card synccard warn">${svg('lock')}<span><b>محفوظاتك في هذا الجهاز فقط</b><small>احمها من الضياع وانقلها إلى أجهزتك الأخرى بملف مشفّر برمزك في OneDrive أو iCloud — بلا خادم ولا حساب.</small></span><button class="btn primary" data-a2="sync">فعّل المزامنة</button></div>`:'';
+  return `<div class="synccard line ${st.k}"><i></i><span>${st.k==='dirty'?'<b>تغييرات لم تُحفظ</b> · ':''}آخر حفظ: ${ago(m.pushed)} · آخر جلب: ${ago(m.pulled)}${SYNC.state.dir?' · المزامنة تلقائية على هذا الجهاز':''}</span><button class="lnk" id="svsync">${SYNC.state.dir?'زامن الآن':IS_IOS||!SYNC.canLinkFolder()?'احفظ الآن':'زامن الآن'}</button><button class="lnk" data-a2="sync">الإعدادات</button></div>`;}
+function viewSaved(){const el=$('v-saved');setTimeout(()=>{if(el.querySelector('.synccard'))return;const h=syncCardHTML();if(!h)return;const v=el.querySelector('.vh');if(v)v.insertAdjacentHTML('afterend',h);else el.insertAdjacentHTML('afterbegin',h);const b=$('svsync');if(b)b.onclick=()=>syncRun(()=>SYNC.state.dir||SYNC.canLinkFolder()?SYNC.syncNow():SYNC.push());},0);setTimeout(()=>{if(!FOL.length||el.querySelector('.folsv'))return;el.insertAdjacentHTML('afterbegin',`<button class="folsv lnk" data-go="#/follow">${svg('bell')}ما تتابعه (${FOL.length})${folNewCount()?' · <b>'+folNewCount()+' جديد</b>':''}</button>`);},0);
   const favs=Object.entries(FAV).filter(([id])=>BYID[id]).sort((a,b)=>b[1].t-a[1].t);
   const usedF=[...new Set(favs.map(x=>x[1].f))];
   let body='';
@@ -1526,13 +1533,18 @@ function syncPayload(){const fi={},fo={},no={};
   for(const id in FAV)fi[id]={id,f:FAV[id].f,t:FAV[id].t,updated:FAV[id].updated||FAV[id].t||0};
   FOLD.forEach(n=>fo[n]={id:n,updated:FOLDT[n]||0});
   for(const id in NOTE)no[id]={id,x:NOTE[id],updated:NOTET[id]||0};
-  return {favorites:{items:fi,del:Object.assign({},DEL.favs)},folders:{items:fo,del:Object.assign({},DEL.folders)},notes:{items:no,del:Object.assign({},DEL.notes)}};}
+  const fl={};FOL.forEach(o=>{const k=fkey(o.f);if(k)fl[k]={id:k,f:o.f,t:o.t,updated:o.t||0};});
+  const pr={};SYNCPREFS.forEach(k=>{const v=LS.get(k,'');if(v)pr[k]={id:k,v,updated:PREFT[k]||0};});
+  return {favorites:{items:fi,del:Object.assign({},DEL.favs)},folders:{items:fo,del:Object.assign({},DEL.folders)},notes:{items:no,del:Object.assign({},DEL.notes)},
+    follows:{items:fl,del:Object.assign({},DEL.follows)},prefs:{items:pr,del:{}}};}
 // يعيد صيغة الملف إلى بيانات الجهاز، مع حفظ ترتيب المجلدات، وإبقاء كل مجلد فيه محفوظات، وتنظيف علامات الحذف القديمة
 function syncApply(P){const it=k=>(P[k]&&P[k].items)||{},dl=k=>Object.assign({},(P[k]&&P[k].del)||{}),n=Date.now(),old=n-TOMB_DAYS*864e5;
   FAV={};for(const [id,x] of Object.entries(it('favorites')))if(x&&x.f)FAV[id]={f:x.f,t:x.t||x.updated||n,updated:x.updated||n};
   const fo=it('folders'),names=Object.keys(fo);FOLDT={};names.forEach(k=>FOLDT[k]=fo[k].updated||n);
   FOLD=[...FOLD.filter(f=>names.includes(f)),...names.filter(f=>!FOLD.includes(f)).sort((a,b)=>FOLDT[a]-FOLDT[b])];
-  DEL={favs:dl('favorites'),folders:dl('folders'),notes:dl('notes')};
+  DEL={favs:dl('favorites'),folders:dl('folders'),notes:dl('notes'),follows:dl('follows')};
+  if(P.follows){FOL=Object.values(it('follows')).filter(x=>x&&x.f).map(x=>({f:x.f,t:x.t||x.updated||n})).sort((a,b)=>a.t-b.t);LS.set('follow',FOL);FOLNEW=null;}
+  if(P.prefs)Object.values(it('prefs')).forEach(x=>{if(x&&x.id&&SYNCPREFS.includes(x.id)&&(x.updated||0)>=(PREFT[x.id]||0)){LS.set(x.id,x.v);PREFT[x.id]=x.updated||n;}});LS.set('prefT',PREFT);
   Object.values(FAV).forEach(v=>{if(!FOLD.includes(v.f)){FOLD.push(v.f);FOLDT[v.f]=n;delete DEL.folders[v.f];}});
   if(!FOLD.length){FOLD=['عام'];FOLDT['عام']=n;}
   NOTE={};NOTET={};for(const [id,x] of Object.entries(it('notes')))if(x&&x.x){NOTE[id]=x.x;NOTET[id]=x.updated||n;}
@@ -1550,27 +1562,46 @@ function syncAskPass(why){return new Promise(res=>{let done=false;const fin=v=>{
 // الآيفون والآيباد لا يستبدلان الملف بل يضيفان «1» و«2»… إلى اسمه؛ لذلك يقبل الجلب عدة ملفات معًا وتُدمج بالأقدم فالأحدث، فلا يحتاج المستخدم إلى تغيير الأسماء
 function syncPickFile(){return new Promise(res=>{const i=document.createElement('input');i.type='file';i.accept='.amali';i.multiple=true;i.hidden=true;document.body.appendChild(i);
   const end=v=>{i.remove();res(v);};i.onchange=()=>{const fs=[...i.files].sort((a,b)=>a.lastModified-b.lastModified);end(fs.length>1?fs:(fs[0]||null));};i.addEventListener('cancel',()=>end(null));i.click();});}
-let syncReopen=false,syncChg=false;
+let syncReopen=false,syncChg=false,SYNCQUIET=false;
+if(new URLSearchParams(location.search).has('selftest'))window.__mb={syncPayload:()=>syncPayload(),syncApply:P=>syncApply(P),syncState:()=>syncState()};
+// ---------- حالة المزامنة الظاهرة، والمزامنة التلقائية على الحاسوب حين يكون المجلد مربوطًا ومأذونًا
+const hasUserData=()=>Object.keys(FAV).length+Object.keys(NOTE).length+FOL.length>0;
+function syncState(){if(!SYNC||!window.crypto||!crypto.subtle)return {k:'na'};const st=SYNC.state,m=SYNC.meta();
+  if(!st.key)return {k:'local',t:'محفوظاتك في هذا الجهاز فقط — اضغط لتفعيل المزامنة'};
+  if(SYNC.isDirty())return {k:'dirty',t:'تغييرات لم تُحفظ في ملف المزامنة'+(st.dir?' — اضغط للمزامنة الآن':' — اضغط للحفظ')};
+  return {k:'ok',t:'مُزامن — آخر حفظ '+ago(m.pushed||m.pulled)};}
+function syncDot(){const me=$('me');if(!me)return;let d=$('syncdot');const st=syncState();
+  if(st.k==='na'||(!hasUserData()&&st.k==='local')){if(d)d.remove();return;}
+  if(!d){d=document.createElement('button');d.id='syncdot';d.type='button';me.parentNode.insertBefore(d,me);d.onclick=syncDotClick;}
+  d.className='syncdot '+st.k;d.title=st.t;d.setAttribute('aria-label',st.t);d.innerHTML=`<i></i><span>${st.k==='ok'?'مُزامن':st.k==='dirty'?'لم يُحفظ':'هذا الجهاز فقط'}</span>`;}
+async function dirGranted(){const d=SYNC&&SYNC.state.dir;if(!d||!d.queryPermission)return false;try{return (await d.queryPermission({mode:'readwrite'}))==='granted';}catch(_){return false;}}
+async function syncDotClick(){const st=syncState();if(st.k==='local'){settingsDlg(true);return;}
+  if(SYNC.state.dir){await syncRun(()=>SYNC.syncNow());return;}
+  if(st.k==='dirty'&&!SYNC.canLinkFolder()){await syncRun(()=>SYNC.push());return;}
+  settingsDlg(true);}
+let autoT=null,autoBusy=false;
+async function autoSync(){if(autoBusy||!SYNC||!SYNC.state.key||!(await dirGranted()))return;autoBusy=true;SYNCQUIET=true;try{await SYNC.syncNow();}catch(_){}finally{SYNCQUIET=false;autoBusy=false;syncDot();if($('syncbox'))syncUI();}}
+function schedAuto(){if(!SYNC||!SYNC.state.dir)return;clearTimeout(autoT);autoT=setTimeout(autoSync,6000);}
 const SYNC=window.AmaliSync?AmaliSync.create({inner:'mabadi-data',fileName:SYNC_FILE,idbName:'mabadi_sync',metaKey:SYNC_META,
   getPayload:syncPayload,
-  merge:d=>{const P=syncPayload(),a=AmaliSync.mergeById(P.favorites,d.favorites),b=AmaliSync.mergeById(P.folders,d.folders),c=AmaliSync.mergeById(P.notes,d.notes);syncApply(P);
-    return {add:a.add+b.add+c.add,upd:a.upd+b.upd+c.upd,del:a.del+b.del+c.del};},
+  merge:d=>{const P=syncPayload(),a=AmaliSync.mergeById(P.favorites,d.favorites),b=AmaliSync.mergeById(P.folders,d.folders),c=AmaliSync.mergeById(P.notes,d.notes),e=AmaliSync.mergeById(P.follows,d.follows),g=AmaliSync.mergeById(P.prefs,d.prefs);syncApply(P);
+    return {add:a.add+b.add+c.add+e.add,upd:a.upd+b.upd+c.upd+e.upd,del:a.del+b.del+c.del+e.del};},
   replace:d=>{try{localStorage.setItem('mabadi:prerep',JSON.stringify({at:Date.now(),p:syncPayload()}));}catch(_){}syncApply(d);},
-  notify:(m)=>toast(m),askPass:w=>{syncReopen=true;return syncAskPass(w);},pickFileFallback:syncPickFile}):null;
+  notify:(m,k)=>{if(!SYNCQUIET||k==='bad')toast(m);},askPass:w=>{syncReopen=true;return syncAskPass(w);},pickFileFallback:syncPickFile}):null;
 // يشغّل عملية مزامنة ثم يعيد فتح الإعدادات إن أغلقها حوار الرمز
-async function syncRun(fn){const b=document.querySelectorAll('#syncbox button');b.forEach(x=>x.disabled=true);syncReopen=false;
+async function syncRun(fn){setTimeout(syncDot,50);const b=document.querySelectorAll('#syncbox button');b.forEach(x=>x.disabled=true);syncReopen=false;
   try{await fn();}catch(e){toast(e&&e.message?e.message:'تعذّرت العملية');}
-  if(syncReopen||!$('syncbox'))settingsDlg(true);else syncUI();syncNudge();}
+  if(syncReopen)settingsDlg(true);else if($('syncbox'))syncUI();syncNudge();syncDot();if(/^#\/saved/.test(location.hash))viewSaved();}
 const ago=t=>{if(!t)return 'لم يحدث بعد';const m=Math.round((Date.now()-t)/6e4);if(m<1)return 'الآن';if(m<60)return `قبل ${m} دقيقة`;const h=Math.round(m/60);if(h<24)return `قبل ${h} ساعة`;const d=Math.round(h/24);return d===1?'أمس':`قبل ${d} يومًا`;};
 function syncUI(){const box=$('syncbox');if(!box)return;
   if(!SYNC||!window.crypto||!crypto.subtle){box.innerHTML='<span class="hint">المزامنة غير متاحة في هذا المتصفح. استعمل النسخة الاحتياطية أدناه.</span>';return;}
   const st=SYNC.state,m=SYNC.meta(),hasKey=!!st.key&&!syncChg,dir=SYNC.canLinkFolder(),dirty=SYNC.isDirty(),pr=LS.get('prerep',null);
-  box.innerHTML=`<p class="hint" style="margin:0 0 8px">ملف واحد مشفّر على جهازك (${esc(SYNC_FILE)}) تحفظه في مجلد سحابي تختاره: OneDrive أو iCloud أو Google Drive. لا خادم ولا حساب، ولا يُرسل التطبيق شيئًا. تُزامَن المحفوظات والمجلدات والملاحظات فقط؛ السجل والإعدادات تبقى في كل جهاز.</p>
+  box.innerHTML=`<p class="hint" style="margin:0 0 8px">ملف واحد مشفّر على جهازك (${esc(SYNC_FILE)}) تحفظه في مجلد سحابي تختاره: OneDrive أو iCloud أو Google Drive. لا خادم ولا حساب، ولا يُرسل التطبيق شيئًا. تُزامَن المحفوظات والمجلدات والملاحظات وما تتابعه وتفضيلات الاستشهاد والمساعد؛ السجل والإعدادات تبقى في كل جهاز.</p>
    <div class="syncstep"><b>١. رمز المزامنة</b>${hasKey?`<div class="rowi"><span class="okdot">معتمد على هذا الجهاز</span><button class="btn" id="spchg">تغيير الرمز</button></div>`:
     `<div class="rowi"><input type="password" id="sp1" autocomplete="new-password" placeholder="6 أحرف فأكثر"><input type="password" id="sp2" autocomplete="new-password" placeholder="أعد كتابته"><button class="btn primary" id="spset">${svg('lock')}اعتماد الرمز</button></div>
     <span class="hint">اكتب الرمز نفسه على كل أجهزتك. على جهاز ثانٍ يكفي «جلب» ثم كتابة الرمز. إن نسيته لا يمكن فتح الملف، وتبقى بيانات جهازك سليمة.</span>`}</div>
    <div class="syncstep"><b>٢. ${dir?'المجلد والمزامنة':IS_IOS?'قبل العمل وبعده':'الجلب والحفظ'}</b>
-   ${dir?`<div class="rowi"><button class="btn" id="slink">${svg('link')}${st.dir?'تغيير مجلد المزامنة':'ربط مجلد المزامنة'}</button>${st.dir?`<span class="hint">المجلد: «${esc(st.dir.name)}»</span>`:''}</div>
+   ${dir?`<div class="rowi"><button class="btn" id="slink">${svg('link')}${st.dir?'تغيير مجلد المزامنة':'ربط مجلد المزامنة'}</button>${st.dir?`<span class="hint">المجلد: «${esc(st.dir.name)}» — تتم المزامنة تلقائيًا عند فتح التطبيق وبعد كل حفظ أو ملاحظة ما دام المتصفح مأذونًا بالمجلد.</span>`:''}</div>
      <div class="rowi"><button class="btn primary" id="snow">${svg('download')}مزامنة الآن${dirty?' <i class="dirty" title="تغييرات لم تُحفظ"></i>':''}</button><button class="btn" id="spull">جلب فقط</button><button class="btn" id="spush">حفظ فقط</button></div>`
     :`<div class="rowi"><button class="btn primary" id="spull">${svg('download')}${IS_IOS?'① قبل العمل: جلب من ملف':'جلب من ملف'}</button><button class="btn${dirty?' primary':''}" id="spush">${svg('share')}${IS_IOS?'② بعد العمل: حفظ في ملف':'حفظ في ملف'}${dirty?' <i class="dirty"></i>':''}</button></div>
      <span class="hint">${IS_IOS?'عند الحفظ اختر «حفظ في الملفات» ثم مجلد المزامنة في iCloud Drive أو OneDrive أو Google Drive، وإن لم يسمح iOS بالاستبدال وأضاف رقمًا إلى الاسم (mabadi-data 1…) فلا بأس: عند «جلب» اختر الملفات كلها معًا فتُدمج بالأحدث، ثم احفظ ملفًا واحدًا واحذف القديمة متى شئت.':'ربط المجلد متاح على الحاسوب في متصفح Chrome أو Edge. هنا: اجلب الملف قبل العمل، واحفظه بعده في مجلد المزامنة.'}</span>`}
@@ -1591,11 +1622,13 @@ function syncNudge(){const old=$('nudge');if(old)old.remove();const n=Date.now()
   const hasData=Object.keys(FAV).length||Object.keys(NOTE).length;
   if(IS_IOS&&!IS_STANDALONE()&&hasData&&n-(LS.get('iosnudge',0)||0)>30*D){kind='ios';
     html=`<b>ثبّت التطبيق على الشاشة الرئيسية</b> (مشاركة ← إضافة إلى الشاشة الرئيسية)، وإلا قد يمسح Safari محفوظاتك إذا لم تفتحه أسبوعًا.<span><button class="btn" data-nu="ok">فهمت</button></span>`;}
+  else if(SYNC&&SYNC.state.key&&!SYNC.state.dir&&SYNC.isDirty()&&S.nudge!==false&&n-(+localStorage.getItem(SYNC_META+'_chg')||n)>2*D&&n>(LS.get('dirtynudge',0)||0)){kind='dirty';
+    html=`<b>لديك تغييرات منذ يومين لم تُحفظ في ملف المزامنة.</b> احفظها الآن لتظهر على أجهزتك الأخرى.<span><button class="btn primary" data-nu="push">${svg('share')}احفظ الآن</button><button class="btn" data-nu="later">لاحقًا</button></span>`;}
   else if(SYNC&&hasData&&S.nudge!==false){const first=Math.min(...Object.values(FAV).map(v=>v.t||n),...Object.values(NOTET),n),last=Math.max(SYNC.lastBackup(),first);
     if(n-last>7*D&&n>(LS.get('bknudge',0)||0)){kind='bk';html=`<b>${SYNC.lastBackup()?'مرّ أسبوع على آخر مزامنة أو نسخة احتياطية.':'محفوظاتك في هذا الجهاز فقط.'}</b> احفظها بالمزامنة المشفّرة أو بنسخة احتياطية.<span><button class="btn primary" data-nu="go">الإعدادات</button><button class="btn" data-nu="later">لاحقًا</button></span>`;}}
   if(!html)return;const e=document.createElement('div');e.id='nudge';e.className='nudge';e.setAttribute('role','status');e.innerHTML=html;document.body.appendChild(e);
   e.onclick=ev=>{const b=ev.target.closest('[data-nu]');if(!b)return;const k=b.dataset.nu;
-    if(kind==='ios')LS.set('iosnudge',n);if(k==='later')LS.set('bknudge',n+7*D);if(k==='go'){LS.set('bknudge',n+D);settingsDlg(true);}e.remove();if(kind==='ios')setTimeout(syncNudge,400);};}
+    if(kind==='ios')LS.set('iosnudge',n);if(kind==='dirty'){LS.set('dirtynudge',n+D);if(k==='push')syncRun(()=>SYNC.push());e.remove();return;}if(k==='later')LS.set('bknudge',n+7*D);if(k==='go'){LS.set('bknudge',n+D);settingsDlg(true);}e.remove();if(kind==='ios')setTimeout(syncNudge,400);};}
 // ---------- offline
 function offlineDlg(){dlg(`${svg('download')} العمل دون اتصال`,`<div class="set"><p style="margin:0">بعد أول زيارة تُحفظ نصوص المكتبة في الجهاز. صور الصفحات تُحفظ عند فتحها، ويمكنك تنزيلها كلها الآن (نحو 380 ميغابايت).</p>
   <button class="btn primary" id="dl">تنزيل المكتبة كاملة</button><div class="bar-p"><i id="dlbar"></i></div><div class="hint" id="dlst"></div></div>`);
@@ -1609,7 +1642,7 @@ function installDlg(){if(deferredInstall){deferredInstall.prompt();deferredInsta
   dlg('ثبّت التطبيق',`<div class="prose"><ul><li><b>آيفون وآيباد (Safari):</b> زر المشاركة ← «إضافة إلى الشاشة الرئيسية».</li><li><b>أندرويد (Chrome):</b> القائمة ⋮ ← «تثبيت التطبيق».</li><li><b>الحاسوب (Chrome أو Edge):</b> أيقونة التثبيت في شريط العنوان.</li></ul></div>`);}
 // ---------- التقييم والملاحظات (نموذج Google خاص بصاحب المكتبة)
 // ---------- guide: جدول القسم ← صفحة الدليل (يتحقق منه ويحدّثه tools/guide/build-guide.mjs)
-const GUIDE={home:4,search:6,filters:8,ask:11,timeline:13,compare:14,item:15,status:17,cite:19,source:21,ruling:22,index:23,laws:25,saved:28,follow:29,updates:30,offline:31,settings:32,feedback:34,about:35};
+const GUIDE={home:4,search:6,filters:8,ask:11,timeline:13,compare:14,item:15,status:17,cite:19,source:21,ruling:22,index:23,laws:25,saved:28,follow:30,updates:31,offline:32,settings:33,feedback:35,about:36};
 const GUIDE_PDF='docs/guide.pdf',GUIDE_WEB='docs/guide/index.html';
 // «مداولة» — التطبيق الشقيق: رابط يفتحه المستخدم بنفسه (لا اتصال بين التطبيقين)، وأيقونته محفوظة في هذا المستودع
 const AMALI_URL='https://ommali-app.github.io/',amaliP=id=>AMALI_URL+'#p='+encodeURIComponent(id);
@@ -1812,7 +1845,7 @@ function showUpdate(b){if($('updbar'))return;const e=document.createElement('div
     location.reload();};
   $('updno').onclick=()=>{updLater=true;e.remove();};}
 setTimeout(checkUpdate,4000);document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate();});setInterval(checkUpdate,30*60e3);
-buildSearch();route();setTimeout(loadAllLaws,1500);if(SYNC)SYNC.restore().then(()=>{if($('syncbox'))syncUI();}).catch(()=>{});setTimeout(syncNudge,2500);introShow();if(!location.hash||location.hash==='#/')playWeave();else wovenOnce=true;
+buildSearch();route();setTimeout(loadAllLaws,1500);if(SYNC)SYNC.restore().then(()=>{if($('syncbox'))syncUI();syncDot();autoSync();}).catch(()=>{});setTimeout(syncNudge,2500);introShow();if(!location.hash||location.hash==='#/')playWeave();else wovenOnce=true;
 document.body.insertAdjacentHTML('beforeend',`<button class="totop" id="totop" hidden aria-label="العودة إلى الأعلى">${svg('back').replace('<svg','<svg style="transform:rotate(-90deg)"')}</button>`);
 $('totop').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
 // الأشرطة الأفقية (الموضوعات، الكتب، «تابع من حيث توقفت») على الحاسوب: أزرار تمرير، وسحب بالفأرة، وعجلة الفأرة
