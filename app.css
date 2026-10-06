@@ -1025,3 +1025,7 @@ mark.dif{background:var(--gold-soft);color:inherit;border-radius:3px;box-shadow:
 @media (max-width:760px){.synccard.warn{flex-wrap:wrap}.synccard.warn .btn{width:100%;justify-content:center}}
 .synccard.line{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;font:.82rem var(--f-ui);color:var(--muted);margin:0 2px 12px}
 .synccard.line>i{width:9px;height:9px;border-radius:50%;background:#3fbf7f}.synccard.line.dirty>i{background:#f0a23b}
+#me{position:relative}
+.syncdot.badge{position:absolute;top:-3px;inset-inline-end:-3px;padding:0;margin:0;background:none;width:16px;height:16px;display:grid;place-items:center}
+.syncdot.badge span{display:none}
+.syncdot.badge i{width:11px;height:11px;box-shadow:0 0 0 2px var(--navy)}

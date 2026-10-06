@@ -9,6 +9,7 @@ try{for(const [nm,vp] of [['جوال',{viewport:{width:390,height:844},isMobile:
   const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(String(e)));
   await p.goto(url+'index.html?selftest=1#/');await p.waitForSelector('.gates',{timeout:30000});await p.waitForTimeout(1500);
   ck(nm+': مؤشر «هذا الجهاز فقط» في الرأس',await p.locator('#syncdot.local').count()===1);
+  if(nm==='جوال')ck(nm+': على الهاتف نقطة على زر الإعدادات',await p.locator('#me #syncdot.badge').count()===1);
   await p.evaluate(()=>{location.hash='#/saved';});await p.waitForTimeout(1000);
   ck(nm+': بطاقة «محفوظاتك في هذا الجهاز فقط»',await p.locator('.synccard.warn').count()===1);
   await p.locator('.synccard.warn [data-a2="sync"]').click();await p.waitForTimeout(600);

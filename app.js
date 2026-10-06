@@ -1057,7 +1057,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610061741';
+const APP_BUILD='202610061837';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1572,8 +1572,12 @@ function syncState(){if(!SYNC||!window.crypto||!crypto.subtle)return {k:'na'};co
   return {k:'ok',t:'مُزامن — آخر حفظ '+ago(m.pushed||m.pulled)};}
 function syncDot(){const me=$('me');if(!me)return;let d=$('syncdot');const st=syncState();
   if(st.k==='na'||(!hasUserData()&&st.k==='local')){if(d)d.remove();return;}
-  if(!d){d=document.createElement('button');d.id='syncdot';d.type='button';me.parentNode.insertBefore(d,me);d.onclick=syncDotClick;}
-  d.className='syncdot '+st.k;d.title=st.t;d.setAttribute('aria-label',st.t);d.innerHTML=`<i></i><span>${st.k==='ok'?'مُزامن':st.k==='dirty'?'لم يُحفظ':'هذا الجهاز فقط'}</span>`;}
+  // على الحاسوب شارة بجانب الإعدادات؛ وعلى الهاتف نقطة صغيرة على زر الإعدادات نفسه حتى لا تزاحم العنوان وزر الرجوع
+  const narrow=matchMedia('(max-width:760px)').matches;
+  if(!d){d=document.createElement('span');d.id='syncdot';d.setAttribute('role','button');d.tabIndex=0;d.onclick=e=>{e.stopPropagation();syncDotClick();};d.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();e.stopPropagation();syncDotClick();}};
+    if(!syncDot.mq){syncDot.mq=matchMedia('(max-width:760px)');syncDot.mq.addEventListener('change',()=>{const x=$('syncdot');if(x)x.remove();syncDot();});}}
+  if(narrow){if(d.parentNode!==me)me.appendChild(d);}else if(d.parentNode!==me.parentNode||d.nextSibling!==me)me.parentNode.insertBefore(d,me);
+  d.className='syncdot '+st.k+(narrow?' badge':'');d.title=st.t;d.setAttribute('aria-label',st.t);d.innerHTML=`<i></i><span>${st.k==='ok'?'مُزامن':st.k==='dirty'?'لم يُحفظ':'هذا الجهاز فقط'}</span>`;}
 async function dirGranted(){const d=SYNC&&SYNC.state.dir;if(!d||!d.queryPermission)return false;try{return (await d.queryPermission({mode:'readwrite'}))==='granted';}catch(_){return false;}}
 async function syncDotClick(){const st=syncState();if(st.k==='local'){settingsDlg(true);return;}
   if(SYNC.state.dir){await syncRun(()=>SYNC.syncNow());return;}
