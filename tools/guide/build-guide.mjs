@@ -14,6 +14,15 @@ const SEED={'mabadi:intro':'1','mabadi:bknudge':'9999999999999','mabadi:iosnudge
 async function ready(p){await p.waitForFunction(()=>document.querySelector('.shell')&&!document.getElementById('loading'),null,{timeout:120000}).catch(()=>{});await p.waitForTimeout(400);}
 async function act(p,a,dev){
   if(a==='search'){await p.fill('#sq',QUERY);await p.waitForTimeout(1200);}
+  if(a==='facets'){await p.fill('#sq',QUERY);await p.waitForTimeout(1500);await p.click('.facets [data-fset="ch"][data-v="عمالي"]');await p.waitForTimeout(1500);}
+  if(a==='pick'){await p.fill('#sq',QUERY);await p.waitForTimeout(1500);await p.click('.facets [data-fset="tp"][data-tog]');await p.waitForTimeout(1500);await p.click('#actf [data-pick="tp"]');await p.waitForTimeout(600);}
+  if(a==='ask'||a==='askext'){await p.waitForSelector('#askl',{timeout:30000});if(a==='askext'){await p.click('details.askext summary');await p.waitForTimeout(300);await p.evaluate(()=>document.querySelector('details.askext').scrollIntoView({block:'start'}));await p.evaluate(()=>scrollBy(0,-80));}await p.waitForTimeout(400);}
+  if(a==='tline'){await p.fill('#sq',QUERY);await p.waitForTimeout(1500);await p.click('.tlc[data-yr="2014"]');await p.waitForTimeout(1200);await p.evaluate(()=>{const e=document.querySelector('.tline');scrollTo(0,e.getBoundingClientRect().top+scrollY-(innerWidth<700?70:90));});await p.waitForTimeout(300);}
+  if(a==='cmp'){await p.fill('#sq',QUERY);await p.waitForTimeout(1500);await p.click('.facets [data-go="#/cmp"]');await p.waitForSelector('.ctile',{timeout:30000});await p.waitForTimeout(800);}
+  if(a==='ga'){await p.click('#browse [data-f="st"][data-v="ga"]');await p.waitForTimeout(1500);}
+  if(a==='follow'){await p.evaluate(()=>{localStorage.setItem('mabadi:follow',JSON.stringify([{f:{ch:'عمالي'},t:1},{f:{q:'مكافأة نهاية الخدمة'},t:2}]));localStorage.removeItem('mabadi:known');});await p.reload();await ready(p);
+    await p.evaluate(()=>{const k=JSON.parse(localStorage.getItem('mabadi:known'));for(const c in k)k[c]=Math.max(0,k[c]-15);localStorage.setItem('mabadi:known',JSON.stringify(k));});await p.reload();await ready(p);await p.waitForTimeout(800);}
+  if(a==='changes'){await p.evaluate(()=>document.querySelector('#v-more [data-a2="changes"]').click());await p.waitForSelector('.chgdlg',{timeout:15000});await p.waitForTimeout(400);}
   if(a==='filters'){await p.click('#ftog');await p.selectOption('#flw','6/2010');await p.fill('#fart','41');await p.waitForTimeout(900);}
   if(a==='share'){await p.evaluate(d=>document.querySelector(`article.pr[data-id="${d}"] [data-a="more"]`).click(),DEMO);await p.waitForTimeout(300);await p.evaluate(()=>document.querySelector('.ashs [data-a="share"]').click());await p.waitForTimeout(400);}
   if(a==='src'){await p.click(`article.pr[data-id="${DEMO}"] [data-a="src"]`);await p.waitForTimeout(1500);}
@@ -39,6 +48,7 @@ async function shoot(b,url){
       const crop=dv==='d'&&!s.full&&!(await p.$('.fbx'));
       await p.screenshot({path:f,type:'jpeg',quality:82,...(crop?{clip:{x:0,y:0,width:1004,height:800}}:{})});
       await p.keyboard.press('Escape').catch(()=>{});
+      if(s.act==='follow')await p.evaluate(()=>{localStorage.removeItem('mabadi:follow');localStorage.removeItem('mabadi:known');});
       console.log('لقطة',s.name,dv);}
     await c.close();}
 }

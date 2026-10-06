@@ -7,8 +7,8 @@ try{for(const [nm,vp] of [['جوال',{viewport:{width:390,height:844},isMobile:
   await c.addInitScript(()=>{localStorage.setItem('mabadi:bknudge','9999999999999');localStorage.setItem('mabadi:iosnudge','9999999999999');localStorage.setItem('mabadi:intro','1');});
   const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(String(e)));
   await p.goto(url+'index.html#/');await p.waitForTimeout(3500);
-  ck(nm+': زر «اسأل المكتبة» في الرئيسية',await p.locator('.askcta').count()===1);
-  await p.locator('.askcta').click();await p.waitForTimeout(800);
+  ck(nm+': بطاقة «اسأل المكتبة» في الرئيسية',await p.locator('form.askcta #haskq').count()===1);
+  await p.locator('.askcta button[type=submit]').click();await p.waitForTimeout(800);
   ck(nm+': صفحة السؤال بأمثلة',await p.locator('.askex .chip').count()>=3);
   await p.fill('#askq','هل يستحق العامل مكافأة نهاية الخدمة إذا استقال قبل خمس سنوات');await p.locator('#askf button[type=submit]').click();
   const t0=Date.now();await p.waitForSelector('#askl',{timeout:20000});const ms=Date.now()-t0;console.log('   زمن الجواب الأول',ms,'ms');
@@ -22,6 +22,10 @@ try{for(const [nm,vp] of [['جوال',{viewport:{width:390,height:844},isMobile:
   ck(nm+': البحث متعدد الكلمات يقترح «اسأل المكتبة»',await p.locator('.askjump').count()===1);
   await p.locator('.askjump').click();await p.waitForSelector('#askl',{timeout:20000});ck(nm+': الاقتراح يفتح السؤال',(await p.inputValue('#askq')).includes('استقالة'));
   // وسم الدائرة
+  ck(nm+': خيار المساعد الخارجي (مطوي)',await p.locator('details.askext:not([open]) [data-ext="claude"]').count()===1);
+  await p.locator('details.askext summary').click();await p.locator('[data-ext="copy"]').click();await p.waitForTimeout(300);
+  ck(nm+': زر «اسأل المكتبة» في صفحة البحث',await p.evaluate(()=>{location.hash='#/search';return 1;})&&(await p.waitForTimeout(600),await p.locator('.askbtn').isVisible()));
+  await p.goBack();await p.waitForTimeout(800);
   ck(nm+': وسم الدائرة في البطاقة',await p.locator('#askl .chtag').count()>0);
   // تسميات السنوات عند اختيار سنة
   await p.evaluate(()=>{location.hash='#/search';});await p.waitForTimeout(800);await p.fill('#sq','مكافأة نهاية الخدمة');await p.waitForTimeout(1500);
