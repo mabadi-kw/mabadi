@@ -138,13 +138,15 @@ const STORE=(META.store&&/github\.io$/.test(location.hostname))?META.store:'',PG
 const LATE=ORDER.filter(c=>COLS[c].unpub),CORE=ORDER.filter(c=>!COLS[c].unpub),COLARR={};
 let LATEDONE=!LATE.length,lateRes;const LATEP=new Promise(r=>lateRes=r);if(LATEDONE)lateRes();
 const getJ=(u,d)=>fetch(u).then(r=>r.ok?r.json():d).catch(()=>d);
-const AUX={alias:getJ('data/alias.json',{}),laws:getJ('data/laws/index.json',null),amend:getJ('data/laws/amend.json',null),stat:getJ('data/status.json',null)};
+const AUX={alias:getJ('data/alias.json',{}),laws:getJ('data/laws/index.json',null),amend:getJ('data/laws/amend.json',null),stat:getJ('data/status.json',null),wd:getJ('data/withdrawn.json',{ids:[]})};
 let done=0;
 const LATET=LATE.map(c=>fetch('data/'+c+'.json').then(r=>r.ok?r.text():'[]').catch(()=>'[]'));
 const arrs=await Promise.all(CORE.map(c=>fetch('data/'+c+'.json').then(r=>r.json()).then(a=>{done++;const l=$('loading');if(l)l.textContent=`جارٍ تحميل المكتبة… ${done} من ${CORE.length}`;const lb=$('loadbar');if(lb)lb.style.width=(done/CORE.length*100)+'%';return a;})));
 CORE.forEach((c,k)=>COLARR[c]=arrs[k]);
+// المسحوب لحماية الخصوصية (data/withdrawn.json) لا يدخل المكتبة ولو بقي في نسخة مخزنة قديمة
+const WD=new Set(((await AUX.wd)||{}).ids||[]);
 const PR=[],BYID={},RUL={},POS={};
-function ingestBase(list){list.forEach(p=>{BYID[p.id]=p;POS[p.id]=PR.length;PR.push(p);p.sk=p.sec.join('›');
+function ingestBase(list){list.forEach(p=>{if(WD.has(p.id))return;BYID[p.id]=p;POS[p.id]=PR.length;PR.push(p);p.sk=p.sec.join('›');
   new Set(p.c.map(c=>c.k).filter(Boolean)).forEach(k=>(RUL[k]=RUL[k]||[]).push(p.id));});}
 ingestBase(arrs.flat());
 // نص البحث المطبَّع يُجهَّز في أوقات الفراغ بعد ظهور الواجهة، ويُستكمل فورًا عند أول بحث
@@ -755,6 +757,7 @@ const MT={b:'مصنَّف من أبواب الكتاب',k:'الكلمة المف
 const splitChips=h=>h?h.match(/<button[\s\S]*?<\/button>/g)||[]:[];
 function chipsFold(arr,k){if(arr.length<=k+1)return arr.join('');return arr.slice(0,k).join('')+`<span class="cmore" hidden>${arr.slice(k).join('')}</span><button class="chip plus" data-unfold aria-label="عرض الباقي">+${arr.length-k}</button>`;}
 // قائمة الإجراءات الأخرى للمبدأ (الهاتف): مشاركة، ملاحظة، استماع، ونسخ أجزاء بعينها
+const reportURL=p=>'https://github.com/mabadi-kw/mabadi/issues/new?labels=privacy&title='+encodeURIComponent('بلاغ خصوصية: '+(REF[p.id]||p.id))+'&body='+encodeURIComponent('المعرّف: '+p.id+'\nالمعرّف الثابت: '+(REF[p.id]||'—')+'\n\nصف موضع البيان الشخصي دون نسخه (مثلًا: اسم شاهد في السطر الثاني):\n');
 function actsSheet(p){const k=(p.c.find(c=>c.k)||{}).k;
   const it=(a,ic,t,s)=>`<button class="ash" data-a="${a}">${svg(ic)}<span><b>${t}</b>${s?`<small>${s}</small>`:''}</span></button>`;
   const d=dlg(`${COLS[p.col].name} · ${p.n}`,`<div class="ashs" data-id="${p.id}">
@@ -766,6 +769,7 @@ function actsSheet(p){const k=(p.c.find(c=>c.k)||{}).k;
    ${it('copytext','copy','نسخ نص المبدأ فقط','دون الإسناد')}
    ${it('link','link','نسخ الرابط الثابت',REF[p.id]?esc(refLabel(REF[p.id])):'رابط يفتح المبدأ مباشرة')}
    ${k&&RUL[k]&&RUL[k].length>1?`<button class="ash" data-go="#/r/${esc(k)}">${svg('gavel')}<span><b>كل مبادئ هذا الحكم</b><small>${RUL[k].length} مبدأ</small></span></button>`:''}
+   <a class="ash" href="${reportURL(p)}" target="_blank" rel="noopener">${svg('report')}<span><b>إبلاغ عن بيان شخصي</b><small>إن وجدت اسمًا أو رقمًا يدل على شخص، يُسحب المبدأ فورًا</small></span></a>
    <a class="ash" href="${amaliP(p.id)}" target="_blank" rel="noopener"><img src="icons/partners/mudawala.png" alt="" class="pic"><span><b>افتح في «مداولة»</b><small>المبدأ نفسه في منصة القاضي ↗</small></span></a>
   </div>`,'sheet');return d;}
 function card(p,re,o={}){
@@ -1089,7 +1093,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610070648';
+const APP_BUILD='202610071729';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
