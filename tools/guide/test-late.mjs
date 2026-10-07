@@ -2,7 +2,8 @@
 import {serve,browser,context} from './lib.mjs';
 let ok=0,bad=0;const ck=(n,c,x='')=>{if(c){ok++;console.log('✔',n);}else{bad++;console.log('✘',n,x);}};
 const {server,url}=await serve();const b=await browser();
-try{const c=await context(b,{viewport:{width:1280,height:800}},url);
+try{const META=JSON.parse((await import('node:fs')).readFileSync(new URL('../../data/meta.json',import.meta.url)));if(!META.order.some(c=>META.cols[c].unpub)){console.log('لا مجموعات متأخرة — تخطٍّ');console.log('\n0 ✔ / 0 ✘');process.exit(0);}
+  const c=await context(b,{viewport:{width:1280,height:800}},url);
   await c.addInitScript(()=>{for(const k of ['bknudge','iosnudge'])localStorage.setItem('mabadi:'+k,'9999999999999');localStorage.setItem('mabadi:intro','1');});
   const p=await c.newPage();const errs=[];p.on('pageerror',e=>errs.push(String(e)));
   // رابط مباشر إلى مبدأ من مجموعة متأخرة

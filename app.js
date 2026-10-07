@@ -132,6 +132,7 @@ let hiddenAt=0;document.addEventListener('visibilitychange',()=>{if(document.hid
 const META=await fetch('data/meta.json').then(r=>r.json());
 const ORDER=META.order,COLS=META.cols,TL=META.toplab,LL=META.lawlab;
 // صور الصفحات ونصها في مستودع تخزين مستقل على الأصل نفسه (meta.store)؛ وفي غير الموقع المنشور تُقرأ من المجلد المحلي
+try{if('caches' in window)caches.open('mabadi-data').then(c=>c.keys().then(ks=>ks.filter(r=>/\/data\/UN\d\d\.json/.test(r.url)).forEach(r=>c.delete(r))));}catch(_){}
 const STORE=(META.store&&/github\.io$/.test(location.hostname))?META.store:'',PG=u=>STORE+u;
 // التحميل على مرحلتين: المجموعات الأساسية تُجهَّز أولًا فتظهر الواجهة، والأحكام غير المنشورة تُنزَّل معها وتُضاف بعد ظهورها
 const LATE=ORDER.filter(c=>COLS[c].unpub),CORE=ORDER.filter(c=>!COLS[c].unpub),COLARR={};
@@ -1088,7 +1089,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610070528';
+const APP_BUILD='202610070648';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
