@@ -19,6 +19,21 @@ def run(root=ROOT, quiet=False):
             n += 1; t = text_of(x)
             f = [y for y in P.scan(t) if y['level'] == 'block']
             if f and allow.get(x['id']) != sha(t): bad.append((x['id'], f))
+    # نصوص القواعد (data/rx) — المفتاح «rx:<المعرّف>»
+    import glob
+    for fp in sorted(glob.glob(os.path.join(root, 'data', 'rx', '*.json'))):
+        for i, t in json.load(open(fp, encoding='utf-8')).items():
+            n += 1
+            f = [y for y in P.scan(t) if y['level'] == 'block']
+            if f and allow.get('rx:' + i) != sha(t): bad.append(('rx:' + i, f))
+    # حزم «مداولة» (نص المبدأ ونص القاعدة؛ search_text مشتق منهما فلا يُفحص لأن تطبيعه يولّد أزواجًا زائفة)
+    mp = os.path.join(root, 'packs', 'manifest.json')
+    if os.path.exists(mp):
+        for e in json.load(open(mp, encoding='utf-8'))['packs']:
+            for it in json.load(open(os.path.join(root, 'packs', e['file']), encoding='utf-8'))['items']:
+                t = ' '.join([it.get('title') or '', ' '.join(it.get('paragraphs') or []), it.get('rule_text') or ''])
+                f = [y for y in P.scan(t) if y['level'] == 'block']
+                if f and it['id'] not in allow and 'rx:' + it['id'] not in allow: bad.append(('pack:' + it['id'], f))
     # نصوص الواجهة الأخرى
     for fn in ('changes.json', 'data/reports.json'):
         p = os.path.join(root, fn)
