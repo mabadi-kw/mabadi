@@ -12,6 +12,7 @@ const fail=m=>{$('card').innerHTML=`<div class="empty">${esc(m)}</div>`;size();}
 if(!/^[A-Z0-9]+-\d+$/.test(id))return fail('معرّف غير صالح.');
 const META=await fetch('data/meta.json').then(r=>r.json());
 const pre=id.split('-')[0], col=PRE[pre]||pre, C=META.cols[col];
+const PG=u=>((META.store&&/github\.io$/.test(location.hostname))?META.store:'')+u;
 if(!C)return fail(`لا توجد في المكتبة مجموعة بالرمز ${pre}.`);
 const arr=await fetch('data/'+col+'.json').then(r=>r.json());
 const p=arr.find(x=>x.id===id);
@@ -38,7 +39,7 @@ const PW=C.pw||595.276,PH=C.ph||822.047,cr=C.crop||[0,0,1,1],cell=C.cell||[684,1
 $('pages').innerHTML=p.pg.map(g=>{const reg=p.rg.find(r=>r.page===g);
   const box=reg?`<div class="hlbox" style="left:${((reg.bbox[0]-6)/PW-cr[0])/cw*100}%;top:${((reg.bbox[1]-4)/PH-cr[1])/chh*100}%;width:${(reg.bbox[2]-reg.bbox[0]+12)/PW/cw*100}%;height:${(reg.bbox[3]-reg.bbox[1]+8)/PH/chh*100}%"></div>`:'';
   const gp=C.gp||20,gc=gp/10,b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
-  return `<figure class="pg"><div class="pgimg" role="img" aria-label="صورة الصفحة ${g+C.off}" style="aspect-ratio:${cell[0]}/${cell[1]};background-image:url(pages/${col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>الصفحة ${g+C.off} من الكتاب</figcaption></figure>`;}).join('');
+  return `<figure class="pg"><div class="pgimg" role="img" aria-label="صورة الصفحة ${g+C.off}" style="aspect-ratio:${cell[0]}/${cell[1]};background-image:url(${PG(`pages/${col}/g${String(b).padStart(3,'0')}`)}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>الصفحة ${g+C.off} من الكتاب</figcaption></figure>`;}).join('');
 $('pgs').hidden=false;
 $('copy').hidden=false;
 $('copy').onclick=()=>{const t=(p.ttl?p.ttl+'\n':'')+p.p.join('\n')+(p.rule?'\nالقاعدة:\n'+p.rule:'')+'\n'+(p.c.length?p.c.map(c=>c.raw).join('\n'):'(لا يوجد إسناد في المصدر)')+(p.fn.length?'\n'+p.fn.join('\n'):'')+`\n[المصدر: ${C.title} — ص ${pp.join('–')}]`;

@@ -131,6 +131,8 @@ let hiddenAt=0;document.addEventListener('visibilitychange',()=>{if(document.hid
 // ---------- data
 const META=await fetch('data/meta.json').then(r=>r.json());
 const ORDER=META.order,COLS=META.cols,TL=META.toplab,LL=META.lawlab;
+// صور الصفحات ونصها في مستودع تخزين مستقل على الأصل نفسه (meta.store)؛ وفي غير الموقع المنشور تُقرأ من المجلد المحلي
+const STORE=(META.store&&/github\.io$/.test(location.hostname))?META.store:'',PG=u=>STORE+u;
 // التحميل على مرحلتين: المجموعات الأساسية تُجهَّز أولًا فتظهر الواجهة، والأحكام غير المنشورة تُنزَّل معها وتُضاف بعد ظهورها
 const LATE=ORDER.filter(c=>COLS[c].unpub),CORE=ORDER.filter(c=>!COLS[c].unpub),COLARR={};
 let LATEDONE=!LATE.length,lateRes;const LATEP=new Promise(r=>lateRes=r);if(LATEDONE)lateRes();
@@ -275,7 +277,7 @@ function amendBanner(L){const ix=LAWBYKEY[L.key]||{},ev=(AMEND.laws||{})[L.key]|
 const artEv=(L,a)=>a.issue||a.bis?[]:((AMEND.arts||{})[L.id+'#'+a.n]||[]);
 function lawPageHTML(col,M,g,reg){const gp=M.gp||20,gc=gp/10,b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
   const box=reg?`<div class="hlbox" style="left:${(reg.bbox[0]-6)/M.pw*100}%;top:${(reg.bbox[1]-4)/M.ph*100}%;width:${(reg.bbox[2]-reg.bbox[0]+12)/M.pw*100}%;height:${(reg.bbox[3]-reg.bbox[1]+8)/M.ph*100}%"></div>`:'';
-  const src=`pages/${col}/g${String(b).padStart(3,'0')}.webp`;return `<figure class="pg"><div class="pgimg" role="img" data-src="${src}" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="${pgCaption(M,g)}" style="aspect-ratio:${M.cell[0]}/${M.cell[1]};background-image:url(pages/${col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>${pgCaption(M,g)}</figcaption></figure>`;}
+  const src=PG(`pages/${col}/g${String(b).padStart(3,'0')}.webp`);return `<figure class="pg"><div class="pgimg" role="img" data-src="${src}" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="${pgCaption(M,g)}" style="aspect-ratio:${M.cell[0]}/${M.cell[1]};background-image:url(pages/${col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>${pgCaption(M,g)}</figcaption></figure>`;}
 function lawPagesHTML(a){const L=a.law;return a.pages.map(g=>lawPageHTML(L.pages_col,L.page_meta,g,(a.rg||[]).find(r=>r.page===g))).join('');}
 const LOADMSG='<div class="empty">جارٍ تحميل النص…</div>';
 function viewLaws(){const el=$('v-laws');document.title='التشريعات — مبادئ التمييز';
@@ -464,10 +466,24 @@ const CLS={'ا':'[اأإآ]','ي':'[يىئ]','ه':'[هة]','و':'[وؤ]'};
 function hlRe(ts){if(!ts.length)return null;return new RegExp('('+ts.map(t=>[...t].map(ch=>ch===' '?'\\s+':(CLS[ch]||ch.replace(/[.*+?^${}()|[\]\\\/]/g,'\\$&'))+'[\\u064B-\\u0652\\u0640]*').join('')).join('|')+')','g');}
 const hl=(s,re)=>{s=esc(s);return re?s.replace(re,'<mark>$1</mark>'):s;};
 let cur=[],shown=30;
-function filterPR(){if(F.q)ensureNS();const qa=qalts(F.q),art=west(F.art).replace(/\s+/g,'');
-  return PR.filter(p=>qa.every(al=>p.ns.includes(al.lit)||al.slice(1).some(t=>synHit(p.ns,t)))&&(!F.col||p.col===F.col)&&(!F.tp||p.tp.some(x=>x[0]===F.tp))&&(!F.ch||p.c.some(x=>x.ch===F.ch))&&(!F.st||stOk(p,F.st))&&(!F.rv||p.rv.length)&&(!F.sec||p.sk===F.sec||p.sk.startsWith(F.sec+'›'))
+// مطابقة النص: تُحسب مرة لكل عبارة بحث (في عامل البحث إن توفر) وتُحفظ قناعًا، ثم تُطبَّق المرشّحات على البيانات الوصفية
+let TQ=null,TMASK=null,TPART=false;
+const textOk=(p,qa)=>{const ns=p.ns!==undefined?p.ns:(p.ns=nsOf(p));return qa.every(al=>ns.includes(al.lit)||al.slice(1).some(t=>synHit(ns,t)));};
+function makePred(){const qa=qalts(F.q),art=west(F.art).replace(/\s+/g,''),m=F.q&&TQ===F.q?TMASK:null;
+  return p=>(!F.q||(m?m[POS[p.id]]===1:textOk(p,qa)))&&(!F.col||p.col===F.col)&&(!F.tp||p.tp.some(x=>x[0]===F.tp))&&(!F.ch||p.c.some(x=>x.ch===F.ch))&&(!F.st||stOk(p,F.st))&&(!F.rv||p.rv.length)&&(!F.sec||p.sk===F.sec||p.sk.startsWith(F.sec+'›'))
    &&(!F.lw&&!art||p.lw.some(([l,as])=>(!F.lw||l===F.lw)&&(!art||as.some(a=>a===art||a.split('/')[0]===art))))
-   &&(!F.ap&&!F.ay||p.c.some(c=>c.k&&apMatch(c.k)))&&(!F.yr||pDate(p).startsWith(F.yr)));}
+   &&(!F.ap&&!F.ay||p.c.some(c=>c.k&&apMatch(c.k)))&&(!F.yr||pDate(p).startsWith(F.yr));}
+function filterPR(){return PR.filter(makePred());}
+let WK=null,WKDONE=false,WKCORE=false,WKSEQ=0,PENDQ=null;
+try{if(window.Worker&&!/[?&]noworker\b/.test(location.search)){WK=new Worker('search-worker.js');WK.postMessage({type:'load',cols:[...CORE,...LATE],core:CORE.length});
+  WK.onmessage=e=>{const m=e.data;
+    if(m.type==='core'){WKCORE=true;}
+    else if(m.type==='done'){WKDONE=true;setTimeout(()=>{for(const p of PR)if(p.ns!==undefined)delete p.ns;NSI=0;},1000);if(TPART&&F.q&&location.hash.startsWith('#/search')){TQ=null;PENDQ=null;runSearch();}}
+    else if(m.type==='r'&&m.seq===WKSEQ&&m.q===F.q){const mk=new Uint8Array(PR.length);m.ids.forEach(id=>{const i=POS[id];if(i!==undefined)mk[i]=1;});
+      TQ=m.q;TMASK=mk;TPART=m.partial||!LATEDONE;PENDQ=null;runSearch();}};
+  WK.onerror=()=>{WK=null;};}}catch(_){WK=null;}
+function needMask(){if(!F.q||!WK||!WKDONE||TQ===F.q)return false;if(PENDQ===F.q)return true;PENDQ=F.q;WKSEQ++;const qa=qalts(F.q).map(al=>({lit:al.lit,alts:al.slice(1)}));WK.postMessage({type:'q',q:F.q,seq:WKSEQ,qa});
+  const c=$('count');if(c)c.innerHTML='<span class="muted">'+(WKDONE?'جارٍ البحث…':'جارٍ تجهيز البحث…')+'</span>';return true;}
 // رقم الطعن وسنته: يطابق أي طعن في مفتاح الحكم («24/1983+25/1983@1983-12-26»)
 function apMatch(k){const n=west(F.ap).trim(),y=west(F.ay).trim();return k.split('@')[0].split('+').some(x=>{const [a,b]=x.split('/');return (!n||a===n)&&(!y||b===y);});}
 // ---------- الانتقال المباشر: «م 41 من 6/2010»، «المادة 154 جزاء»، «الطعن 730/2012»، «V09L-0184»
@@ -538,7 +554,7 @@ const NEWPR=PR.filter(isNew);const newIn=list=>list.forEach(p=>{if(isNew(p))NEWP
 const curF=()=>Object.fromEntries(FKEYS.filter(k=>F[k]).map(k=>[k,F[k]]));
 const fkey=f=>FKEYS.filter(k=>f[k]).map(k=>k+'='+f[k]).join('&');
 function fname(f){return withF(Object.assign({},FBLANK,f),()=>scopeLabel()+(F.st?' · '+STL[F.st]:''));}
-const fmatch=(f,list)=>withF(Object.assign({},FBLANK,f),()=>{const keep=new Set(filterPR().map(p=>p.id));return list.filter(p=>keep.has(p.id));});
+const fmatch=(f,list)=>withF(Object.assign({},FBLANK,f),()=>list.filter(makePred()));
 let FOLNEW=null;
 function folNew(){if(FOLNEW)return FOLNEW;FOLNEW={};if(NEWPR.length)FOL.forEach(o=>{const n=collapse(fmatch(o.f,NEWPR));if(n.length)FOLNEW[fkey(o.f)]=n;});return FOLNEW;}
 const folNewCount=()=>new Set(Object.values(folNew()).flat().map(p=>p.id)).size;
@@ -1043,12 +1059,12 @@ function ttsVoiceUI(){const s=$('vsel');if(!s)return;const L=ttsArVoices().sort(
   $('vnone').hidden=!!L.length;}
 // ---------- source pages
 const PT={};
-async function pageLines(col,g){const b=Math.floor((g-1)/1000),k=col+'/'+b;if(!PT[k])PT[k]=fetch(`pagetext/${col}/t${String(b).padStart(3,'0')}.json`).then(r=>r.ok?r.json():{}).catch(()=>({}));return (await PT[k])[g]||[];}
+async function pageLines(col,g){const b=Math.floor((g-1)/1000),k=col+'/'+b;if(!PT[k])PT[k]=fetch(PG(`pagetext/${col}/t${String(b).padStart(3,'0')}.json`)).then(r=>r.ok?r.json():{}).catch(()=>({}));return (await PT[k])[g]||[];}
 function pageFig(p,g){const C=COLS[p.col],PW=C.pw||595.276,PH=C.ph||822.047,cr=C.crop||[0,0,1,1],cell=C.cell||[684,1000],cw=cr[2]-cr[0],chh=cr[3]-cr[1];
   const reg=p.rg.find(r=>r.page===g);
   const box=reg?`<div class="hlbox" style="left:${((reg.bbox[0]-6)/PW-cr[0])/cw*100}%;top:${((reg.bbox[1]-4)/PH-cr[1])/chh*100}%;width:${(reg.bbox[2]-reg.bbox[0]+12)/PW/cw*100}%;height:${(reg.bbox[3]-reg.bbox[1]+8)/PH/chh*100}%"></div>`:'';
   const gp=C.gp||20,gc=gp/10,b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
-  return `<figure class="pg" data-g="${g}"><div class="pgimg" role="img" data-src="pages/${p.col}/g${String(b).padStart(3,'0')}.webp" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="صورة الصفحة ${pageNo(p.col,g)}" style="aspect-ratio:${cell[0]}/${cell[1]};background-image:url(pages/${p.col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>${pageCap(p.col,g)}</figcaption></figure><details class="pgtxt" data-id="${p.id}" data-g="${g}"><summary>نص الصفحة المستخرج</summary><div class="ptx">…</div></details>`;}
+  return `<figure class="pg" data-g="${g}"><div class="pgimg" role="img" data-src="${PG(`pages/${p.col}/g${String(b).padStart(3,'0')}.webp`)}" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="صورة الصفحة ${pageNo(p.col,g)}" style="aspect-ratio:${cell[0]}/${cell[1]};background-image:url(pages/${p.col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>${pageCap(p.col,g)}</figcaption></figure><details class="pgtxt" data-id="${p.id}" data-g="${g}"><summary>نص الصفحة المستخرج</summary><div class="ptx">…</div></details>`;}
 // صفحات المبدأ متصلة من أولها إلى آخرها، وزرّان لعرض الصفحة السابقة والتالية (داخل حدود المجموعة أو الملف)
 function pagesHTML(p){if(COLS[p.col].noimg){if(COLS[p.col].unpub)return '<p class="muted pgnote">حكم غير منشور: نص القاعدة كما ورد في الحكم، وحُجبت أسماء الأطراف من الأشخاص والشركات وبقيت الجهات الحكومية والصفات.</p>';const ns=printed(p);return `<p class="muted pgnote">${ns.length?`الصفحة ${ns.join('–')} من الكتاب. `:''}المصدر ملف Word نُقل نصه كما هو، فلا صورة صفحة لهذه المجموعة.</p>`;}
   if(!p.pg.length)return '';const g0=p.pg[0],g1=p.pg[p.pg.length-1],C=COLS[p.col],d=pageDoc(p.col,g0),lo=d?d.first:1,hi=d?d.last:(C.last||1e9);
@@ -1072,7 +1088,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610070004';
+const APP_BUILD='202610070528';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1263,7 +1279,7 @@ function pickDlg(k){const T={tp:'اختر الموضوع',ch:'اختر الدا�
   const d=dlg(T[k],`<input class="flt" id="pkq" type="search" placeholder="ابحث…" autocomplete="off" enterkeyhint="done">${others?'<p class="hint">الأعداد ضمن بحثك ومرشحاتك الأخرى.</p>':''}<div class="pkl">${body||'<div class="empty">لا خيارات.</div>'}</div>`,'pick');
   const q=d.querySelector('#pkq');q.oninput=()=>{const v=norm(q.value.trim());d.querySelectorAll('.pko').forEach(b=>b.hidden=!!v&&!b.dataset.n.includes(v));d.querySelectorAll('.pkg').forEach(g=>g.hidden=![...g.querySelectorAll('.pko')].some(b=>!b.hidden));};
   if(matchMedia('(pointer:fine)').matches)q.focus();const on=d.querySelector('.pko.on');if(on)on.scrollIntoView({block:'center'});}
-function runSearch(){shown=30;if(F.yr){const y=F.yr;F.yr='';TLB=collapse(filterPR());F.yr=y;}cur=filterPR();const qa=qalts(F.q);if(qa.some(a=>a.length>1)){const L=[],S=[];cur.forEach(p=>(qa.every(a=>p.ns.includes(a.lit))?L:S).push(p));cur=L.concat(S);SYNN=S.length;}else SYNN=0;RAWN=cur.length;cur=collapse(cur);if(!F.yr)TLB=cur;const idle=idleF()&&SCOPE==='p';calcFacets();
+function runSearch(){if(needMask())return;shown=30;if(F.yr){const y=F.yr;F.yr='';TLB=collapse(filterPR());F.yr=y;}cur=filterPR();const qa=qalts(F.q);if(qa.some(a=>a.length>1)){const L=[],S=[];cur.forEach(p=>(qa.every(a=>(p.ns!==undefined?p.ns:nsOf(p)).includes(a.lit))?L:S).push(p));cur=L.concat(S);SYNN=S.length;}else SYNN=0;RAWN=cur.length;cur=collapse(cur);if(!F.yr)TLB=cur;const idle=idleF()&&SCOPE==='p';calcFacets();
   $('browse').hidden=!idle;$('list').hidden=idle;document.querySelector('#v-search>.hint').hidden=idle;if(idle){renderBrowse();$('more').hidden=true;}else renderList();
   const L={col:v=>COLS[v]?.name,tp:v=>TL[v]?.[1],ch:v=>v,lw:v=>LL[v]||v,art:v=>'المادة '+v,rv:()=>'يحتاج مراجعة',sec:v=>v.split('›').slice(-1)[0],ap:v=>'طعن رقم '+v,ay:v=>'سنة الطعن '+v,yr:v=>'جلسات '+v,st:v=>STL[v]||v,all:()=>'كل المبادئ'};
   const PK={col:1,tp:1,ch:1,lw:1};
@@ -1654,7 +1670,7 @@ function offlineDlg(){dlg(`${svg('download')} العمل دون اتصال`,`<di
   <button class="btn primary" id="dl">تنزيل المكتبة كاملة</button><div class="bar-p"><i id="dlbar"></i></div><div class="hint" id="dlst"></div></div>`);
   $('dl').onclick=async()=>{if(!('caches' in window)){$('dlst').textContent='هذا المتصفح لا يدعم التخزين دون اتصال.';return;}$('dl').disabled=true;
    try{const Fs=await fetch('files.json',{cache:'no-store'}).then(r=>r.json());const cF=await caches.open('mabadi-files'),cD=await caches.open('mabadi-data');const tot=Fs.files.length;let n=0,by=0;const q=[...Fs.files];
-    const work=async()=>{while(q.length){const f=q.shift(),c=f.p.startsWith('pages/')?cF:cD;try{if(!(await c.match(f.p))){const r=await fetch(f.p);if(r.ok)await c.put(f.p,r);}}catch(_){}n++;by+=f.s;if($('dlbar')){$('dlbar').style.width=(n/tot*100)+'%';$('dlst').textContent=`${n} من ${tot} ملف · ${(by/1048576).toFixed(0)} ميغابايت`;}}};
+    const work=async()=>{while(q.length){const f=q.shift(),c=f.p.startsWith('pages/')?cF:cD;try{const u=/^(pages|pagetext)\//.test(f.p)?PG(f.p):f.p;if(!(await c.match(u))){const r=await fetch(u);if(r.ok)await c.put(u,r);}}catch(_){}n++;by+=f.s;if($('dlbar')){$('dlbar').style.width=(n/tot*100)+'%';$('dlst').textContent=`${n} من ${tot} ملف · ${(by/1048576).toFixed(0)} ميغابايت`;}}};
     await Promise.all([work(),work(),work(),work()]);if($('dlst'))$('dlst').textContent='اكتمل: المكتبة كلها محفوظة في هذا الجهاز.';}catch(_){if($('dlst'))$('dlst').textContent='تعذّر التنزيل الآن. حاول مرة أخرى.';}
    if($('dl'))$('dl').disabled=false;};}
 let deferredInstall=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;});
@@ -1894,13 +1910,13 @@ $('totop').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
   if(y<900||!up){if(y>lastY+4||y<900)b.classList.remove('on');}else{b.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>b.classList.remove('on'),2500);}
   lastY=y;},{passive:true});}
 // ---------- المرحلة الثانية من التحميل: الأحكام غير المنشورة
-(async()=>{if(LATEDONE){nsIdle();return;}const sub=$('sub'),base=()=>`${nf(PR.length)} مبدأً · ${ORDER.length} مجموعة`;
+(async()=>{if(LATEDONE){if(!WK)nsIdle();return;}const sub=$('sub'),base=()=>`${nf(PR.length)} مبدأً · ${ORDER.length} مجموعة`;
   if(sub)sub.textContent=base()+' · جارٍ تحميل الأحكام غير المنشورة…';
   await new Promise(r=>setTimeout(r,400));
   for(let k=0;k<LATE.length;k++){const c=LATE[k];let a=[];try{a=JSON.parse(await LATET[k]);}catch(_){}
     await new Promise(r=>setTimeout(r,0));COLARR[c]=a;ingestBase(a);cixIn(c);countIn(a);artIn(a);newIn(a);}
-  dgIn();await REFP;refIn(LATE);ASKIX=null;FOLNEW=null;LATEDONE=true;lateRes();if(sub)sub.textContent=base();
+  dgIn();await REFP;refIn(LATE);ASKIX=null;FOLNEW=null;LATEDONE=true;if(TPART){TQ=null;PENDQ=null;}lateRes();if(sub)sub.textContent=base();
   const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));
   if(h==='search'){if(!$('list').hidden||F.q||!idleF())runSearch();else route();}else if(!h||h.startsWith('index')||h==='follow'||h==='more'||h==='review')route();
-  nsIdle();})().catch(e=>console.error(e));
+  if(!WK)nsIdle();})().catch(e=>console.error(e));
 })().catch(e=>{const m=document.getElementById('main');if(m)m.innerHTML='<div class="empty">تعذّر تحميل المكتبة. أعد تحميل الصفحة.</div>';console.error(e);});
