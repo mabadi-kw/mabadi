@@ -474,7 +474,7 @@ let cur=[],shown=30;
 let TQ=null,TMASK=null,TPART=false;
 const textOk=(p,qa)=>{const ns=p.ns!==undefined?p.ns:(p.ns=nsOf(p));return qa.every(al=>ns.includes(al.lit)||al.slice(1).some(t=>synHit(ns,t)));};
 function makePred(){const qa=qalts(F.q),art=west(F.art).replace(/\s+/g,''),m=F.q&&TQ===F.q?TMASK:null,ixs=F.ix&&IX&&IX.ki[F.ix]!==undefined?ixDesc(IX.ki[F.ix]):null;
-  return p=>(!ixs||ixs.has(p.id))&&(!F.q||(m?m[POS[p.id]]===1:textOk(p,qa)))&&(!F.col||p.col===F.col)&&(!F.tp||p.tp.some(x=>x[0]===F.tp))&&(!F.ch||p.c.some(x=>x.ch===F.ch))&&(!F.st||stOk(p,F.st))&&(!F.rv||p.rv.length)&&(!F.sec||p.sk===F.sec||p.sk.startsWith(F.sec+'›'))
+  return p=>(!ixs||ixs.has(p.id))&&(!F.q||(m&&!p.mst?m[POS[p.id]]===1:textOk(p,qa)))&&(!F.col||p.col===F.col)&&(!F.tp||p.tp.some(x=>x[0]===F.tp))&&(!F.ch||p.c.some(x=>x.ch===F.ch))&&(!F.st||stOk(p,F.st))&&(!F.rv||p.rv.length)&&(!F.sec||p.sk===F.sec||p.sk.startsWith(F.sec+'›'))
    &&(!F.lw&&!art||p.lw.some(([l,as])=>(!F.lw||l===F.lw)&&(!art||as.some(a=>a===art||a.split('/')[0]===art))))
    &&(!F.ap&&!F.ay||p.c.some(c=>c.k&&apMatch(c.k)))&&(!F.yr||pDate(p).startsWith(F.yr));}
 function filterPR(){return PR.filter(makePred());}
@@ -794,18 +794,19 @@ function card(p,re,o={}){
   return `<article class="pr card" id="p${p.id}" data-id="${p.id}">
    <div class="num">${p.n}${p.np!==p.n?`<small>طُبع ${p.np}</small>`:''}<div class="idchip">${p.id}</div></div>
    <div class="body">
-    <div class="crumb"><span>${esc(COLS[p.col].name)}</span>${COLS[p.col].unpub?'<span class="abadge">من حكم غير منشور</span>':''}${p.sec.map(x=>`<span>${esc(x)}</span>`).join('')}${pCh(p).length?`<b class="chtag" title="الدائرة كما وردت في إسناد المبدأ؛ وما قبلها اسم الكتاب وبابه">${svg('scale')}دائرة ${esc(pCh(p).join('، '))}</b>`:''}</div>
+    <div class="crumb"><span>${esc(COLS[p.col].name)}</span>${COLS[p.col].extract?'<span class="abadge mstb">مستخلص — غير رسمي</span>':COLS[p.col].unpub?'<span class="abadge">من حكم غير منشور</span>':''}${p.sec.map(x=>`<span>${esc(x)}</span>`).join('')}${pCh(p).length?`<b class="chtag" title="الدائرة كما وردت في إسناد المبدأ؛ وما قبلها اسم الكتاب وبابه">${svg('scale')}دائرة ${esc(pCh(p).join('، '))}</b>`:''}</div>
     ${statusHTML(p,tw.length)}
     ${p.ttl?`<div class="ttl">${hl(p.ttl,re)}</div>`:''}<div class="text">${h.join('')}</div>
     ${p.rule===undefined&&p.rx!==undefined?`<details class="rule" data-rx="${p.id}"${o.open?' open':''}><summary>القاعدة — نص الحكم</summary><div class="text">جارٍ التحميل…</div></details>`:''}
     ${p.rule?`<details class="rule"${o.open||(re&&(re.lastIndex=0,re.test(p.rule)))?' open':''}><summary>القاعدة — نص الحكم</summary><div class="text">${hl(p.rule,re)}</div></details>`:''}
+    ${p.mst&&p.c[0]&&p.c[0].panel?`<div class="fn">الهيئة: ${esc(p.c[0].panel.president)}${p.c[0].panel.members.length?' — '+esc(p.c[0].panel.members.join('، ')):''}</div>`:''}${p.mst&&p.mst.same?`<div class="fn">المبدأ نفسه في المكتبة: <button class="linkbtn" data-go="#/p/${esc(p.mst.same)}">${esc(p.mst.same)}</button></div>`:''}
     ${p.fn.length?`<div class="fn">${p.fn.map(esc).join('<br>')}</div>`:''}${p.sa.length?`<div class="sa">${p.sa.map(esc).join('<br>')}</div>`:''}
     ${also}<div class="meta">${meta}</div>
     <div class="acts no-print">
      <button class="btn" data-a="copy">${svg('copy')}نسخ</button>
      <button class="btn citeb" data-a="citedlg" title="الإسناد بصيغة موحدة للحكم أو المذكرة">${svg('quote')}استشهد</button>
      <button class="btn${fav?' on':''}" data-a="fav">${svg('star')}${fav?'محفوظ':'حفظ'}</button>
-     <button class="btn" data-a="src" title="صورة الصفحة في المصدر">${svg('page')}ص ${printed(p).join('–')}</button>
+     ${p.pg.length?`<button class="btn" data-a="src" title="صورة الصفحة في المصدر">${svg('page')}ص ${printed(p).join('–')}</button>`:''}
      <span class="sp"></span>
      ${o.page?'':`<button class="btn" data-go="#/p/${p.id}">${svg('open')}فتح</button>`}
      <button class="btn icon more" data-a="more" aria-label="إجراءات أخرى" title="إجراءات أخرى">${svg('dots')}</button>
@@ -1094,7 +1095,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610081539';
+const APP_BUILD='202610081749';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1344,6 +1345,41 @@ function timelineHTML(){const B=TLB||[];if(B.length<8)return '';const by={};let 
 function renderList(){const re=hlRe(qalts(F.q).flat());const ah=artHits();$('list').innerHTML=(F.q?jumpHTML(smartJump(F.q)):'')+(F.q&&txn(F.q).split(' ').filter(w=>w.length>1).length>=3?`<button class="askjump card${cur.length<3?' strong':''}" data-ask="${esc(F.q)}">${svg('askq')}<span><b>اسأل المكتبة بهذه العبارة</b><small>${cur.length<3?'نتائج قليلة لأن البحث يشترط ورود كل الكلمات — «اسأل المكتبة» يرتّب الأقرب ولو لم ترد كلها':'يرتّب المبادئ بقربها من عبارتك ولو لم ترد كل كلماتها'}</small></span><span class="garr">${svg('back')}</span></button>`:'')+facetsHTML()+timelineHTML()+(ah.length?`<details class="arthits card fold"><summary>${svg('scroll')} في نصوص التشريعات: ${nf(ah.length)} ${ah.length===1?'مادة':ah.length<11?'مواد':'مادة'} <small>${esc(ah.slice(0,2).map(([L,a])=>a.label+' · '+L.short).join(' — '))}${ah.length>2?' …':''}</small></summary>${ah.slice(0,8).map(([L,a])=>`<button class="arow" data-go="#/a/${a.id}"><b>${esc(a.label)} · ${esc(L.short)}</b><span>${hl(a.paras.join(' ').slice(0,220),re)}${a.paras.join(' ').length>220?'…':''}</span></button>`).join('')}${ah.length>8?`<button class="btn sm" data-scope-l="1">كل المواد في نطاق «التشريعات» (${nf(ah.length)})</button>`:''}</details>`:'')+(cur.length?cur.slice(0,shown).map(p=>card(p,re)).join(''):'<div class="empty">لا توجد نتائج. جرّب كلمة أقصر أو أزل أحد المرشحات.</div>');$('more').hidden=cur.length<=shown;prefetchRules(cur.slice(0,shown));}
 function setFilter(k,v){Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:'',ap:'',ay:'',yr:'',st:'',all:false,ix:''});SCOPE='p';F[k]=v;go('#/search');}
 // ---------- INDEX
+// ---------- المستخلص (packs/*.amx): مشفّر، يُفتح بالرمز على الجهاز وحده (AMX1: PBKDF2-SHA256 → AES-GCM-256، gzip)
+let MSTMAN=null,MSTON=0;getJ('packs/extract_manifest.json',null).then(m=>{MSTMAN=m&&m.files&&m.files.length?m:null;if(MSTMAN&&location.hash==='#/more')route();});
+const MSTDB=()=>new Promise((res,rej)=>{const r=indexedDB.open('mabadi_mst',1);r.onupgradeneeded=()=>r.result.createObjectStore('k');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});
+const mstGet=async k=>{try{const db=await MSTDB();return await new Promise(r=>{const q=db.transaction('k').objectStore('k').get(k);q.onsuccess=()=>r(q.result);q.onerror=()=>r(null);});}catch(_){return null;}};
+const mstPut=async(k,v)=>{try{const db=await MSTDB();db.transaction('k','readwrite').objectStore('k').put(v,k);}catch(_){}};
+const mstClear=async()=>{try{const db=await MSTDB();db.transaction('k','readwrite').objectStore('k').clear();}catch(_){}};
+async function mstKey(pass,salt,iter){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass.normalize('NFC')),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt,iterations:iter},k,{name:'AES-GCM',length:256},false,['decrypt']);}
+const hexb=b=>[...b].map(x=>x.toString(16).padStart(2,'0')).join('');
+async function mstOpen(buf,pass,remember){const b=new Uint8Array(buf);if(String.fromCharCode(...b.slice(0,4))!=='AMX1')throw new Error('fmt');
+  const iter=new DataView(b.buffer,b.byteOffset).getUint32(5),salt=b.slice(9,25),iv=b.slice(25,37),sk='s'+hexb(salt);
+  let key=pass?await mstKey(pass,salt,iter):await mstGet(sk);if(!key)throw new Error('nokey');
+  const pt=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv},key,b.slice(37)));
+  if(pass&&remember)await mstPut(sk,key);
+  const raw=await new Response(new Blob([pt]).stream().pipeThrough(new DecompressionStream('gzip'))).arrayBuffer();return JSON.parse(new TextDecoder().decode(raw));}
+function mstIngest(pk){const add=[];for(const it of pk.items){if(BYID[it.id]||WD.has(it.id))continue;const col=it.source;
+    if(!COLS[col]){const y='20'+col.slice(-2);COLS[col]={name:'المستخلص '+y,title:'مستخلص مبادئ التمييز '+y+' — غير رسمي',n:0,unpub:true,extract:true};ORDER.push(col);}
+    COLS[col].n++;
+    add.push({id:it.id,col,n:it.number,np:it.number,sec:[it.branches.join('، ')],p:it.paragraphs,c:it.citations.map(c=>({raw:c.raw,ch:c.chamber,k:c.ruling_key,panel:c.panel})),
+      cp:[],sa:[],fn:[],pg:[],rg:[],rv:[],rel:it.same_as?[it.same_as]:[],tp:[],lw:[],src:{},mst:{novel:it.novel,same:it.same_as||null},_ix:(it.index||[]).map(x=>x.key)});}
+  if(!add.length)return 0;ingestBase(add);countIn(add);artIn(add);
+  const ixAdd=()=>{if(!IX)return;add.forEach(p=>{const ns=p._ix.map(k=>IX.ki[k]).filter(i=>i!==undefined);if(ns.length){IX.a[p.id]=ns;ns.forEach(i=>IX.by[i].push(p.id));}});};
+  if(IX)ixAdd();else ixLoad().then(ixAdd);MSTON+=add.length;return add.length;}
+async function mstLoad(pass,remember){let n=0;for(const f of MSTMAN.files){const buf=await fetch('packs/'+f.file).then(r=>{if(!r.ok)throw new Error('net');return r.arrayBuffer();});n+=mstIngest(await mstOpen(buf,pass,remember));}return n;}
+async function mstAuto(){if(!MSTMAN){await new Promise(r=>setTimeout(r,1200));if(!MSTMAN)return;}if(MSTON)return;try{const n=await mstLoad(null,false);if(n){const sub=$('sub');if(sub)sub.textContent=`${nf(PR.length)} مبدأً · ${ORDER.length} مجموعة`;if(location.hash.startsWith('#/search')&&!idleF())runSearch();}}catch(_){}}
+function mstDlg(){const on=!!MSTON;const d=dlg('المستخلص 2018–2026',on?`<p>المستخلص مفتوح على هذا الجهاز: ${nf(MSTON)} مبدأً، تظهر في البحث والفهرس بعلامة «مستخلص — غير رسمي».</p><button class="btn" id="mstoff">أقفله على هذا الجهاز</button>`:
+  `<p class="muted">مبادئ من أحكام غير منشورة (2018–2026) لم تصدر فيها مجموعات ولا مجلات. النص حرفيًا من الحكم، والمرجع هو الحكم نفسه. يُفتح بالرمز على جهازك وحده، ولا يُرسل الرمز إلى أي مكان.</p>
+   <label>رمز المستخلص<input id="mstp" type="password" autocomplete="current-password" style="width:100%"></label>
+   <label style="display:flex;gap:8px;align-items:center;margin-top:8px"><input id="mstr" type="checkbox" checked> تذكّر على هذا الجهاز</label>
+   <p id="mstm" class="muted"></p><button class="btn primary" id="msto">افتح</button>`);
+  if(on){d.querySelector('#mstoff').onclick=async()=>{await mstClear();location.reload();};return;}
+  const go=async()=>{const p=d.querySelector('#mstp').value;if(!p)return;const m=d.querySelector('#mstm');m.textContent='جارٍ الفتح…';
+    try{const n=await mstLoad(p,d.querySelector('#mstr').checked);m.textContent=`فُتح: ${nf(n)} مبدأ.`;setTimeout(()=>{closeDlg();route();},700);}
+    catch(e){m.innerHTML='<span style="color:#a12a2a">'+(e.message==='net'?'تعذّر تنزيل الملف؛ تحقق من الاتصال.':'الرمز غير صحيح.')+'</span>';}};
+  d.querySelector('#msto').onclick=go;d.querySelector('#mstp').onkeydown=e=>{if(e.key==='Enter')go();};}
 let idxTab='topics';
 // ---------- الفهرس الموحّد: تبويب «مجموعة القواعد القانونية — القسم الخامس» (data/ix.json، يُحمَّل عند الحاجة)
 let IXP=null,IX=null,IXPART=0,IXL='',IXK=-1;
@@ -1468,6 +1504,7 @@ function viewMore(){const inst=navigator.standalone===true||matchMedia('(display
   ${T('data-go="#/ask"','askq','اسأل المكتبة','سؤال كامل بلغتك، والجواب مبادئ بنصها')}
   ${T('data-go="#/follow"','bell','ما تتابعه',FOL.length?`${FOL.length} ${FOL.length<=2?'متابعة':'متابعات'}${folNewCount()?' · '+folNewCount()+' جديد':''}`:'تنبيه بما يُضاف في موضوع أو مادة')}
   ${T('data-go="#/index/topics"','book','الفهرس','الموضوعات والقوانين والكتب')}
+  ${MSTMAN?T('data-a2="mst"','lock','المستخلص 2018–2026',MSTON?`مفتوح على هذا الجهاز · ${nf(MSTON)} مبدأ`:'مقفل — للقضاة الذين لديهم الرمز'):''}
   ${T('data-a2="sync"','link','المزامنة بين أجهزتك','انقل محفوظاتك وملاحظاتك بين الهاتف والحاسوب')}
   ${T('data-a2="offline"','download','العمل دون اتصال','نزّل صور صفحات المصادر كلها إلى الجهاز')}
   ${T('data-a2="settings"','gear','الإعدادات','الخط والحجم والمظهر، واسمك وصورتك، والقفل')}
@@ -1858,7 +1895,7 @@ document.addEventListener('click',e=>{const t=e.target;
   if(t.closest('[data-hist]')){savedTab='hist';go('#/saved');return;}
   const lq=t.closest('[data-lq]');if(lq){const L=lawByName(lq.dataset.lq);if(L)go('#/law/'+L.id);return;}
   const uf=t.closest('[data-unfold]');if(uf){const m=uf.previousElementSibling;if(m){m.hidden=false;uf.remove();}return;}
-  const a2=t.closest('[data-a2]');if(a2){const k=a2.dataset.a2;if(k==='changes')loadChanges(true).then(L=>changesDlg(L,'ما الجديد',false));if(k==='settings')settingsDlg();if(k==='sync')settingsDlg(true);if(k==='guide')openGuide('');if(k==='rate')feedbackScreen();if(k==='offline')offlineDlg();if(k==='install')installDlg();if(k==='printsaved')printSaved();
+  const a2=t.closest('[data-a2]');if(a2){const k=a2.dataset.a2;if(k==='mst')mstDlg();if(k==='changes')loadChanges(true).then(L=>changesDlg(L,'ما الجديد',false));if(k==='settings')settingsDlg();if(k==='sync')settingsDlg(true);if(k==='guide')openGuide('');if(k==='rate')feedbackScreen();if(k==='offline')offlineDlg();if(k==='install')installDlg();if(k==='printsaved')printSaved();
     if(k==='citesaved'){citeDlg(Object.entries(FAV).filter(([id,v])=>BYID[id]&&(!savedFold||v.f===savedFold)).map(x=>BYID[x[0]]).sort((a,b)=>pDate(b).localeCompare(pDate(a))));}
     if(k==='copysaved'){const ps=Object.entries(FAV).filter(([id,v])=>BYID[id]&&(!savedFold||v.f===savedFold)).map(x=>quoteText(BYID[x[0]]));clip(ps.join('\n\n———\n\n'),()=>toast(`نُسخ ${ps.length} مبدأ`));}
     if(k==='clrhist'){HIST=[];LS.set('hist',HIST);viewSaved();}return;}
@@ -1954,12 +1991,12 @@ $('totop').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
   if(y<900||!up){if(y>lastY+4||y<900)b.classList.remove('on');}else{b.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>b.classList.remove('on'),2500);}
   lastY=y;},{passive:true});}
 // ---------- المرحلة الثانية من التحميل: الأحكام غير المنشورة
-(async()=>{if(LATEDONE){if(!WK)nsIdle();return;}const sub=$('sub'),base=()=>`${nf(PR.length)} مبدأً · ${ORDER.length} مجموعة`;
+(async()=>{if(LATEDONE){if(!WK)nsIdle();(window.requestIdleCallback||(f=>setTimeout(f,1500)))(()=>ixLoad().then(()=>{if(location.hash.startsWith('#/p/')||location.hash.startsWith('#/t/'))route();else if(location.hash==='#/search'&&!idleF())runSearch();}));mstAuto();return;}const sub=$('sub'),base=()=>`${nf(PR.length)} مبدأً · ${ORDER.length} مجموعة`;
   if(sub)sub.textContent=base()+' · جارٍ تحميل الأحكام غير المنشورة…';
   await new Promise(r=>setTimeout(r,400));
   for(let k=0;k<LATE.length;k++){const c=LATE[k];let a=[];try{a=JSON.parse(await LATET[k]);}catch(_){}
     await new Promise(r=>setTimeout(r,0));COLARR[c]=a;ingestBase(a);cixIn(c);countIn(a);artIn(a);newIn(a);}
-  dgIn();await REFP;refIn(LATE);ASKIX=null;FOLNEW=null;LATEDONE=true;if(TPART){TQ=null;PENDQ=null;}lateRes();(window.requestIdleCallback||(f=>setTimeout(f,1500)))(()=>ixLoad().then(()=>{if(location.hash.startsWith('#/p/')||location.hash.startsWith('#/t/'))route();else if(location.hash==='#/search'&&!idleF())runSearch();}));if(sub)sub.textContent=base();
+  dgIn();await REFP;refIn(LATE);ASKIX=null;FOLNEW=null;LATEDONE=true;if(TPART){TQ=null;PENDQ=null;}lateRes();(window.requestIdleCallback||(f=>setTimeout(f,1500)))(()=>ixLoad().then(()=>{if(location.hash.startsWith('#/p/')||location.hash.startsWith('#/t/'))route();else if(location.hash==='#/search'&&!idleF())runSearch();}));mstAuto();if(sub)sub.textContent=base();
   const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));
   if(h==='search'){if(!$('list').hidden||F.q||!idleF())runSearch();else route();}else if(!h||h.startsWith('index')||h==='follow'||h==='more'||h==='review')route();
   if(!WK)nsIdle();})().catch(e=>console.error(e));

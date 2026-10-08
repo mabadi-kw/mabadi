@@ -1,0 +1,26 @@
+{
+ "format": "AMX1",
+ "kdf": "PBKDF2-SHA256",
+ "iterations": 600000,
+ "cipher": "AES-GCM-256",
+ "compression": "gzip",
+ "key_id": 1,
+ "test": true,
+ "test_code": "اختبار مداولة المكتبة تجريبي 2026",
+ "files": [
+  {
+   "file": "mabadi-extract-TEST_labour_v1.0.amx",
+   "branch": "labour",
+   "items": 1,
+   "bytes": 674,
+   "sha256": "f55bf5a609bfded21aa4bf0b3f0806ca7a4f333ad186da766cb30139885fb0e3"
+  },
+  {
+   "file": "mabadi-extract-TEST_civil_v1.0.amx",
+   "branch": "civil",
+   "items": 1,
+   "bytes": 483,
+   "sha256": "3dd996219a5558eb872f2a10330479d790965c045bd0916573e782a9416e5702"
+  }
+ ]
+}

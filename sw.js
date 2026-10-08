@@ -1,5 +1,5 @@
 // مبادئ التمييز — عامل الخدمة: يجعل المكتبة تعمل دون اتصال.
-const VERSION='202610081539';
+const VERSION='202610081749';
 const SHELL='mabadi-shell-'+VERSION, DATA='mabadi-data', FILES='mabadi-files', FONTS='mabadi-fonts';
 const SHELL_FILES=['./','index.html','app.js','sync-core.js','search-worker.js','app.css','embed.html','embed.js','manifest.webmanifest','icons/icon.svg','icons/favicon.svg','icons/partners/mudawala.png','icons/icon-192.png','data/meta.json'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(SHELL).then(c=>c.addAll(SHELL_FILES.map(u=>new Request(u,{cache:'reload'})))).then(()=>self.skipWaiting()));});
@@ -29,7 +29,7 @@ self.addEventListener('fetch',e=>{
   if(u.origin!==location.origin)return;
   const p=u.pathname;
   if(p.includes('/pages/')){e.respondWith(cacheFirst(req,FILES));return;}
-  if(p.includes('/data/')||p.includes('/pagetext/')){e.respondWith(staleWhileRevalidate(req,DATA));return;}
+  if(p.includes('/data/')||p.includes('/pagetext/')||(p.includes('/packs/')&&(p.endsWith('.amx')||p.endsWith('extract_manifest.json')))){e.respondWith(staleWhileRevalidate(req,DATA));return;}
   if(p.includes('/packs/')||p.includes('/docs/')||p.endsWith('/files.json')||p.endsWith('/version.json'))return;
   e.respondWith(networkFirst(req,SHELL));
 });

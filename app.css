@@ -1049,3 +1049,5 @@ mark.dif{background:var(--gold-soft);color:inherit;border-radius:3px;box-shadow:
 .ixs .tree details{margin:2px 0}.ixs .tree summary{display:flex;cursor:pointer;padding:8px 10px;border-radius:9px;background:var(--bg)}
 .ixs .tree .leaf{display:flex;width:100%;border:0;background:none;text-align:start;padding:7px 10px 7px 10px;padding-inline-start:22px;cursor:pointer;font:inherit;color:var(--blue);border-radius:8px}
 .ixs .tree .leaf:hover{background:var(--blue-soft)}
+
+.abadge.mstb{background:#f3e3b6;color:#6b4e0e;border:1px dashed #b8923a}
