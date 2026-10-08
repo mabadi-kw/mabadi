@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ar" dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تشفير المستخلص</title>
+<style>
+:root{--bg:#f4f1ea;--ink:#10213b;--navy:#0b1f3b;--gold:#b8923a;--rule:#e4ddcc;--bad:#a12a2a;--ok:#1f7a4d}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Tahoma,"Segoe UI",Arial,sans-serif;line-height:1.8}
+main{max-width:760px;margin:0 auto;padding:24px 16px}
+h1{font-size:1.5rem;margin:0 0 4px;color:var(--navy)}
+.card{background:#fff;border:1px solid var(--rule);border-radius:12px;padding:16px 18px;margin:14px 0}
+label{display:block;font-weight:700;margin:10px 0 4px}
+input[type=password],input[type=text]{width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid var(--rule);border-radius:9px;font-size:1rem}
+button{background:var(--navy);color:#fff;border:0;border-radius:999px;padding:10px 20px;font-size:1rem;cursor:pointer;margin-top:12px}
+button:disabled{opacity:.4;cursor:default}
+.muted{color:#5e6b80;font-size:.9rem}.bad{color:var(--bad)}.ok{color:var(--ok)}
+pre{white-space:pre-wrap;background:#f8f6f0;border-radius:8px;padding:10px;font-size:.85rem;max-height:260px;overflow:auto}
+a.dl{display:inline-block;margin:6px 0 0 10px;color:#1a4b8c}
+</style></head><body><main>
+<h1>تشفير المستخلص</h1>
+<p class="muted">تعمل هذه الصفحة على جهازك وحده دون اتصال. لا يُرسل منها شيء إلى أي مكان، ولا يُحفظ الرمز.</p>
+<div class="card">
+<label for="f">1) ملف المستخلص (النص المكشوف)</label>
+<input id="f" type="file" accept=".json,application/json">
+<p id="finfo" class="muted"></p>
+</div>
+<div class="card">
+<label for="p1">2) رمز المستخلص</label>
+<input id="p1" type="password" autocomplete="new-password" placeholder="خمس كلمات أو 20 حرفًا على الأقل">
+<label for="p2">أعد كتابة الرمز</label>
+<input id="p2" type="password" autocomplete="new-password">
+<p id="pinfo" class="muted">احفظ الرمز في مكان آمن؛ إن ضاع لا يمكن فتح الملف، ولا يستطيع أحد استعادته.</p>
+</div>
+<div class="card">
+<button id="go" disabled>3) افحص ثم شفّر</button>
+<pre id="log" hidden></pre>
+<div id="out"></div>
+</div>
+<script type="module">
+// محرك الخصوصية — نسخة المتصفح، مطابقة لـ tools/privacy/privacy.py (مكتبة مبادئ التمييز).
+// الاستعمال: import {scan, verdict, loadExtra} from './privacy.js'
+// scan(text, names?) → [{kind, match, level:'block'|'review'}] · verdict(findings) → 'block'|'review'|'pass'
+// loadExtra(words): معجم أسماء محلي من ديباجات أحكام المستخدم — يبقى على جهازه ولا يُرفع.
+const FIRST=new Set(["محمد", "أحمد", "محمود", "مصطفى", "علي", "حسن", "حسين", "عبدالله", "عبدالرحمن", "عبدالعزيز", "عبداللطيف", "عبدالوهاب", "عبدالرزاق", "عبدالمحسن", "عبدالكريم", "عبدالحميد", "عبدالمجيد", "عبدالسلام", "عبدالرحيم", "عبدالناصر", "عبدالهادي", "عبدالمنعم", "عبدالفتاح", "عبدالحكيم", "عبدالجليل", "عبدالعظيم", "عبدالإله", "عبدالرسول", "عبدالأمير", "عبدالحسين", "عبدالخالق", "عبدالباقي", "عبدالقادر", "عبدالغني", "عبدالحليم", "عبدالمطلب", "عبدالمنعم", "خالد", "سعد", "سعود", "فهد", "فيصل", "ناصر", "نايف", "نواف", "بدر", "بندر", "تركي", "ماجد", "مشعل", "مشاري", "متعب", "منصور", "منيف", "مبارك", "مساعد", "مطلق", "مطر", "مرزوق", "ملفي", "مزيد", "مرشد", "يوسف", "يعقوب", "إبراهيم", "ابراهيم", "إسماعيل", "اسماعيل", "إسحاق", "اسحاق", "موسى", "عيسى", "هارون", "داود", "سليمان", "يحيى", "زكريا", "إلياس", "الياس", "أيوب", "ايوب", "يونس", "عمر", "عثمان", "أنس", "انس", "بلال", "حمزة", "طارق", "عادل", "عماد", "عصام", "هشام", "وليد", "جمال", "كمال", "طلال", "جاسم", "حمد", "حمود", "حامد", "حماد", "راشد", "رشيد", "سالم", "سلمان", "سلطان", "صالح", "صلاح", "ضاري", "عايض", "عايش", "عبيد", "عواد", "عوض", "غازي", "غانم", "فلاح", "فرج", "فواز", "قاسم", "كريم", "لافي", "مانع", "محسن", "مهدي", "نبيل", "نادر", "نجيب", "وائل", "ياسر", "ياسين", "زيد", "زياد", "سامي", "سامر", "شادي", "شريف", "صقر", "ضيف", "عامر", "عباس", "عدنان", "عزيز", "علاء", "فارس", "فراس", "فؤاد", "فوزي", "قيس", "كامل", "لؤي", "مجدي", "مدحت", "معتز", "معاذ", "منذر", "مهند", "ناجي", "نزار", "هاني", "هاشم", "هيثم", "وسام", "وسيم", "يزيد", "براك", "بشار", "بسام", "جابر", "جراح", "حجاج", "حمدان", "خليفة", "خليل", "دخيل", "ذياب", "راكان", "رائد", "رياض", "زبن", "سرحان", "سعيد", "سيف", "شافي", "شبيب", "شملان", "صنهات", "ضاحي", "طلق", "ظاهر", "عبيد", "عجيل", "عذبي", "غنام", "فهيد", "قبلان", "كنهل", "محيا", "مزعل", "مطلق", "نهار", "هزاع", "هايف", "فاطمة", "عائشة", "مريم", "زينب", "خديجة", "سارة", "نورة", "نوره", "هيا", "منيرة", "لطيفة", "شيخة", "دانة", "دانه", "حصة", "موضي", "سعاد", "أمل", "امل", "هند", "هدى", "منى", "نجلاء", "نادية", "ناديه", "سميرة", "سلوى", "عبير", "أسماء", "اسماء", "رقية", "سمية", "حليمة", "آمنة", "امنة", "ليلى", "ريم", "رنا", "رانيا", "دلال", "جميلة", "بدرية", "غدير", "شهد", "شوق", "شيماء", "أنفال", "انفال", "أبرار", "ابرار", "هنوف", "الهنوف", "ندى", "نوال", "وفاء", "ابتسام", "إيمان", "ايمان", "حنان", "بشاير", "بثينة", "تهاني", "جواهر", "حياة", "خلود", "دعاء", "رحاب", "رهف", "روان", "زهراء", "زهرة", "سهام", "سوسن", "شروق", "صفاء", "ضحى", "عفاف", "عهود", "غادة", "فجر", "فوزية", "كوثر", "لولوة", "مشاعل", "منال", "مها", "ميثاء", "نسرين", "نعيمة", "هبة", "هيفاء", "وضحة", "يسرى", "بتول", "جنى"]),FAMILY=new Set(["العنزي", "المطيري", "العجمي", "الرشيدي", "الشمري", "الهاجري", "الظفيري", "العتيبي", "الدوسري", "السبيعي", "الحربي", "القحطاني", "الخالدي", "الفضلي", "الصليلي", "البذالي", "الدويش", "الكندري", "العوضي", "البلوشي", "الفيلكاوي", "الشطي", "الكوهجي", "الصايغ", "الغانم", "الخرافي", "البحر", "الصقر", "الساير", "العبدالرزاق", "المرزوق", "الحمد", "الصالح", "الرومي", "الملا", "الإبراهيم", "الابراهيم", "العلي", "العمر", "الشايع", "الوزان", "القطان", "المسلم", "الحساوي", "الزنكي", "البغلي", "الأنصاري", "الانصاري", "السعيد", "السعد", "العبيدي", "الجاسم", "المضف", "الهولي", "الشرهان", "الياسين", "الفرحان", "القناعي", "البدر", "الصباح", "المطوع", "العازمي", "الرندي", "الشلاحي", "السهلي", "الجويسري", "المري", "المحيني", "العصيمي", "العريفان", "السلمان", "الشمالي", "النجار", "الحداد", "القلاف", "العيدان", "الغريب"]);
+const ALLOW=["صباح السالم", "صباح الأحمد", "صباح الناصر", "مبارك الكبير", "جابر الأحمد", "جابر العلي", "سعد العبدالله", "علي صباح السالم", "عبدالله السالم", "عبدالله المبارك", "أحمد الجابر", "حسن النية", "سوء النية", "أمين سر", "أمين السر", "أمين عام", "الأمين العام", "بيت الزكاة", "شركة نفط الكويت", "مؤسسة البترول الكويتية", "مؤسسة الخطوط الجوية الكويتية", "الخطوط الجوية الكويتية", "بنك الكويت المركزي", "جامعة الكويت", "عبد الناصر", "محمد صلى الله عليه وسلم", "الإمام مالك", "أبو حنيفة", "أبي حنيفة", "الإمام أحمد", "ابن حنبل"];
+const AMBIG=new Set(["عادل", "كريم", "سعيد", "جميل", "نور", "حياة", "أمين", "امين", "فاضل", "صالح", "سالم", "مبارك", "منصور", "رشيد", "راشد", "حامد", "حمد", "كامل", "عزيز", "هادي", "ناصر", "شريف", "عامر", "غانم", "ظاهر", "مطلق", "مانع", "فلاح", "فرج", "وفاء", "أمل", "امل", "آمنة", "امنة", "هدى", "منى", "ندى", "سلوى", "ضحى", "فجر", "شروق", "صفاء", "سهام", "رحاب", "نوال", "حنان", "إيمان", "ايمان", "عفاف", "دعاء", "بشاير", "تهاني", "ابتسام", "سعاد", "منال", "مها", "زهرة", "شوق", "ريم", "هبة", "جمال", "كمال", "نبيل", "نجيب", "طلال", "وسام", "فواز", "فارس", "قاسم", "خليفة", "خليل", "صقر", "سيف", "بدر", "سلطان", "نايف", "رائد", "سامي", "هاني", "عباس", "مهدي", "يحيى", "حسن", "حسين", "علي", "عيسى", "موسى", "يوسف", "سليمان", "داود", "محمود", "مصطفى", "إبراهيم", "ابراهيم", "أحمد", "احمد", "أسماء", "اسماء", "يزيد", "وفاء", "حصة", "طلق", "ظاهر", "مانع", "كامل"]),STOPW=new Set(["على", "علي", "في", "من", "عن", "الى", "إلى", "ان", "أن", "بأن", "وأن", "قد", "لم", "لا", "ما", "الذي", "التي", "عليه", "عليها", "به", "بها", "له", "لها", "بعد", "قبل", "حيث", "كان", "وكان", "بين", "غير", "كل"]);
+const EXTRA=new Set();
+function loadExtra(ws){for(const w of ws){const n=norm(w);if(n.length>=3)EXTRA.add(n);}}
+const DIG={'٠':'0','١':'1','٢':'2','٣':'3','٤':'4','٥':'5','٦':'6','٧':'7','٨':'8','٩':'9','۰':'0','۱':'1','۲':'2','۳':'3','۴':'4','۵':'5','۶':'6','۷':'7','۸':'8','۹':'9'};
+const norm=s=>s.replace(/[٠-٩۰-۹]/g,d=>DIG[d]).replace(/\u0640/g,'').replace(/[\u064B-\u0652]/g,'');
+const AR='[\\u0621-\\u064A]',TOK=new RegExp(AR+'+','g');
+const isFirst=w=>FIRST.has(w)||EXTRA.has(w),isName=w=>FIRST.has(w)||FAMILY.has(w)||EXTRA.has(w)||(w.startsWith('عبد')&&w.length>4);
+const ROLE=new RegExp('(?:الشاهد(?:ة|ين|ان)?|شاهد(?:ة)?\\s+الإثبات|المرحوم(?:ة)?|المتوفى|المتوفاة|المجني\\s+علي(?:ه|ها|هم)|المتهم(?:ة|ين)?|المحكوم\\s+علي(?:ه|ها)|السيد(?:ة)?|الشيخ(?:ة)?|المدعو(?:ة)?|المحامي(?:ة)?|القاصر(?:ة)?|الطفل(?:ة)?|المحضون(?:ة)?|(?:ال)?طاعن(?:ة)?|المطعون\\s+ضد(?:ه|ها|هم)|المستأنف(?:ة)?(?:\\s+ضد(?:ه|ها))?|المدعي(?:ة)?(?:\\s+علي(?:ه|ها))?|الضابط|الملازم|النقيب|الرائد|المقدم|العقيد|الوكيل|الرقيب|العريف)(?:\\s+(?:الأول[ىي]?|الثاني(?:ة)?|الثالث(?:ة)?|الرابع(?:ة)?|أولاً?|ثانياً?))?\\s*[/:]?\\s*('+AR+'+(?:\\s+'+AR+'+){0,3})','g');
+const PAREN=new RegExp('\\(\\s*('+AR+'{2,}(?:\\s*[،,\\-–]\\s*'+AR+'{2,}){1,5})\\s*\\)','g');
+const IDENT=[
+ [/(?<!\d)[23]\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])\d{5}(?!\d)/g,'رقم مدني'],
+ [/KW\d{2}[A-Z]{4}\d{10,22}/gi,'آيبان'],
+ [/(?:هاتف|تلفون|تليفون|جوال|نقال|الهاتف|رقم\s+الهاتف)(?:ه|ها|هم)?\s*(?:رقم)?\s*:?\s*\+?(?:965)?\s*[2569]\d{7}(?!\d)/g,'هاتف'],
+ [/(?:لوحة|لوحات|اللوحة|رقم\s+المركبة)\s*(?:رقم|المعدنية)?\s*:?\s*\d{1,3}\s*[\/\-]\s*\d{3,6}/g,'لوحة مركبة'],
+ [/(?:رقم\s+(?:ال)?حساب|حساب\s+رقم)\s*:?\s*\d{6,}/g,'رقم حساب'],
+ [/قطعة\s*\d+\s*[،,]?\s*(?:شارع|جادة)\s*\d+/g,'عنوان'],
+ [/منزل\s+رقم\s*\d+/g,'عنوان'],
+ [/[\w.+-]+@[\w-]+\.[\w.]+/g,'بريد']];
+const OWNER=new RegExp('(?:لصاحبها|لصاحبه|لمالكها|المملوكة\\s+ل)\\s*/?\\s*('+AR+'+(?:\\s+'+AR+'+){1,3})','g');
+const allowed=s=>ALLOW.some(a=>new RegExp('(?<![\\u0621-\\u064A])'+a.replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/ /g,'\\s+')+'(?![\\u0621-\\u064A])').test(s));
+function scan(text,names){const t=norm(text),out=[];const add=(kind,m,level='block')=>{if(!allowed(m))out.push({kind,match:m.trim(),level});};
+  if(names){const tk=t.match(TOK)||[],pairs=new Set(tk.slice(1).map((b,i)=>tk[i]+' '+b));
+    for(const n of names){const nt=norm(n).match(TOK)||[];for(let i=0;i<nt.length-1;i++)if(nt[i].length>=3&&nt[i+1].length>=3&&pairs.has(nt[i]+' '+nt[i+1]))add('party',nt[i]+' '+nt[i+1]);}}
+  const toks=[...t.matchAll(TOK)];
+  for(let i=0;i<toks.length-1;i++){const a=toks[i][0],b=toks[i+1][0];if(t.slice(toks[i].index+a.length,toks[i+1].index).trim())continue;
+    if(isFirst(a)&&isName(b)){if(AMBIG.has(a)&&AMBIG.has(b)&&!(i+2<toks.length&&isName(toks[i+2][0])))continue;add('name',a+' '+b);}
+    else if(a.startsWith('عبد')&&a.length>4&&(FAMILY.has(b)||isFirst(b)))add('name',a+' '+b);}
+  for(const m of t.matchAll(ROLE)){const nx=m[1].match(TOK)||[];if(!nx.length)continue;const slash=/[\/:]/.test(m[0]);
+    const strong=(isFirst(nx[0])&&!AMBIG.has(nx[0]))||EXTRA.has(nx[0]),dbl=nx.length>1&&(isFirst(nx[0])||FAMILY.has(nx[0]))&&isName(nx[1]);
+    if(dbl||(strong&&(slash||nx.length>1&&!STOPW.has(nx[1])))||(slash&&isFirst(nx[0])))add('role',m[0]);}
+  for(const m of t.matchAll(PAREN)){const ps=m[1].split(/[،,\-–]/).map(s=>s.trim());if(ps.some(p=>isFirst(p)||EXTRA.has(p))&&ps.every(p=>(p.match(TOK)||[]).length<=3))add('paren',m[0]);}
+  for(const [rx,lab] of IDENT)for(const m of t.matchAll(rx))add('ident',lab+': '+m[0]);
+  for(const m of t.matchAll(OWNER)){const nx=m[1].match(TOK)||[];if(nx.length&&(isFirst(nx[0])||EXTRA.has(nx[0])))add('owner',m[0]);}
+  const seen=new Set();return out.filter(f=>{const k=f.kind+'|'+f.match;if(seen.has(k))return false;seen.add(k);return true;});}
+const verdict=f=>f.some(x=>x.level==='block')?'block':f.length?'review':'pass';
+
+const $=id=>document.getElementById(id);let PLAIN=null;
+const BR={'عمالي':'labour','مدني':'civil','تجاري':'commercial','جزائي':'criminal','إداري':'administrative','أحوال شخصية':'personal-status','طلبات رجال القضاء':'judiciary'};
+const ITER=600000,KEYID=1;
+const log=t=>{$('log').hidden=false;$('log').textContent+=t+'\n';};
+const strong=p=>p.length>=20||p.trim().split(/\s+/).length>=5;
+function check(){const p=$('p1').value,q=$('p2').value;let m='';if(p&&!strong(p))m='الرمز قصير: خمس كلمات أو 20 حرفًا على الأقل.';else if(q&&p!==q)m='الرمزان غير متطابقين.';
+  $('pinfo').innerHTML=m?'<span class="bad">'+m+'</span>':'احفظ الرمز في مكان آمن؛ إن ضاع لا يمكن فتح الملف، ولا يستطيع أحد استعادته.';$('go').disabled=!(PLAIN&&p&&p===q&&strong(p));}
+$('p1').oninput=$('p2').oninput=check;
+$('f').onchange=async()=>{const f=$('f').files[0];PLAIN=null;$('finfo').textContent='';if(!f)return check();
+  try{const j=JSON.parse(await f.text());if(j.kind!=='unofficial_extract'||!Array.isArray(j.items))throw 0;PLAIN=j;$('finfo').textContent=`${j.items.length} مبدأً · ${j.counts?.citations||'?'} إسنادًا`;}catch(_){$('finfo').innerHTML='<span class="bad">ليس ملف مستخلص صالحًا.</span>';}check();};
+async function gz(bytes){const s=new Blob([bytes]).stream().pipeThrough(new CompressionStream('gzip'));return new Uint8Array(await new Response(s).arrayBuffer());}
+async function gunz(bytes){const s=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));return new Uint8Array(await new Response(s).arrayBuffer());}
+async function key(pass,salt,iter){const k=await crypto.subtle.importKey('raw',new TextEncoder().encode(pass.normalize('NFC')),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',hash:'SHA-256',salt,iterations:iter},k,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);}
+async function encrypt(obj,pass){const salt=crypto.getRandomValues(new Uint8Array(16)),iv=crypto.getRandomValues(new Uint8Array(12));
+  const ct=new Uint8Array(await crypto.subtle.encrypt({name:'AES-GCM',iv},await key(pass,salt,ITER),await gz(new TextEncoder().encode(JSON.stringify(obj)))));
+  const h=new Uint8Array(4+1+4+16+12);h.set([65,77,88,49]);h[4]=KEYID;new DataView(h.buffer).setUint32(5,ITER);h.set(salt,9);h.set(iv,25);
+  const out=new Uint8Array(h.length+ct.length);out.set(h);out.set(ct,h.length);return out;}
+async function decrypt(buf,pass){const b=new Uint8Array(buf);if(String.fromCharCode(...b.slice(0,4))!=='AMX1')throw new Error('ليس ملف AMX1');
+  const iter=new DataView(b.buffer,b.byteOffset).getUint32(5),salt=b.slice(9,25),iv=b.slice(25,37);
+  const k=await key(pass,salt,iter);const pt=new Uint8Array(await crypto.subtle.decrypt({name:'AES-GCM',iv},k,b.slice(37)));
+  const raw=await gunz(pt);return JSON.parse(new TextDecoder().decode(raw));}
+const hex=async b=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',b))].map(x=>x.toString(16).padStart(2,'0')).join('');
+$('go').onclick=async()=>{$('go').disabled=true;$('log').textContent='';$('out').innerHTML='';
+  log('الفحص: محرك الخصوصية على نص كل مبدأ…');const bad=[];
+  for(const it of PLAIN.items)for(const t of it.paragraphs){const f=scan(t).filter(x=>x.level==='block');if(f.length)bad.push(it.id+' · '+f.map(x=>x.kind).join('، '));}
+  if(bad.length){log('توقف التشفير: '+bad.length+' مبدأ فيه علامة بيان شخصي:\n'+bad.join('\n'));log('أرسل هذه المعرّفات إلى المكتبة، ولا تنشر شيئًا.');return;}
+  log('الفحص: لا علامات. ✓');
+  const groups={};for(const it of PLAIN.items)for(const b of it.branches)(groups[BR[b]||'other']=groups[BR[b]||'other']||[]).push(it);
+  const pass=$('p1').value,man={format:'AMX1',kdf:'PBKDF2-SHA256',iterations:ITER,cipher:'AES-GCM-256',compression:'gzip',key_id:KEYID,generated:new Date().toISOString().slice(0,10),files:[]};
+  for(const [br,its] of Object.entries(groups)){const pk={...PLAIN,pack:'extract_'+br,counts:{items:its.length,novel:its.filter(i=>i.novel).length},items:its};
+    const enc=await encrypt(pk,pass);const back=await decrypt(enc.buffer,pass);if(back.items.length!==its.length)throw new Error('فشل التحقق');
+    const name=`mabadi-extract_${br}_v1.0.amx`,sha=await hex(enc);man.files.push({file:name,branch:br,items:its.length,bytes:enc.length,sha256:sha});
+    const a=document.createElement('a');a.className='dl';a.href=URL.createObjectURL(new Blob([enc],{type:'application/octet-stream'}));a.download=name;a.textContent='⬇ '+name+' ('+its.length+')';$('out').append(a);
+    log(name+': '+its.length+' مبدأً · فُتح بالرمز للتحقق ✓');}
+  const mb=new TextEncoder().encode(JSON.stringify(man,null,1));const a=document.createElement('a');a.className='dl';a.href=URL.createObjectURL(new Blob([mb],{type:'application/json'}));a.download='extract_manifest.json';a.textContent='⬇ extract_manifest.json';$('out').append(a);
+  log('\nنزّل الملفات، وضعها في مجلد «مخرجات»، ثم احذف ملف النص المكشوف. لا تكتب الرمز في أي محادثة.');};
+</script></main></body></html>
