@@ -145,6 +145,7 @@ const arrs=await Promise.all(CORE.map(c=>fetch('data/'+c+'.json').then(r=>r.json
 CORE.forEach((c,k)=>COLARR[c]=arrs[k]);
 // المسحوب لحماية الخصوصية (data/withdrawn.json) لا يدخل المكتبة ولو بقي في نسخة مخزنة قديمة
 const WD=new Set(((await AUX.wd)||{}).ids||[]);
+const WDP=Object.fromEntries(Object.entries(((await AUX.wd)||{}).pages||{}).map(([c,g])=>[c,new Set(g)]));
 const PR=[],BYID={},RUL={},POS={};
 function ingestBase(list){list.forEach(p=>{if(WD.has(p.id))return;BYID[p.id]=p;POS[p.id]=PR.length;PR.push(p);p.sk=p.sec.join('›');
   new Set(p.c.map(c=>c.k).filter(Boolean)).forEach(k=>(RUL[k]=RUL[k]||[]).push(p.id));});}
@@ -1065,7 +1066,7 @@ function ttsVoiceUI(){const s=$('vsel');if(!s)return;const L=ttsArVoices().sort(
 // ---------- source pages
 const PT={};
 async function pageLines(col,g){const b=Math.floor((g-1)/1000),k=col+'/'+b;if(!PT[k])PT[k]=fetch(PG(`pagetext/${col}/t${String(b).padStart(3,'0')}.json`)).then(r=>r.ok?r.json():{}).catch(()=>({}));return (await PT[k])[g]||[];}
-function pageFig(p,g){const C=COLS[p.col],PW=C.pw||595.276,PH=C.ph||822.047,cr=C.crop||[0,0,1,1],cell=C.cell||[684,1000],cw=cr[2]-cr[0],chh=cr[3]-cr[1];
+function pageFig(p,g){if(WDP[p.col]&&WDP[p.col].has(g))return `<figure class="pg" data-g="${g}"><div class="pgimg pgwd">حُجبت صورة هذه الصفحة لحماية بيانات أشخاص وردت فيها</div><figcaption>${pageCap(p.col,g)}</figcaption></figure>`;const C=COLS[p.col],PW=C.pw||595.276,PH=C.ph||822.047,cr=C.crop||[0,0,1,1],cell=C.cell||[684,1000],cw=cr[2]-cr[0],chh=cr[3]-cr[1];
   const reg=p.rg.find(r=>r.page===g);
   const box=reg?`<div class="hlbox" style="left:${((reg.bbox[0]-6)/PW-cr[0])/cw*100}%;top:${((reg.bbox[1]-4)/PH-cr[1])/chh*100}%;width:${(reg.bbox[2]-reg.bbox[0]+12)/PW/cw*100}%;height:${(reg.bbox[3]-reg.bbox[1]+8)/PH/chh*100}%"></div>`:'';
   const gp=C.gp||20,gc=gp/10,b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
@@ -1093,7 +1094,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610071738';
+const APP_BUILD='202610081259';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;

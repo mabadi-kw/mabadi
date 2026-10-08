@@ -34,6 +34,22 @@ def run(root=ROOT, quiet=False):
                 t = ' '.join([it.get('title') or '', ' '.join(it.get('paragraphs') or []), it.get('rule_text') or ''])
                 f = [y for y in P.scan(t) if y['level'] == 'block']
                 if f and it['id'] not in allow and 'rx:' + it['id'] not in allow: bad.append(('pack:' + it['id'], f))
+    # نصوص الصفحات المصوّرة (pagetext) — عدا التشريعات؛ أسماء هيئة المحكمة مستثناة بسياقها. المفتاح «page:<المجموعة>:<الصفحة>»
+    import re as _re
+    JUD = _re.compile(r'(المستشار|المستشارين|القاضي|القضاة|رئيس المحكمة|برئاسة|وعضوية|أمين السر|وكيل النيابة|بحضور|جلسة \d{1,2}/\d{1,2}/\d{4}|وكيل المحكمة|رئيس الجلسة|و ?د\.)')
+    for fp in sorted(glob.glob(os.path.join(root, 'pagetext', '*', 't*.json'))):
+        c = fp.split(os.sep)[-2]
+        if c.startswith('LAW'): continue
+        for g, lines in json.load(open(fp, encoding='utf-8')).items():
+            if not lines: continue
+            t = P.norm(' '.join(l[0] for l in lines)); f = []
+            for y in P.scan(t):
+                if y['level'] != 'block': continue
+                i = t.find(y['match'].split(': ')[-1])
+                if y['kind'] in ('name', 'role') and JUD.search(t[max(0, i - 60):i]): continue
+                f.append(y)
+            key = f'page:{c}:{g}'
+            if f and allow.get(key) != sha(t): bad.append((key, f))
     # نصوص الواجهة الأخرى
     for fn in ('changes.json', 'data/reports.json'):
         p = os.path.join(root, fn)
