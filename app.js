@@ -473,7 +473,7 @@ let cur=[],shown=30;
 // مطابقة النص: تُحسب مرة لكل عبارة بحث (في عامل البحث إن توفر) وتُحفظ قناعًا، ثم تُطبَّق المرشّحات على البيانات الوصفية
 let TQ=null,TMASK=null,TPART=false;
 const textOk=(p,qa)=>{const ns=p.ns!==undefined?p.ns:(p.ns=nsOf(p));return qa.every(al=>ns.includes(al.lit)||al.slice(1).some(t=>synHit(ns,t)));};
-function makePred(){const qa=qalts(F.q),art=west(F.art).replace(/\s+/g,''),m=F.q&&TQ===F.q?TMASK:null,ixs=F.ix&&IX?ixDesc(+F.ix):null;
+function makePred(){const qa=qalts(F.q),art=west(F.art).replace(/\s+/g,''),m=F.q&&TQ===F.q?TMASK:null,ixs=F.ix&&IX&&IX.ki[F.ix]!==undefined?ixDesc(IX.ki[F.ix]):null;
   return p=>(!ixs||ixs.has(p.id))&&(!F.q||(m?m[POS[p.id]]===1:textOk(p,qa)))&&(!F.col||p.col===F.col)&&(!F.tp||p.tp.some(x=>x[0]===F.tp))&&(!F.ch||p.c.some(x=>x.ch===F.ch))&&(!F.st||stOk(p,F.st))&&(!F.rv||p.rv.length)&&(!F.sec||p.sk===F.sec||p.sk.startsWith(F.sec+'›'))
    &&(!F.lw&&!art||p.lw.some(([l,as])=>(!F.lw||l===F.lw)&&(!art||as.some(a=>a===art||a.split('/')[0]===art))))
    &&(!F.ap&&!F.ay||p.c.some(c=>c.k&&apMatch(c.k)))&&(!F.yr||pDate(p).startsWith(F.yr));}
@@ -545,7 +545,7 @@ function cmini(p,q,max){const d=pDate(p),k=((p.c.find(c=>c.k)||{}).k||'').split(
   return `<div class="cmi"><div class="cmh"><b>${esc(pCh(p).join('، ')||'—')}</b>${d?`<span>${fdate(d)}</span>`:''}${k?`<small>الطعن ${esc(k.replace(/\+/g,' و'))}</small>`:''}</div><div class="cmt">${q?pdiffHTML(p,q,max):esc(p.p.join(' '))}</div><button class="lnk" data-go="#/p/${p.id}">افتح المبدأ ومصدره ‹</button></div>`;}
 function pairHTML([v,a,b]){const cf=(STAT.conf||{})[confKey(a.id,b.id)];
   return `<div class="cpair card">${cf!==undefined?`<div class="cpt"><span class="stb conf">${svg('info')}اختلاف مؤكَّد بين الدائرتين</span></div>`:v>=.8?`<div class="cpt"><span class="ptag">صياغة شبه متطابقة</span></div>`:''}<div class="cpg">${cmini(a,b,380)}${cmini(b,a,380)}</div><div class="cpf"><button class="btn sm" data-go="#/cmp/${a.id},${b.id}">${svg('cols')}قارنهما كاملين</button></div></div>`;}
-function scopeLabel(){const L={ix:v=>IX?ixPath(+v).join(' ← '):'',col:v=>COLS[v]?.name,tp:v=>TL[v]?.[1],ch:v=>v,lw:v=>LL[v]||v,art:v=>'المادة '+v,sec:v=>v.split('›').slice(-1)[0],yr:v=>'جلسات '+v};
+function scopeLabel(){const L={ix:v=>IX&&IX.ki[v]!==undefined?ixPath(IX.ki[v]).join(' ← '):'',col:v=>COLS[v]?.name,tp:v=>TL[v]?.[1],ch:v=>v,lw:v=>LL[v]||v,art:v=>'المادة '+v,sec:v=>v.split('›').slice(-1)[0],yr:v=>'جلسات '+v};
   return [F.q?'«'+F.q+'»':'',...Object.keys(L).filter(k=>F[k]).map(k=>L[k](F[k]))].filter(Boolean).join(' · ');}
 // ---------- المتابعة: موضوع أو دائرة أو مادة أو بحث، وتنبيه بما يُضاف في الدفعات الجديدة
 const FKEYS=['q','col','tp','ch','lw','art','sec','st','ix'],FBLANK={q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:'',ap:'',ay:'',yr:'',st:'',all:false,ix:''};
@@ -589,7 +589,7 @@ function sugItems(q){const nq=norm(q.trim()),G=[];if(!nq){
     return G;}
   const has=t=>{const n=norm(t);return n.startsWith(nq)?2:n.split(' ').some(w=>w.startsWith(nq))?1:n.includes(nq)?.5:0;};
   const rec=QH.filter(v=>has(v)).slice(0,3).map(v=>({k:'q',v,ic:'clock',t:v}));
-  const tps=TORD.filter(t=>has(TL[t][1])).sort((a,b)=>has(TL[b][1])-has(TL[a][1])||tcount[b]-tcount[a]).slice(0,5).map(t=>({k:'tp',v:t,ic:'tag',t:TL[t][1],s:`موضوع في «${famOf(t)}» · ${nf(tcount[t])} مبدأ`}));
+  const tps=IX?IX.t.map((n,i)=>[n,i]).filter(([n])=>n[3]>0&&has(n[0])).sort((a,b)=>has(b[0][0])-has(a[0][0])||(a[0][2]<0?-1:0)-(b[0][2]<0?-1:0)||b[0][3]-a[0][3]).slice(0,5).map(([n,i])=>({k:'ix',v:n[4],ic:'tag',t:n[0],s:`${n[2]>=0?'باب في «'+ixPath(n[2]).join(' ← ')+'»':'كلمة موضوع'} · ${nf(n[3])} مبدأ`})):TORD.filter(t=>has(TL[t][1])).sort((a,b)=>has(TL[b][1])-has(TL[a][1])||tcount[b]-tcount[a]).slice(0,5).map(t=>({k:'tp',v:t,ic:'tag',t:TL[t][1],s:`موضوع في «${famOf(t)}» · ${nf(tcount[t])} مبدأ`}));
   const seen=new Set([...rec.map(x=>norm(x.v)),...tps.map(x=>norm(x.t))]);
   const syn=SYNRAW.filter(v=>v.length>2&&has(v)&&norm(v)!==nq&&!seen.has(norm(v))).sort((a,b)=>has(b)-has(a)).slice(0,4).map(v=>({k:'q',v,ic:'search',t:v}));
   const lws=LORD.filter(l=>LL[l]&&has(LL[l])).slice(0,3).map(l=>({k:'lw',v:l,ic:'scroll',t:LL[l],s:'قانون · '+nf(lcount[l])+' مبدأ'}));
@@ -609,7 +609,7 @@ function attachSug(inp,mode){const form=inp.closest('form');if(!form||form.datas
     place();box.hidden=false;sel=-1;};
   const pick=it=>{close();inp.blur();
     if(it.k==='q'){QH=[it.v,...QH.filter(x=>x!==it.v)].slice(0,8);LS.set('qhist',QH);if(mode==='home')doSearch(it.v);else{inp.value=it.v;F.q=it.v;runSearch();}}
-    else if(it.k==='tp'||it.k==='lw'){if(mode==='search')inp.value='';setFilter(it.k,it.v);}
+    else if(it.k==='tp'||it.k==='lw'||it.k==='ix'){if(mode==='search')inp.value='';setFilter(it.k,it.v);}
     else if(it.k==='art'){Object.assign(F,FBLANK,{lw:it.l,art:String(it.v)});SCOPE='p';if(mode==='search')inp.value='';go('#/search');if(location.hash==='#/search'){syncInputs();runSearch();}}
     else if(it.k==='ask')go('#/ask/'+encodeURIComponent(it.v));};
   // في صفحة البحث تظهر النتائج أثناء الكتابة: تُطوى القائمة بعد توقف الكتابة قليلًا حتى لا تحجب النتائج (وتعود بالضغط على المربع)
@@ -784,7 +784,7 @@ function card(p,re,o={}){
   const also=(same.length?`<div class="also"><span>ورد أيضًا في</span>${chipsFold(same.map(i=>{const q=BYID[i];return `<button class="chip" data-go="#/p/${q.id}"${q.rx!==undefined||q.rule?' title="ومعه نص القاعدة"':''}>${esc(COLS[q.col].name)} · ${q.n}</button>`;}),3)}</div>`:'')
     +(tw.length?`<div class="also tw"><span title="المبدأ نفسه بنصه في أحكام أخرى">وتواتر عليه ${tw.length===1?'حكم آخر':tw.length===2?'حكمان آخران':tw.length<=10?tw.length+' أحكام أخرى':tw.length+' حكمًا آخر'}</span>${chipsFold(tw.map(i=>BYID[i]).sort((a,b)=>yr(b).localeCompare(yr(a))).map(q=>`<button class="chip" data-go="#/p/${q.id}" title="${esc(COLS[q.col].name)} · ${q.n}">${yr(q)||esc(COLS[q.col].name)}</button>`),4)}</div>`:'');
   const rel=(rs.length?`<span class="relw" title="النص نفسه منشور في موضع آخر">المبدأ نفسه في: ${rs.map(rchip).join('')}</span>`:'')+(ro.length?`<span class="relw other" title="مبادئ أخرى قررها الحكم نفسه في مسائل مختلفة">من الحكم نفسه: ${ro.map(rchip).join('')}</span>`:'');
-  const tps=p.tp.filter(x=>TL[x[0]]).map(([t,m,lo])=>`<button class="chip${m==='a'?' auto':''}${lo?' low':''}" data-f="tp" data-v="${esc(t)}" title="${esc(TL[t][0])} — ${MT[m]||''}">${esc(TL[t][1])}</button>`).join('');
+  const tps=IX&&IX.a[p.id]?IX.a[p.id].map(i=>{const pt=ixPath(i);return `<button class="chip" data-f="ix" data-v="${esc(IX.t[i][4])}" title="${esc(pt.join(' ← '))}${IX.ev.has(p.id)?' — بالدليل من القواعد المشتركة':' — تبويب المكتب الفني'}">${esc(pt.slice(-2).join(' ← '))}</button>`;}).join(''):IX?'':p.tp.filter(x=>TL[x[0]]).map(([t,m,lo])=>`<button class="chip${m==='a'?' auto':''}${lo?' low':''}" data-f="tp" data-v="${esc(t)}" title="${esc(TL[t][0])} — ${MT[m]||''}">${esc(TL[t][1])}</button>`).join('');
   const lws=p.lw.map(([l,as,su])=>`<button class="chip lw${su?' sus':''}${LAWBYKEY[l]?' full':''}" ${LAWBYKEY[l]?(artOf(l,as[0])?`data-go="#/a/${artOf(l,as[0]).id}"`:`data-go="#/law/${LAWBYKEY[l].id}"`):`data-f="lw" data-v="${esc(l)}"`} title="${esc(LL[l]||l)}${LAWBYKEY[l]?' — افتح نص المادة':''}">${as.length?'م '+esc(as.slice(0,3).join('، '))+(as.length>3?'…':'')+' · ':''}${l==='دستور'?'الدستور':'ق '+esc(l)}</button>`).join('');
   const fav=!!FAV[p.id],note=NOTE[p.id];
   const tpA=splitChips(tps),lwA=splitChips(lws),nrel=rs.length+ro.length,flag=p.rv.length?'<span class="chip flag">يحتاج مراجعة</span>':'';
@@ -1094,7 +1094,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610081259';
+const APP_BUILD='202610081539';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1194,7 +1194,7 @@ function buildSearch(){
    <div id="lres" hidden></div>
    <div class="card filters" id="fbox" hidden>
     <label>المجموعة<select id="fcol"><option value="">الكل</option>${ORDER.map(k=>`<option value="${k}">${esc(COLS[k].name)} (${nf(COLS[k].n)})</option>`).join('')}</select></label>
-    <label>الموضوع<input class="fsrch" type="search" data-for="ftp" placeholder="ابحث في الموضوعات…" autocomplete="off" enterkeyhint="done"><select id="ftp"><option value="">الكل</option>${FAMS.map(f=>`<optgroup label="${esc(f)}">${TORD.filter(t=>famOf(t)===f).map(t=>`<option value="${esc(t)}">${esc(TL[t][1])} (${tcount[t]})</option>`).join('')}</optgroup>`).join('')}</select></label>
+    <label>الباب<input class="fsrch" type="search" data-for="ftp" placeholder="ابحث في كلمات الموضوع…" autocomplete="off" enterkeyhint="done"><select id="ftp"><option value="">الكل</option></select></label>
     <label>الدائرة<input class="fsrch" type="search" data-for="fch" placeholder="ابحث في الدوائر…" autocomplete="off" enterkeyhint="done"><select id="fch"><option value="">الكل</option>${CHS.map(s=>`<option>${esc(s)}</option>`).join('')}</select></label>
     <label>القانون<input class="fsrch" type="search" data-for="flw" placeholder="ابحث باسم القانون أو رقمه…" autocomplete="off" enterkeyhint="done"><select id="flw"><option value="">الكل</option>${LORD.map(l=>`<option value="${esc(l)}">${esc(LL[l]||l)} (${lcount[l]})</option>`).join('')}</select></label>
     <label>المادة<input id="fart" inputmode="numeric" placeholder="مثل 51" autocomplete="off"></label>
@@ -1208,7 +1208,7 @@ function buildSearch(){
   attachSug($('sq'),'search');
   $('ssf').onsubmit=e=>{e.preventDefault();const q=$('sq').value.trim();if(q){QH=[q,...QH.filter(x=>x!==q)].slice(0,8);LS.set('qhist',QH);}$('sq').blur();};
   $('ftog').onclick=()=>{$('fbox').hidden=!$('fbox').hidden;$('sfp').hidden=$('fbox').hidden&&!F.ap&&!F.ay;};
-  [['fcol','col'],['ftp','tp'],['fch','ch'],['flw','lw']].forEach(([i,k])=>$(i).onchange=()=>{F[k]=$(i).value;runSearch()});
+  [['fcol','col'],['ftp','ix'],['fch','ch'],['flw','lw']].forEach(([i,k])=>$(i).onchange=()=>{F[k]=$(i).value;runSearch()});
   $('fart').oninput=()=>{clearTimeout(t);t=setTimeout(()=>{F.art=$('fart').value;runSearch()},200)};
   $('frv').onchange=()=>{F.rv=$('frv').checked;runSearch()};
   el.querySelectorAll('.fsrch').forEach(selFilter);
@@ -1250,7 +1250,7 @@ function selFilter(inp){const sel=$(inp.dataset.for);FSORIG[sel.id]=sel.innerHTM
     sel.querySelectorAll('optgroup').forEach(g=>{if(!g.querySelector('option'))g.remove();});sel.value=cur;
     const n=sel.querySelectorAll('option').length-1;inp.setAttribute('aria-label',`${n} نتيجة`);});}
 function fsReset(){document.querySelectorAll('.fsrch').forEach(i=>{if(i.value){i.value='';const sel=$(i.dataset.for);sel.innerHTML=FSORIG[sel.id];}});}
-function syncInputs(){fsReset();$('sq').value=F.q;$('fcol').value=F.col;$('ftp').value=F.tp;$('fch').value=F.ch;$('flw').value=F.lw;$('fart').value=F.art;$('frv').checked=F.rv;$('fap').value=F.ap;$('fay').value=F.ay;}
+function syncInputs(){fsReset();$('sq').value=F.q;$('fcol').value=F.col;$('ftp').value=F.ix;$('fch').value=F.ch;$('flw').value=F.lw;$('fart').value=F.art;$('frv').checked=F.rv;$('fap').value=F.ap;$('fay').value=F.ay;}
 // صفحة «المبادئ» بلا بحث ولا مرشح = تصفح: الموضوعات والكتب (مع وضع الترتيب)؛ ومع البحث = النتائج
 const idleF=()=>!F.q&&!F.col&&!F.tp&&!F.ch&&!F.lw&&!F.art&&!F.rv&&!F.sec&&!F.ap&&!F.ay&&!F.yr&&!F.st&&!F.all&&!F.ix;
 // مرشح الحالة: أحكام العدول، والمعدول عنه، والهيئة العامة، وما صدر بعده تعديل لنصه
@@ -1264,12 +1264,15 @@ function calcFacets(){if(SCOPE!=='p'||idleF()){FAC=null;return;}
   let tps,fam='';const tc={};
   if(F.tp){fam=famOf(F.tp);withF({tp:'',yr:''},()=>collapse(filterPR())).forEach(p=>new Set(p.tp.map(t=>t[0]).filter(t=>TL[t]&&famOf(t)===fam)).forEach(t=>tc[t]=(tc[t]||0)+1));tps=Object.entries(tc).sort((a,b)=>b[1]-a[1]);}
   else{cur.forEach(p=>new Set(p.tp.map(t=>t[0]).filter(t=>TL[t])).forEach(t=>tc[t]=(tc[t]||0)+1));tps=Object.entries(tc).filter(([,n])=>n<cur.length).sort((a,b)=>b[1]-a[1]).slice(0,14);}
+  let ixs=[];if(IX){const ic={},par=F.ix&&IX.ki[F.ix]!==undefined?IX.ki[F.ix]:-1;cur.forEach(p=>{const ns=IX.a[p.id];if(!ns)return;const seen=new Set();ns.forEach(i=>{let j=i,up=-2;while(j>=0&&IX.t[j][2]!==par){up=j;j=IX.t[j][2];}if(j>=0&&!seen.has(j)){seen.add(j);ic[j]=(ic[j]||0)+1;}});});
+    ixs=Object.entries(ic).filter(([,n])=>F.ix||n<cur.length).sort((a,b)=>b[1]-a[1]).slice(0,16);}
   const bs=F.st?withF({st:'',yr:''},()=>collapse(filterPR())):TLB,stc={};Object.keys(STL).forEach(k=>{const n=bs.filter(p=>stOk(p,k)).length;if(n)stc[k]=n;});
-  FAC={chc,tps,fam,tot:bc.length,stc};}
+  FAC={chc,tps,fam,tot:bc.length,stc,ixs};}
 function facetsHTML(){const X=FAC;if(!X)return '';const chs=Object.entries(X.chc).sort((a,b)=>b[1]-a[1]);let h='';
-  if(F.ix&&IX)h+=`<div class="frow"><span class="fl">${svg('book')}الباب</span><div class="fstrip"><button class="chip fc on" data-go="#/index/topics">${esc(ixPath(+F.ix).join(' ← '))}</button><button class="chip fc" data-fset="ix" data-v="">إزالة</button></div></div>`;
+  if(IX&&(F.ix||X.ixs.length>1)){const fi=F.ix?IX.ki[F.ix]:undefined,up=fi!==undefined?IX.t[fi][2]:-1;
+    h+=`<div class="frow"><span class="fl">${svg('book')}الباب</span><div class="fstrip">${fi!==undefined?`<button class="chip fc" data-fset="ix" data-v="${up>=0?esc(IX.t[up][4]):''}">${up>=0?'› '+esc(IX.t[up][0]):'كل الأبواب'}</button><button class="chip fc on" data-go="#/index/topics" title="${esc(ixPath(fi).join(' ← '))}">${esc(IX.t[fi][0])}</button>`:''}${X.ixs.map(([i,n])=>`<button class="chip fc" data-fset="ix" data-v="${esc(IX.t[i][4])}">${esc(IX.t[i][0])} <small>${nf(n)}</small></button>`).join('')}</div></div>`;}
   if(chs.length>1||F.ch)h+=`<div class="frow"><span class="fl">${svg('scale')}الدائرة</span><div class="fstrip"><button class="chip fc${F.ch?'':' on'}" data-fset="ch" data-v="">كل الدوائر <small>${nf(X.tot)}</small></button>${chs.slice().sort((a,b)=>(b[0]===F.ch)-(a[0]===F.ch)).map(([c,n])=>`<button class="chip fc${F.ch===c?' on':''}" data-fset="ch" data-v="${esc(c)}" data-tog>${esc(c)} <small>${nf(n)}</small></button>`).join('')}</div></div>`;
-  if(X.tps.length>1||F.tp){const tc=([t,n])=>`<button class="chip fc${F.tp===t?' on':''}" data-fset="tp" data-v="${esc(t)}" data-tog>${esc(TL[t][1])} <small>${nf(n)}</small></button>`,pk=`<button class="chip fc fpk" data-pick="tp">${svg('search')}${F.tp?'موضوع آخر…':'اختر موضوعًا…'}</button>`;
+  if(F.tp||(!IX&&X.tps.length>1)){const tc=([t,n])=>`<button class="chip fc${F.tp===t?' on':''}" data-fset="tp" data-v="${esc(t)}" data-tog>${esc(TL[t][1])} <small>${nf(n)}</small></button>`,pk=`<button class="chip fc fpk" data-pick="tp">${svg('search')}${F.tp?'موضوع آخر…':'اختر موضوعًا…'}</button>`;
     const sel=X.tps.filter(x=>x[0]===F.tp),oth=X.tps.filter(x=>x[0]!==F.tp);
     h+=`<div class="frow"><span class="fl">${svg('tag')}${F.tp?'في «'+esc(X.fam)+'»':'الموضوع'}</span><div class="fstrip">${sel.map(tc).join('')}${pk}${oth.map(tc).join('')}${F.tp?`<button class="chip fc" data-fset="tp" data-v="">كل الموضوعات</button>`:''}</div></div>`;}
   const sc=Object.entries(X.stc||{});if(sc.length||F.st)h+=`<div class="frow"><span class="fl">${svg('info')}الحالة</span><div class="fstrip">${F.st?`<button class="chip fc" data-fset="st" data-v="">كل الحالات</button>`:''}${sc.map(([k,n])=>`<button class="chip fc st-${k}${F.st===k?' on':''}" data-fset="st" data-v="${k}" data-tog title="${k==='ga'?'أحكام الهيئة العامة التي نصّت على العدول عن رأي سابق':k==='hy'?'كل ما صدر عن الهيئة العامة':k==='chg'?'المادة التي طبّقها المبدأ عُدّلت أو أُلغيت بعد جلسته':'ثبت أن الهيئة العامة عدلت عنه'}">${STL[k]} <small>${nf(n)}</small></button>`).join('')}</div></div>`;
@@ -1288,7 +1291,7 @@ function pickDlg(k){const T={tp:'اختر الموضوع',ch:'اختر الدا�
   if(matchMedia('(pointer:fine)').matches)q.focus();const on=d.querySelector('.pko.on');if(on)on.scrollIntoView({block:'center'});}
 function runSearch(){if(F.ix&&!IX){ixLoad().then(()=>runSearch());return;}if(needMask())return;shown=30;if(F.yr){const y=F.yr;F.yr='';TLB=collapse(filterPR());F.yr=y;}cur=filterPR();const qa=qalts(F.q);if(qa.some(a=>a.length>1)){const L=[],S=[];cur.forEach(p=>(qa.every(a=>(p.ns!==undefined?p.ns:nsOf(p)).includes(a.lit))?L:S).push(p));cur=L.concat(S);SYNN=S.length;}else SYNN=0;RAWN=cur.length;cur=collapse(cur);if(!F.yr)TLB=cur;const idle=idleF()&&SCOPE==='p';calcFacets();
   $('browse').hidden=!idle;$('list').hidden=idle;document.querySelector('#v-search>.hint').hidden=idle;if(idle){renderBrowse();$('more').hidden=true;}else renderList();
-  const L={col:v=>COLS[v]?.name,tp:v=>TL[v]?.[1],ch:v=>v,lw:v=>LL[v]||v,art:v=>'المادة '+v,rv:()=>'يحتاج مراجعة',sec:v=>v.split('›').slice(-1)[0],ap:v=>'طعن رقم '+v,ay:v=>'سنة الطعن '+v,yr:v=>'جلسات '+v,st:v=>STL[v]||v,all:()=>'كل المبادئ'};
+  const L={ix:v=>IX&&IX.ki[v]!==undefined?'الباب: '+ixPath(IX.ki[v]).slice(-2).join(' ← '):'',col:v=>COLS[v]?.name,tp:v=>TL[v]?.[1],ch:v=>v,lw:v=>LL[v]||v,art:v=>'المادة '+v,rv:()=>'يحتاج مراجعة',sec:v=>v.split('›').slice(-1)[0],ap:v=>'طعن رقم '+v,ay:v=>'سنة الطعن '+v,yr:v=>'جلسات '+v,st:v=>STL[v]||v,all:()=>'كل المبادئ'};
   const PK={col:1,tp:1,ch:1,lw:1};
   $('actf').innerHTML=Object.keys(L).filter(k=>F[k]&&!(k==='all'&&Object.keys(L).some(j=>j!=='all'&&F[j]))).map(k=>PK[k]?`<span class="achip"><button class="chip ap" data-pick="${k}" title="غيّر الاختيار">${esc(L[k](F[k]))}<svg class="i dn" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button><button class="chip ax" data-clr="${k}" aria-label="إزالة ${esc(L[k](F[k]))}">×</button></span>`:`<button class="chip" data-clr="${k}">${esc(L[k](F[k]))}</button>`).join('');
   const dn=RAWN-cur.length;
@@ -1339,13 +1342,13 @@ function timelineHTML(){const B=TLB||[];if(B.length<8)return '';const by={};let 
   const sel=F.yr&&by[F.yr]?`<b class="tlsel">معروض الآن: مبادئ جلسات ${F.yr} فقط (${nf(by[F.yr].length)})</b>`:'';
   return `<details class="card tline fold${F.yr?' has':''}" open><summary>${svg('clock')} المسار عبر الزمن <small class="muted">${mn}–${mx} · اضغط عمود سنة لعرض مبادئها وحدها، واضغطه ثانية للعودة</small></summary><div class="tlw"><div class="tlg">${h}</div></div><div class="tll">${sel}${legend}${F.yr?`<button class="lnk" data-clr="yr">✕ كل السنوات</button>`:''}</div></details>`;}
 function renderList(){const re=hlRe(qalts(F.q).flat());const ah=artHits();$('list').innerHTML=(F.q?jumpHTML(smartJump(F.q)):'')+(F.q&&txn(F.q).split(' ').filter(w=>w.length>1).length>=3?`<button class="askjump card${cur.length<3?' strong':''}" data-ask="${esc(F.q)}">${svg('askq')}<span><b>اسأل المكتبة بهذه العبارة</b><small>${cur.length<3?'نتائج قليلة لأن البحث يشترط ورود كل الكلمات — «اسأل المكتبة» يرتّب الأقرب ولو لم ترد كلها':'يرتّب المبادئ بقربها من عبارتك ولو لم ترد كل كلماتها'}</small></span><span class="garr">${svg('back')}</span></button>`:'')+facetsHTML()+timelineHTML()+(ah.length?`<details class="arthits card fold"><summary>${svg('scroll')} في نصوص التشريعات: ${nf(ah.length)} ${ah.length===1?'مادة':ah.length<11?'مواد':'مادة'} <small>${esc(ah.slice(0,2).map(([L,a])=>a.label+' · '+L.short).join(' — '))}${ah.length>2?' …':''}</small></summary>${ah.slice(0,8).map(([L,a])=>`<button class="arow" data-go="#/a/${a.id}"><b>${esc(a.label)} · ${esc(L.short)}</b><span>${hl(a.paras.join(' ').slice(0,220),re)}${a.paras.join(' ').length>220?'…':''}</span></button>`).join('')}${ah.length>8?`<button class="btn sm" data-scope-l="1">كل المواد في نطاق «التشريعات» (${nf(ah.length)})</button>`:''}</details>`:'')+(cur.length?cur.slice(0,shown).map(p=>card(p,re)).join(''):'<div class="empty">لا توجد نتائج. جرّب كلمة أقصر أو أزل أحد المرشحات.</div>');$('more').hidden=cur.length<=shown;prefetchRules(cur.slice(0,shown));}
-function setFilter(k,v){Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:'',ap:'',ay:'',yr:'',st:'',all:false});SCOPE='p';F[k]=v;go('#/search');}
+function setFilter(k,v){Object.assign(F,{q:'',col:'',tp:'',ch:'',lw:'',art:'',rv:false,sec:'',ap:'',ay:'',yr:'',st:'',all:false,ix:''});SCOPE='p';F[k]=v;go('#/search');}
 // ---------- INDEX
 let idxTab='topics';
 // ---------- الفهرس الموحّد: تبويب «مجموعة القواعد القانونية — القسم الخامس» (data/ix.json، يُحمَّل عند الحاجة)
 let IXP=null,IX=null,IXPART=0,IXL='',IXK=-1;
 function ixLoad(){if(!IXP)IXP=fetch('data/ix.json').then(r=>r.json()).then(d=>{const T=d.t;d.kids=T.map(()=>[]);T.forEach((n,i)=>{if(n[2]>=0)d.kids[n[2]].push(i);});
-  d.by=T.map(()=>[]);for(const id in d.a){if(WD.has(id))continue;d.a[id].forEach(i=>d.by[i].push(id));}d.ev=new Set(d.e);IX=d;return d;}).catch(()=>null);return IXP;}
+  d.ki={};T.forEach((n,i)=>d.ki[n[4]]=i);d.by=T.map(()=>[]);for(const id in d.a){if(WD.has(id))continue;d.a[id].forEach(i=>d.by[i].push(id));}d.ev=new Set(d.e);IX=d;const fs=$('ftp');if(fs){const kid=T.map(()=>[]);T.forEach((n,i)=>{if(n[2]>=0)kid[n[2]].push(i);});const walk=(i,pre)=>{const n=T[i];if(!n[3])return '';const lab=pre?pre+' ← '+n[0]:n[0];return `<option value="${esc(n[4])}">${esc(lab)} (${n[3]})</option>`+(pre.split(' ← ').length<2?kid[i].sort((a,b)=>T[a][0].localeCompare(T[b][0],'ar')).map(j=>walk(j,lab)).join(''):'');};const o=pt=>T.map((n,i)=>[n,i]).filter(([n])=>n[2]<0&&n[1]===pt&&n[3]>0).sort((a,b)=>a[0][0].localeCompare(b[0][0],'ar')).map(([,i])=>walk(i,'')).join('');fs.innerHTML=`<option value="">الكل</option><optgroup label="مدني وتجاري وأحوال وعمالي وإداري">${o(0)}</optgroup><optgroup label="جزائي">${o(1)}</optgroup>`;fs.value=F.ix||'';FSORIG.ftp=fs.innerHTML;}return d;}).catch(()=>null);return IXP;}
 function ixDesc(i){const o=new Set(),st=[i];while(st.length){const j=st.pop();IX.by[j].forEach(x=>o.add(x));IX.kids[j].forEach(k=>st.push(k));}return o;}
 function ixPath(i){const p=[];while(i>=0){p.unshift(IX.t[i][0]);i=IX.t[i][2];}return p;}
 const ixLet=s=>(s||'').replace(/^[أإآ]/,'ا').charAt(0);
@@ -1361,9 +1364,9 @@ function ixTab(b){b.innerHTML=LOADMSG;ixLoad().then(d=>{if(!d){b.innerHTML='<div
   const drawK=()=>{const q=norm($('ixq').value);const list=q?d.t.map((n,i)=>[n,i]).filter(([n])=>n[1]===IXPART&&n[3]>0&&norm(n[0]).includes(q)).slice(0,120):tops.filter(([n])=>ixLet(n[0])===IXL);
     $('ixk').innerHTML=list.map(([n,i])=>`<button class="ixr${i===IXK?' on':''}" data-ixk="${i}"><span>${esc(n[0])}${q&&n[2]>=0?` <small class="muted">— ${esc(ixPath(n[2]).join(' ← '))}</small>`:''}</span><span class="n">${nf(n[3])}</span></button>`).join('')||'<div class="empty">لا نتائج.</div>';};
   const sub=i=>{const k=d.kids[i].filter(j=>d.t[j][3]>0);if(!k.length)return '';return k.map(j=>{const n=d.t[j],kk=d.kids[j].filter(x=>d.t[x][3]>0);
-    return kk.length?`<details><summary>${esc(n[0])}<span class="n">${nf(n[3])}</span></summary><button class="leaf" data-ix="${j}">كل مبادئ هذا الباب<span class="n">${nf(n[3])}</span></button>${sub(j)}</details>`:`<button class="leaf" data-ix="${j}">${esc(n[0])}<span class="n">${nf(n[3])}</span></button>`;}).join('');};
+    return kk.length?`<details><summary>${esc(n[0])}<span class="n">${nf(n[3])}</span></summary><button class="leaf" data-ix="${esc(n[4])}">كل مبادئ هذا الباب<span class="n">${nf(n[3])}</span></button>${sub(j)}</details>`:`<button class="leaf" data-ix="${esc(n[4])}">${esc(n[0])}<span class="n">${nf(n[3])}</span></button>`;}).join('');};
   const drawS=()=>{if(IXK<0||!d.t[IXK]){$('ixs').innerHTML='<div class="empty">اختر كلمة موضوع.</div>';return;}const n=d.t[IXK];
-    $('ixs').innerHTML=`<div class="ixh">${n[2]>=0?`<small class="muted">${esc(ixPath(n[2]).join(' ← '))}</small>`:''}<h3>${esc(n[0])}</h3><button class="btn primary" data-ix="${IXK}">كل المبادئ (${nf(n[3])})</button></div><div class="tree">${sub(IXK)}</div>`;};
+    $('ixs').innerHTML=`<div class="ixh">${n[2]>=0?`<small class="muted">${esc(ixPath(n[2]).join(' ← '))}</small>`:''}<h3>${esc(n[0])}</h3><button class="btn primary" data-ix="${esc(n[4])}">كل المبادئ (${nf(n[3])})</button></div><div class="tree">${sub(IXK)}</div>`;};
   drawK();drawS();
   b.onclick=e=>{const t=e.target.closest('[data-ixp],[data-ixl],[data-ixk],[data-ix]');if(!t)return;
     if(t.dataset.ixp!==undefined){IXPART=+t.dataset.ixp;IXL='';IXK=-1;ixTab(b);return;}
@@ -1386,7 +1389,13 @@ function viewIndex(sub,arg){
   if(idxTab==='books'){b.innerHTML=`<p class="muted">تصفح كل كتاب بأبوابه وعناوينه كما وردت فيه.</p><div class="grid g3">${ordered('cols',ORDER).map(c=>bookTile(c)).join('')}</div>`;}
 }
 function topicRow(t,mx){return `<button class="row" data-f="tp" data-v="${esc(t)}"><span>${esc(TL[t][1])}${mx?'':` <small class="muted">— ${esc(TL[t][0])}</small>`}</span><span class="n">${nf(tcount[t])}</span>${mx?`<span class="bar"><i style="width:${tcount[t]/mx*100}%"></i></span>`:''}</button>`;}
-function famPage(el,f){const ts=TORD.filter(t=>famOf(t)===f),mx=Math.max(...ts.map(t=>tcount[t]));
+function famPage(el,f){if(!IX){el.innerHTML=LOADMSG;ixLoad().then(d=>d?famPage(el,f):famPageOld(el,f));return;}
+  const ic={};let tot=0;PR.forEach(p=>{if(!p.tp.some(t=>famOf(t[0])===f))return;tot++;const ns=IX.a[p.id];if(!ns)return;new Set(ns.map(i=>{while(IX.t[i][2]>=0)i=IX.t[i][2];return i;})).forEach(i=>ic[i]=(ic[i]||0)+1);});
+  const rows=Object.entries(ic).sort((a,b)=>b[1]-a[1]),mx=rows.length?rows[0][1]:1;
+  el.innerHTML=`<div class="crumbs"><button data-go="#/index/topics">الفهرس</button>›<span>${esc(f)}</span></div><div class="vh"><span class="tile" style="padding:0;border:0;box-shadow:none;background:none"><span class="ic">${svg(FAMIC[famLetter[f]]||'scale')}</span></span><h2>${esc(f)}</h2><span class="muted">${nf(famcount[f]||0)} مبدأ</span></div>
+   <p class="muted">كلمات الموضوع في الفهرس الموحّد التي تقع فيها مبادئ «${esc(f)}»، بتبويب المكتب الفني.</p><input class="flt" id="fflt" placeholder="ابحث في كلمات الموضوع…"><div class="rows" id="frows"></div>`;
+  const draw=q=>$('frows').innerHTML=rows.filter(([i])=>!q||norm(IX.t[i][0]).includes(q)).map(([i,n])=>`<button class="row" data-f="ix" data-v="${esc(IX.t[i][4])}"><span>${esc(IX.t[i][0])}${IX.t[i][1]?' <small class="muted">— جزائي</small>':''}</span><span class="n">${nf(n)}</span><span class="bar"><i style="width:${n/mx*100}%"></i></span></button>`).join('')||'<div class="empty">لا نتائج.</div>';draw('');$('fflt').oninput=()=>draw(norm($('fflt').value));}
+function famPageOld(el,f){const ts=TORD.filter(t=>famOf(t)===f),mx=Math.max(...ts.map(t=>tcount[t]));
   el.innerHTML=`<div class="crumbs"><button data-go="#/index/topics">الفهرس</button>›<span>${esc(f)}</span></div><div class="vh"><span class="tile" style="padding:0;border:0;box-shadow:none;background:none"><span class="ic">${svg(FAMIC[famLetter[f]]||'scale')}</span></span><h2>${esc(f)}</h2><span class="muted">${nf(famcount[f]||0)} مبدأ</span></div>
    <input class="flt" id="fflt" placeholder="ابحث في موضوعات «${esc(f)}»…"><div class="rows" id="frows"></div>`;
   const draw=q=>$('frows').innerHTML=ts.filter(t=>!q||norm(TL[t][1]).includes(q)).map(t=>topicRow(t,mx)).join('')||'<div class="empty">لا نتائج.</div>';draw('');$('fflt').oninput=()=>draw(norm($('fflt').value));}
@@ -1950,7 +1959,7 @@ $('totop').onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
   await new Promise(r=>setTimeout(r,400));
   for(let k=0;k<LATE.length;k++){const c=LATE[k];let a=[];try{a=JSON.parse(await LATET[k]);}catch(_){}
     await new Promise(r=>setTimeout(r,0));COLARR[c]=a;ingestBase(a);cixIn(c);countIn(a);artIn(a);newIn(a);}
-  dgIn();await REFP;refIn(LATE);ASKIX=null;FOLNEW=null;LATEDONE=true;if(TPART){TQ=null;PENDQ=null;}lateRes();if(sub)sub.textContent=base();
+  dgIn();await REFP;refIn(LATE);ASKIX=null;FOLNEW=null;LATEDONE=true;if(TPART){TQ=null;PENDQ=null;}lateRes();(window.requestIdleCallback||(f=>setTimeout(f,1500)))(()=>ixLoad().then(()=>{if(location.hash.startsWith('#/p/')||location.hash.startsWith('#/t/'))route();else if(location.hash==='#/search'&&!idleF())runSearch();}));if(sub)sub.textContent=base();
   const h=decodeURIComponent((location.hash||'').replace(/^#\/?/,''));
   if(h==='search'){if(!$('list').hidden||F.q||!idleF())runSearch();else route();}else if(!h||h.startsWith('index')||h==='follow'||h==='more'||h==='review')route();
   if(!WK)nsIdle();})().catch(e=>console.error(e));

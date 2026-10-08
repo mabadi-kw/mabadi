@@ -1,8 +1,8 @@
 {
  "format": "mabadi-manifest",
  "producer": "مكتبة مبادئ التمييز",
- "schema_version": "1.7",
- "updated": "2026-10-07",
+ "schema_version": "1.8",
+ "updated": "2026-10-08",
  "site": "https://mabadi-kw.github.io/mabadi/",
  "links": {
   "principle": "https://mabadi-kw.github.io/mabadi/#/p/{id}",
@@ -11,12 +11,12 @@
  },
  "packs": [
   {
-   "file": "mabadi-pack_administrative_v1.7_part1of2.json",
+   "file": "mabadi-pack_administrative_v1.8_part1of2.json",
    "pack": "إداري",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 7632626,
-   "sha256": "2550585f7b4b46d3b4f026b4bee3d8298eec7374f93817bd1b2ebd5d1701d0e7",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 7984942,
+   "sha256": "863f0378fd84d9fff7336bc07e51c3d2647a358a7d48b00ba013e306ca574e2e",
    "counts": {
     "items": 1218,
     "rulings": 591,
@@ -28,24 +28,21 @@
     "items_total": 1970
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 1973,
-    "items_after": 1970,
-    "deleted": 3,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر."
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_administrative_v1.7_part2of2.json",
+   "file": "mabadi-pack_administrative_v1.8_part2of2.json",
    "pack": "إداري",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 6835971,
-   "sha256": "44c8eed709b29def359ed805a4bf4f13693a0569971ac7bf032a7e6f3d5448d3",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 7002656,
+   "sha256": "9aec0e44879aef5d184971c98b3019a34c33e12f90f77c085100042d19d9c184",
    "counts": {
     "items": 752,
     "rulings": 222,
@@ -57,24 +54,21 @@
     "items_total": 1970
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 1973,
-    "items_after": 1970,
-    "deleted": 3,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر."
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_civil_v1.7_part1of3.json",
+   "file": "mabadi-pack_civil_v1.8_part1of3.json",
    "pack": "مدني",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 10216870,
-   "sha256": "d40c4a004496edc3ec0d5b6903b033817bd4b6bcfba9e35855205ecc9742f31f",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 10826761,
+   "sha256": "68bf476a220547d718bd86ff351a6e5ec3f11fdb23c5f8af22a120d2426ca5e3",
    "counts": {
     "items": 2773,
     "rulings": 1541,
@@ -86,24 +80,21 @@
     "items_total": 5269
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 5270,
-    "items_after": 5269,
-    "deleted": 1,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر."
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_civil_v1.7_part2of3.json",
+   "file": "mabadi-pack_civil_v1.8_part2of3.json",
    "pack": "مدني",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 8614224,
-   "sha256": "7cd19734d0003e54f9a5d8ba59232600f585f39f73408003e302839f9094dca9",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 9023569,
+   "sha256": "9c041828e2740c7a67d0793fb02a9795bf12e5439100237faee70e39efcb6143",
    "counts": {
     "items": 1244,
     "rulings": 388,
@@ -115,25 +106,21 @@
     "items_total": 5269
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 5270,
-    "items_after": 5269,
-    "deleted": 1,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر.",
-     "حُذف rule_text من عناصر تضمّن نص قاعدتها بيانًا شخصيًا (عنوانًا أو اسمًا)، وبقي الموجز: QK5-01789، QK5-01795، QK5-02697"
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_civil_v1.7_part3of3.json",
+   "file": "mabadi-pack_civil_v1.8_part3of3.json",
    "pack": "مدني",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 8629428,
-   "sha256": "c886115a81cd7b68560efaeef1526f664345e403b8922c361f1d476f00910aa5",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 8902729,
+   "sha256": "0ca2032451a039d646eb12d1dd5da6f5b62fee5c833c30beba64b5b373684628",
    "counts": {
     "items": 1252,
     "rulings": 370,
@@ -145,24 +132,21 @@
     "items_total": 5269
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 5270,
-    "items_after": 5269,
-    "deleted": 1,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر."
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_commercial_v1.7_part1of5.json",
+   "file": "mabadi-pack_commercial_v1.8_part1of5.json",
    "pack": "تجاري",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 15433544,
-   "sha256": "9106f6e74dbe7e80307bb4a69c46d04b067d8634c80b80b6dac709cd634a85df",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 16028803,
+   "sha256": "b1ec566bdaeb33ce11ac8b7df20a5112286894e5bd4488a3aa327d3fb3a80df0",
    "counts": {
     "items": 5354,
     "rulings": 3577,
@@ -174,24 +158,21 @@
     "items_total": 13487
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 13490,
-    "items_after": 13487,
-    "deleted": 3,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر."
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_commercial_v1.7_part2of5.json",
+   "file": "mabadi-pack_commercial_v1.8_part2of5.json",
    "pack": "تجاري",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 11955331,
-   "sha256": "39254d2264e8721dc643095fd24d54a4bbd5a48893eb9f602a731212510b5d94",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 12832672,
+   "sha256": "ea23437388799c9cff173677eebbfc5b4720bc8a75e4ac0490535410822a5f24",
    "counts": {
     "items": 3788,
     "rulings": 2469,
@@ -203,24 +184,21 @@
     "items_total": 13487
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 13490,
-    "items_after": 13487,
-    "deleted": 3,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر."
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_commercial_v1.7_part3of5.json",
+   "file": "mabadi-pack_commercial_v1.8_part3of5.json",
    "pack": "تجاري",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 11292750,
-   "sha256": "b148e7735b7a99352ba6df82e4a92e37e361d53b80a4d8e5c1645c9d34a667d1",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 11842255,
+   "sha256": "e6d2111a57876a16567c4ca628f242c5f3428ad159e8e23d6326f1c77f227e3d",
    "counts": {
     "items": 1411,
     "rulings": 449,
@@ -232,25 +210,21 @@
     "items_total": 13487
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 13490,
-    "items_after": 13487,
-    "deleted": 3,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر.",
-     "حُذف rule_text من عناصر تضمّن نص قاعدتها بيانًا شخصيًا (عنوانًا أو اسمًا)، وبقي الموجز: QK5-01225، QK5-01849"
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_commercial_v1.7_part4of5.json",
+   "file": "mabadi-pack_commercial_v1.8_part4of5.json",
    "pack": "تجاري",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 11340967,
-   "sha256": "be747fd7b71bace00ee2a2c8fe739312a1a2a3e06fa99f70212064025fff409d",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 11687275,
+   "sha256": "ff26765eb1f6d9f2310966b75c474293b16895c29c2f7d245a289de1ce34d213",
    "counts": {
     "items": 1470,
     "rulings": 542,
@@ -262,25 +236,21 @@
     "items_total": 13487
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 13490,
-    "items_after": 13487,
-    "deleted": 3,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر.",
-     "حُذف rule_text من عناصر تضمّن نص قاعدتها بيانًا شخصيًا (عنوانًا أو اسمًا)، وبقي الموجز: QK5-05201"
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_commercial_v1.7_part5of5.json",
+   "file": "mabadi-pack_commercial_v1.8_part5of5.json",
    "pack": "تجاري",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 11323817,
-   "sha256": "f6c65626a6a29d0931dec7bc41780dc11da0d51c919485a1a03ca99441ca9a29",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 11639843,
+   "sha256": "566a0736578f9fbb248359fc55602bce4a45713c55a380c58bd4ad8587b00d28",
    "counts": {
     "items": 1464,
     "rulings": 560,
@@ -292,25 +262,21 @@
     "items_total": 13487
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 13490,
-    "items_after": 13487,
-    "deleted": 3,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر.",
-     "حُذف rule_text من عناصر تضمّن نص قاعدتها بيانًا شخصيًا (عنوانًا أو اسمًا)، وبقي الموجز: QK5-08606، QK5-08622"
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_criminal_v1.7_part1of3.json",
+   "file": "mabadi-pack_criminal_v1.8_part1of3.json",
    "pack": "جزائي",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 11484479,
-   "sha256": "0919778a1fba654f47256174b820fe0f318b96270d007027887b7ef129df9ea5",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 12281032,
+   "sha256": "86e8aed624e830e58969eeaf742797aede8139638c708978a6dec9abfb0fc7cb",
    "counts": {
     "items": 3509,
     "rulings": 2137,
@@ -322,24 +288,21 @@
     "items_total": 7250
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 7254,
-    "items_after": 7250,
-    "deleted": 4,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر."
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_criminal_v1.7_part2of3.json",
+   "file": "mabadi-pack_criminal_v1.8_part2of3.json",
    "pack": "جزائي",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 10422595,
-   "sha256": "ede4431f7ee142d7fc14b82248dd639cfe08ad1d590ba8900ba89702a8871c36",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 10986844,
+   "sha256": "4f06407ceec1ef77c0ea75738b00d63aece780588b8bb9d184e0cd79f7f2ea32",
    "counts": {
     "items": 1817,
     "rulings": 427,
@@ -351,25 +314,21 @@
     "items_total": 7250
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 7254,
-    "items_after": 7250,
-    "deleted": 4,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر.",
-     "حُذف rule_text من عناصر تضمّن نص قاعدتها بيانًا شخصيًا (عنوانًا أو اسمًا)، وبقي الموجز: QJ5-00461، QJ5-00625"
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_criminal_v1.7_part3of3.json",
+   "file": "mabadi-pack_criminal_v1.8_part3of3.json",
    "pack": "جزائي",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 10439101,
-   "sha256": "6b84a69fbbea0372e7a9d5f2f17433ac2edaf0f82d77c49c7c93a1d0e9644a29",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 10917859,
+   "sha256": "62b86e4642e792056495bee145c49ce18b52ee98ab08388cb5b2873e1f5de950",
    "counts": {
     "items": 1924,
     "rulings": 428,
@@ -381,49 +340,42 @@
     "items_total": 7250
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 7254,
-    "items_after": 7250,
-    "deleted": 4,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر.",
-     "حُذف rule_text من عناصر تضمّن نص قاعدتها بيانًا شخصيًا (عنوانًا أو اسمًا)، وبقي الموجز: QJ5-01696"
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_judiciary_v1.7.json",
+   "file": "mabadi-pack_judiciary_v1.8.json",
    "pack": "طلبات رجال القضاء",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 264587,
-   "sha256": "7b21f78c2824bcb1851a1377cf07d32c567e0c2f802a3e7ebfbbc5817f5f5850",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 268981,
+   "sha256": "2b64542834191fb051dd2c880c45d0b79ed0da4b3bcdffa85efb923f1c8ab4a0",
    "counts": {
     "items": 41,
     "rulings": 20,
     "needs_review": 3
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 41,
-    "items_after": 41,
-    "deleted": 0,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر."
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_labour_v1.7_part1of2.json",
+   "file": "mabadi-pack_labour_v1.8_part1of2.json",
    "pack": "عمالي",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 8616911,
-   "sha256": "2ba332a311c3c8385e9207a11b9a8a86201deb678659a071df6c28f7387b8892",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 8919403,
+   "sha256": "eaa918250689b00b35d0aa3e484263a5be567ff7b169a9940f5db98e9bd909e8",
    "counts": {
     "items": 1930,
     "rulings": 1115,
@@ -435,24 +387,21 @@
     "items_total": 3227
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 3227,
-    "items_after": 3227,
-    "deleted": 0,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر."
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_labour_v1.7_part2of2.json",
+   "file": "mabadi-pack_labour_v1.8_part2of2.json",
    "pack": "عمالي",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 7792866,
-   "sha256": "fe5635cdb313b0794aad002c109dacb19ff9d18cec8e478ece423f028ac82569",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 8204864,
+   "sha256": "73d6537dd774591146e4bee813a1c568ee6bafcf105c66fab644a2eea88c57c4",
    "counts": {
     "items": 1297,
     "rulings": 352,
@@ -464,24 +413,21 @@
     "items_total": 3227
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 3227,
-    "items_after": 3227,
-    "deleted": 0,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر."
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_personal-status_v1.7_part1of2.json",
+   "file": "mabadi-pack_personal-status_v1.8_part1of2.json",
    "pack": "أحوال شخصية",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 7176545,
-   "sha256": "b35bac617ef119a9a46dcac26d2fff3e8560d0b86d2c9cfa183777c0e7d6b70b",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 7605908,
+   "sha256": "27a920a5ad3c7a9e96981e55db26f920f2d85fb77058c7e5b611cc71c4d960e0",
    "counts": {
     "items": 2057,
     "rulings": 1187,
@@ -493,24 +439,21 @@
     "items_total": 3125
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 3127,
-    "items_after": 3125,
-    "deleted": 2,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر."
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
   },
   {
-   "file": "mabadi-pack_personal-status_v1.7_part2of2.json",
+   "file": "mabadi-pack_personal-status_v1.8_part2of2.json",
    "pack": "أحوال شخصية",
-   "schema_version": "1.7",
-   "generated": "2026-10-07",
-   "bytes": 6371694,
-   "sha256": "1d6789660133b3392b4453066296aa2656739fd45fba48639f4cc44b3fdb7184",
+   "schema_version": "1.8",
+   "generated": "2026-10-08",
+   "bytes": 6636039,
+   "sha256": "4458c4f56766dba9a63e8ed99cc5015b7a9224a55d325e000a75573a3b1c21ef",
    "counts": {
     "items": 1068,
     "rulings": 324,
@@ -522,17 +465,25 @@
     "items_total": 3125
    },
    "changelog": {
-    "version": "1.7",
-    "previous": "1.6",
-    "date": "2026-10-07",
-    "items_before": 3127,
-    "items_after": 3125,
-    "deleted": 2,
+    "version": "1.8",
+    "previous": "1.7",
+    "date": "2026-10-08",
     "notes": [
-     "إصدار خصوصية: سُحبت مبادئ تضمنت بيانات أشخاص (أسماء أو عناوين أو أرقام مدنية) وردت في وقائع الدعاوى. لا تغيير آخر.",
-     "حُذف rule_text من عناصر تضمّن نص قاعدتها بيانًا شخصيًا (عنوانًا أو اسمًا)، وبقي الموجز: QK5-01780، QK5-01855، QK5-02681"
+     "إضافة الفهرس الموحّد (index) وعلامة المبدأ الإجرائي (procedural). لا حذف ولا تعديل نص. topics باقٍ (مهجور، يُحذف في 1.9)."
     ]
    }
+  }
+ ],
+ "extras": [
+  {
+   "file": "index_v1.8.json",
+   "bytes": 755542,
+   "sha256": "09249a7eaf593604c6ad883e90230ada84ca5e09cfc39b9c071dd23a6bff996f"
+  },
+  {
+   "file": "topics_to_index_v1.8.json",
+   "bytes": 822208,
+   "sha256": "3abdddbc49abd4a95f24ac1585e73612f95e01c420312c79e4a7220162c0c45d"
   }
  ]
 }

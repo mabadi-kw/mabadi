@@ -182,7 +182,7 @@ out['stats'] = {'items': total, 'qk5_qj5': qk, 'other': other, 'other_indexed_di
 json.dump(out, open(os.path.join(os.path.dirname(__file__), 'index_full.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
 # نسخة التطبيق المضغوطة: data/ix.json = {t:[[label,part(0/1),parent_idx,count]], a:{id:[node_idx,...]}, e:[ids by evidence]}
 KI = {n['k']: i for i, n in enumerate(out['tree'])}
-ix = {'v': 1, 't': [[n['l'], 0 if n['p'] == 'civil' else 1, KI.get(n['par'], -1), n['n']] for n in out['tree']],
+ix = {'v': 1, 't': [[n['l'], 0 if n['p'] == 'civil' else 1, KI.get(n['par'], -1), n['n'], n['k']] for n in out['tree']],   # المفتاح الخامس ثابت بين الإصدارات
       'a': {i: [KI[k] for k, b, nn_ in ks] for i, ks in out['a'].items()},
       'e': sorted(i for i, ks in out['a'].items() if all(b == 'evidence' for k, b, nn_ in ks))}
 json.dump(ix, open(D('ix.json'), 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
