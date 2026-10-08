@@ -186,6 +186,8 @@ def main():
         r=parse(open(f,encoding='utf8').read(),M[key]['rel'])
         r['id']=key; r['rel']=M[key]['rel']; r['mtime']=M[key]['mtime']
         out.append(r)
+    if os.environ.get('NAMES_OUT'):   # أسماء الأطراف لمحرك الخصوصية على الجهاز نفسه فقط — لا تخرج منه
+        json.dump({r['id']:r.get('_pn',[]) for r in out},open(os.environ['NAMES_OUT'],'w'),ensure_ascii=False)
     # كاشف تسرّب الأسماء: ثنائيات من أسماء الأطراف في كل المجموعة، فيها كلمة نادرة
     BG=set()
     for r in out:
