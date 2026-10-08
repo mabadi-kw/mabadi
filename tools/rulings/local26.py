@@ -39,21 +39,34 @@ kept = json.load(open(os.path.join(work, 'kept.json'), encoding='utf-8'))
 exc = json.load(open(os.path.join(work, 'excluded.json'), encoding='utf-8'))
 names = json.load(open(os.path.join(work, 'names.json'), encoding='utf-8'))
 # 3) الخصوصية
-PV.load_extra({w for ns in names.values() for n in ns for w in re.findall(r'[ء-ي]+', n) if len(w) >= 3 and w not in PV.STOPW})
+ORG = re.compile(r'شرك[ةه]|وزار[ةه]|بنك|مؤسس[ةه]|هيئ[ةه]|بلدي[ةه]|جامع[ةه]|نادي|مكتب|مصرف|جمعي[ةه]|ديوان|إدار[ةه]|ادار[ةه]|مجلس|الكويت|الدول[ةه]|مركز|مستشفى|اتحاد|صندوق|معهد|مدرس[ةه]|كلي[ةه]|ورث[ةه]|بصفت')
+# كلمة تتكرر في نصوص مبادئ ثلاثة أحكام مختلفة فأكثر مصطلح لا اسم؛ فلا تدخل المعجم المحلي
+DF = collections.Counter()
+for r in kept: DF.update({w for x in r['rules'] for w in re.findall(r'[ء-ي]+', PV.norm(x['t']))})
+LEX = {w for ns in names.values() for n in ns if not ORG.search(n) for w in re.findall(r'[ء-ي]+', PV.norm(n)) if len(w) >= 3 and w not in PV.STOPW and DF[w] < 3}
+PV.load_extra(LEX)
 # 4) هيئة المحكمة
-TITLE = re.compile(r'(?:السيد(?:ة)?|السادة|الأستاذ|الاستاذ|المستشار(?:ين|ون)?|وكيل\s+المحكمة|رئيس\s+الدائرة|القاضي|القضاة|/|:|-)')
-STOP = re.compile(r'وحضور|بحضور|أمين\s+السر|امين\s+السر|النيابة|المرفوع|في\s+الطعن|\n\s*\n')
+TITLE = re.compile(r'"?\s*(?:السيد(?:ة)?|السادة|الأستاذ|الاستاذ|المستشار(?:ين|ون)?|وكيل\s+المحكمة|رئيس\s+الدائرة|رئيس\s+المحكمة|نائب\s+رئيس\s+المحكمة|القاضي|القضاة)\s*"?|[/:"“”]')
+def _names(block):
+    out = []
+    for ln in block.split('\n'):
+        x = re.sub(r'\s+', ' ', TITLE.sub(' ', ln)).strip(' ،,.-')
+        if not x: continue
+        x = re.sub(r'^و\s+', '', x)
+        if x.startswith('و') and len(x.split()[0]) > 3 and x.split()[0] not in PV.FIRST and x.split()[0][1:] in PV.FIRST | PV.FAMILY | {'عبد'} | {w for w in PV.FIRST}:
+            x = x[1:]
+        elif x.startswith('و') and x.split()[0][1:].startswith('عبد'): x = x[1:]
+        if 2 <= len(x.split()) <= 6: out.append(x)
+    return out
 def panel(t):
-    h = re.sub(r'[ـ]', '', t[:3000]); m = re.search(r'برئاس[ةه]', h)
+    h = re.sub(r'[ـ\t]', ' ', t[:3000]); m = re.search(r'برئاس[ةه]', h)
     if not m: return None
-    seg = h[m.end():m.end() + 500]; s = STOP.search(seg); seg = seg[:s.start()] if s else seg
+    seg = h[m.end():m.end() + 900]; s = re.search(r'وحضور|بحضور|أمين\s+(?:ال)?سر|امين\s+(?:ال)?سر|النياب[ةه]|المرفوع|في\s+الطعن', seg); seg = seg[:s.start()] if s else seg
     pres, _, mem = seg.partition('وعضوية')
-    clean = lambda x: re.sub(r'\s+', ' ', TITLE.sub(' ', x)).strip(' ،,.')
-    p = clean(pres); ms = [clean(x) for x in re.split(r'،|,|\s+و\s+|\s+و(?=\s*(?:السيد|المستشار|الأستاذ))', mem)]
-    ms = [x for x in ms if 2 <= len(x.split()) <= 6]
-    if not p or not 2 <= len(p.split()) <= 6: return None
-    return {'president': p, 'members': ms}
-out = []; why = collections.Counter(); kinds = collections.Counter(); rev = []
+    p = _names(pres); ms = _names(mem)
+    if len(p) != 1: return None
+    return {'president': p[0], 'members': ms}
+out = []; why = collections.Counter(); kinds = collections.Counter(); rev = []; fpc = collections.Counter()
 for r in kept:
     if CIRC and r.get('circuit') != CIRC: why['دائرة أخرى'] += 1; continue
     pn = names.get(r['id'], [])
@@ -63,7 +76,9 @@ for r in kept:
         if PV.verdict(f) == 'block':
             why['استُبعد لبيان شخصي'] += 1
             for y in f:
-                if y['level'] == 'block': kinds[y['kind']] += 1
+                if y['level'] == 'block':
+                    kinds[y['kind']] += 1
+                    if y['kind'] == 'name' and all(DF[w] >= 3 for w in y['match'].split()): fpc[y['match']] += 1   # زوج من كلمات شائعة: غالبًا ليس اسمًا
             continue
         rules.append({'t': x['t'], **({'review': [y['kind'] for y in f]} if f else {})})
     if not rules: continue
@@ -88,7 +103,7 @@ open(os.path.join(outd, 'review.html'), 'w', encoding='utf-8').write('<!doctype 
 ex = collections.Counter(e['why'] for e in exc)
 log = [f'ملفات: {len(docs)} · حُوّل إلى نص: {nconv}', f'أحكام وقرارات صالحة بعد الاختيار: {len(kept)}', f'أحكام لها مبادئ مجازة: {len(out)} · مبادئ مجازة: {len(allr)}',
        f'هيئة المحكمة مستخرجة في: {sum(1 for d in out if d["panel"])} من {len(out)}', 'الاستبعاد على مستوى الحكم:'] + [f'  {k}: {v}' for k, v in ex.most_common()] + \
-      ['الاستبعاد على مستوى المبدأ:'] + [f'  {k}: {v}' for k, v in why.most_common()] + ['أنواع العلامات المانعة:'] + [f'  {k}: {v}' for k, v in kinds.most_common()] + \
+      ['الاستبعاد على مستوى المبدأ:'] + [f'  {k}: {v}' for k, v in why.most_common()] + ['أنواع العلامات المانعة:'] + [f'  {k}: {v}' for k, v in kinds.most_common()] + ['أزواج شائعة عُدّت أسماء (للتحقق من الإنذار الكاذب):'] + [f'  {k}: {v}' for k, v in fpc.most_common(25)] + \
       ['', 'parse26: ' + r1.stdout.strip().replace('\n', ' | '), 'select26: ' + r2.stdout.strip().replace('\n', ' | ')] + ([('stderr: ' + r1.stderr[-500:])] if r1.returncode else [])
 open(os.path.join(outd, 'log.txt'), 'w', encoding='utf-8').write('\n'.join(log) + '\n')
 print('\n'.join(log))
