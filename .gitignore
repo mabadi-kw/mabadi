@@ -1,2 +1,3 @@
 tools/fix/contrib/
 __pycache__/
+tools/index/index_full.json

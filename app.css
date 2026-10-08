@@ -1031,3 +1031,21 @@ mark.dif{background:var(--gold-soft);color:inherit;border-radius:3px;box-shadow:
 .syncdot.badge i{width:11px;height:11px;box-shadow:0 0 0 2px var(--navy)}
 
 .pgwd{display:grid;place-items:center;min-height:180px;background:var(--bg2);color:var(--muted);font-size:.9rem;text-align:center;padding:16px;border-radius:10px}
+
+/* الفهرس الموحّد */
+.ixbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.ixbar .flt{flex:1;min-width:200px;margin:0}
+.ixabc{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0}
+.ixabc button{width:36px;height:36px;border-radius:9px;border:1px solid var(--rule);background:var(--sheet);font-family:var(--f-ui);font-size:1rem;cursor:pointer}
+.ixabc button[aria-pressed="true"]{background:var(--gold);border-color:var(--gold);color:var(--navy);font-weight:700}
+.ixabc button:disabled{opacity:.3;cursor:default}
+.ixgrid{display:grid;grid-template-columns:300px minmax(0,1fr);gap:14px;align-items:start}
+@media (max-width:760px){.ixgrid{grid-template-columns:1fr}}
+.ixk{padding:6px;display:flex;flex-direction:column;gap:2px;max-height:70vh;overflow:auto}
+.ixr{display:flex;justify-content:space-between;gap:8px;align-items:center;border:0;background:none;text-align:start;padding:9px 12px;border-radius:10px;cursor:pointer;font:inherit;color:var(--ink)}
+.ixr:hover{background:var(--bg)}.ixr.on{background:var(--navy);color:#fff}.ixr.on .muted{color:#c9d4e6}
+.ixr .n,.ixs .n{color:var(--muted);font-size:.85rem;margin-inline-start:auto;padding-inline-start:10px}.ixr.on .n{color:#dfe8f7}
+.ixs{padding:16px 18px}.ixh{display:flex;flex-wrap:wrap;align-items:baseline;gap:10px;margin-bottom:10px}.ixh h3{margin:0;font-family:var(--f-title);font-size:1.5rem;color:var(--navy2)}.ixh small{flex-basis:100%}
+.ixs .tree details{margin:2px 0}.ixs .tree summary{display:flex;cursor:pointer;padding:8px 10px;border-radius:9px;background:var(--bg)}
+.ixs .tree .leaf{display:flex;width:100%;border:0;background:none;text-align:start;padding:7px 10px 7px 10px;padding-inline-start:22px;cursor:pointer;font:inherit;color:var(--blue);border-radius:8px}
+.ixs .tree .leaf:hover{background:var(--blue-soft)}
