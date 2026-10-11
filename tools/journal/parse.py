@@ -15,10 +15,10 @@ import re, sys, json, os
 
 RE_SESS = re.compile(r'^جلسة\s+(\d{1,2})\s*/\s*(\d{1,2})\s*/\s*(\d{4})\s*م?\s*$')
 RE_COURT = re.compile(r'^محكمة التمييز\s*$')
-RE_CH = re.compile(r'^(?:ال)?دائرة\s+(.+?)\s*$')
+RE_CH = re.compile(r'^(?:ال)?دائـ*رة\s+(.+?)\s*$')
 RE_NUM = re.compile(r'^\(\s*(\d+)\s*\)\s*$')
-RE_CIT = re.compile(r'^\(\s*(?:ال)?طع(?:ن|نان|نين|ون)\b.*\)\s*$')
-RE_CIT_OPEN = re.compile(r'^\(\s*(?:ال)?طع(?:ن|نان|نين|ون)\b')
+RE_CIT = re.compile(r'^\(\s*(?:ال)?طع(?:ن|نان|نين|ون|ان)\b.*\)\s*$')
+RE_CIT_OPEN = re.compile(r'^\(\s*(?:ال)?طع(?:ن|نان|نين|ون|ان)\b')
 RE_K = re.compile(r'^(\d{1,2})\s*[-–ـ]\s*(.*)$')
 RE_BUL = re.compile(r'^[-–]\s*(.*)$')
 RE_FULL = re.compile(r'^(?:المحكمـ*ة|المحكمة\s*[:.]?)\s*$')
@@ -93,6 +93,9 @@ def parse_file(path):
             if phase in (None, 'head'):
                 phase = 'head'
                 cur['heads'].append({'k': k, 'title': body, 'sum': []})
+            elif cur['texts'] and (k <= cur['texts'][-1]['k'] or (k > max(h['k'] for h in cur['heads']) and cur['texts'][-1]['k'] >= max(h['k'] for h in cur['heads']))):
+                # بند مرقّم داخل نص القاعدة (فقرات نص منقول): تتمة لا قاعدة جديدة
+                cur['texts'][-1]['paras'].append(t)
             else:
                 cur['texts'].append({'k': k, 'paras': [body] if body else []})
             i += 1
@@ -100,6 +103,10 @@ def parse_file(path):
         m = RE_BUL.match(t)
         if m and phase == 'head' and cur['heads']:
             cur['heads'][-1]['sum'].append(m.group(1).strip()); i += 1; continue
+        # عنوان أول بلا شرطة بعد رقمه («1 أحوال شخصية …»)
+        m = re.match(r'^(\d{1,2})\s+(\D.*)$', t)
+        if m and phase == 'head' and not cur['heads']:
+            cur['heads'].append({'k': int(m.group(1)), 'title': m.group(2).strip(), 'sum': []}); i += 1; continue
         # سطر بلا علامة: تتمة
         if phase == 'text' and cur['texts']:
             cur['texts'][-1]['paras'].append(t)

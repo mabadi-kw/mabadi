@@ -149,7 +149,9 @@ def build(J, out):
                     n += 1
                     rv = []
                     t = texts.get(h['k'])
-                    if t is None or len(texts) != len(r['texts']) or [x['k'] for x in r['texts']] != list(range(1, len(r['texts']) + 1)):
+                    _tk = [x['k'] for x in r['texts']]
+                    by_k = len(set(_tk)) == len(_tk) and set(_tk) <= {x['k'] for x in r['heads']} and len({x['k'] for x in r['heads']}) == len(r['heads'])
+                    if not by_k and (t is None or len(texts) != len(r['texts']) or _tk != list(range(1, len(r['texts']) + 1))):
                         # ترقيم مضطرب في المصدر: المطابقة بالترتيب
                         t = seq_texts[hi] if hi < len(seq_texts) else None
                         if t is not None and t['k'] != h['k']: rv.append(f'رقم نص القاعدة في المصدر ({t["k"]}) يخالف رقم العنوان ({h["k"]})؛ طوبقا بالترتيب')

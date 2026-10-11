@@ -20,9 +20,16 @@ def nz(t):
 
 
 def to_pdf(doc):
-    out = os.path.join(PDFDIR, os.path.splitext(os.path.basename(doc))[0] + '.pdf')
+    # اسم PDF من المسار النسبي كاملًا (أسماء الملفات تتكرر بين السنوات والأجزاء)
+    key = re.sub(r'[\\/]+', '__', os.path.splitext(os.path.relpath(doc, SRC))[0])
+    out = os.path.join(PDFDIR, key + '.pdf')
     if not os.path.exists(out):
-        subprocess.run(['soffice', '-env:UserInstallation=file:///tmp/lo_pages', '--headless', '--convert-to', 'pdf', '--outdir', PDFDIR, doc], capture_output=True, timeout=600)
+        tmpd = tempfile.mkdtemp(dir=PDFDIR)
+        prof = 'file:///tmp/lo_pages_' + str(os.getpid())
+        subprocess.run(['soffice', '-env:UserInstallation=' + prof, '--headless', '--convert-to', 'pdf', '--outdir', tmpd, doc], capture_output=True, timeout=600)
+        got = os.path.join(tmpd, os.path.splitext(os.path.basename(doc))[0] + '.pdf')
+        if os.path.exists(got): os.replace(got, out)
+        if not os.listdir(tmpd): os.rmdir(tmpd)
     return out
 
 
@@ -158,7 +165,7 @@ def main():
             pages = pdf_lines(pdf)
             FL = flat(pages)
             its = [it for it in items if it['src']['file'] == f]
-            ruls = [r for r in rulings if r['file'] == f]
+            ruls = sorted([r for r in rulings if r['file'] == f], key=lambda r: r['line'])   # بترتيب ورودها في الملف (الأقسام قد تتداخل في الملف الواحد)
             loc = locate(its, ruls, FL)
             first = gpage + 1
             for pi, p in enumerate(pages, 1):

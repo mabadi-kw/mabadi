@@ -9,9 +9,10 @@
 يبدأ كل حكم عند سطر «محكمة التمييز» (لا عند رقمه، لأن الرقم قد يغيب). لا يُغيَّر حرف من النص.
 """
 import re, sys, json, os
-RE_SESS = re.compile(r'^جلسة\s+(\d{1,2})\s*/\s*(\d{1,2})\s*/\s*(\d{4})\s*م?\s*$')
+RE_SESS = re.compile(r'^جلسة\s*(\d{1,2})\s*/\s*(\d{1,2})\s*/\s*(\d{4})\s*م?\s*$')
 RE_NUM = re.compile(r'^\(\s*(\d+)\s*\)$')
-RE_CIT_OPEN = re.compile(r'^\(\s*(?:ال)?طع(?:ن|نان|نين|ون)\b')
+RE_CIT_OPEN = re.compile(r'^\(\s*(?:ال)?طع(?:ن|نان|نين|ون|ان)\b')
+RE_CIT_BARE = re.compile(r'^(?:ال)?طع(?:ن|نان|نين|ون)\s+(?:(?:رقم|رقما|أرقام|ارقام)\s*:?\s*)?\d')
 RE_K = re.compile(r'^(\d{1,2})\s*[-–ـ]\s*(.*)$')
 RE_BUL = re.compile(r'^[-–]\s*(.*)$')
 RE_FULL = re.compile(r'^["“”]?\s*ال[ـ\s]*م[ـ\s]*ح[ـ\s]*ك[ـ\s]*م[ـ\s]*ة\s*["“”]?\s*[:.]?$')
@@ -43,6 +44,8 @@ def parse_file(path):
                 m = RE_SESS.match(u.translate(DIG))
                 if m and not cur['sess']:
                     cur['sess'] = f"{int(m.group(3)):04d}-{int(m.group(2)):02d}-{int(m.group(1)):02d}"; cur['sess_raw'] = u; i += 1; continue
+                if not cur['sess'] and re.match(r'^جلسة\s*[\d٠-٩]', u):
+                    cur['sess_raw'] = u; cur['issues'].append(f'تاريخ الجلسة في المصدر غير صالح: {u}'); i += 1; break
                 if not cur['sess'] and not RE_K.match(u): chl.append(u); i += 1; continue
                 break
             cur['ch'] = ' '.join(chl) or None
@@ -51,9 +54,9 @@ def parse_file(path):
         if phase == 'hdr':
             m = RE_NUM.match(t.translate(DIG))
             if m and cur['n'] is None: cur['n'] = int(m.group(1)); i += 1; continue
-            if cur['cit'] is None and RE_CIT_OPEN.match(t):
+            if cur['cit'] is None and (RE_CIT_OPEN.match(t) or RE_CIT_BARE.match(t)):
                 c = t
-                while not c.rstrip().endswith(')') and i + 1 < N and lines[i + 1]:
+                while c.startswith('(') and not c.rstrip().endswith(')') and i + 1 < N and lines[i + 1]:
                     i += 1; c += ' ' + lines[i]
                 cur['cit'] = c; i += 1; continue
             if not RE_K.match(t):
@@ -62,6 +65,13 @@ def parse_file(path):
         if (RE_FULL.match(t) or RE_FULL2.match(t)) and phase in ('text', 'head') and cur['texts' if phase == 'text' else 'heads']:
             phase = 'full'; cur['full'] = []; i += 1; continue
         if phase == 'full':
+            # حكم تالٍ تحت رأس الجلسة نفسه (بلا «محكمة التمييز» جديدة): رقمه وحده في سطر ويلي الحكم السابق مباشرة
+            m = RE_NUM.match(t.translate(DIG))
+            if m and cur['n'] is not None and int(m.group(1)) == cur['n'] + 1:
+                prev = cur
+                cur = {'n': int(m.group(1)), 'ch': prev['ch'], 'sess': prev['sess'], 'sess_raw': prev['sess_raw'], 'panel': list(prev['panel']), 'cit': None, 'heads': [], 'texts': [], 'issues': [],
+                       'line': i + 1, 'part_sec': prev.get('part_sec'), 'full': None, 'shared_hdr': True}
+                out.append(cur); phase = 'hdr'; i += 1; continue
             cur['full'].append(t); i += 1; continue
         m = RE_K.match(t)
         if m:
@@ -79,7 +89,9 @@ def parse_file(path):
         m = RE_BUL.match(t)
         if m and phase == 'head' and cur['heads']:
             cur['heads'][-1]['sum'].append(m.group(1).strip()); i += 1; continue
-        if phase == 'text' and cur['texts']:
+        if phase == 'text' and cur['texts'] and RE_CIT_OPEN.match(t) and re.search(r'جلسة\s*\d', t.translate(DIG)) and t.rstrip().endswith(')'):
+            cur['cit_end'] = t   # سطر الإسناد بعد آخر قاعدة: ليس من نصها
+        elif phase == 'text' and cur['texts']:
             cur['texts'][-1]['paras'].append(t)
         elif phase == 'head' and cur['heads']:
             if cur['heads'][-1]['sum']: cur['heads'][-1]['sum'][-1] += ' ' + t

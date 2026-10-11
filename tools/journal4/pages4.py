@@ -20,9 +20,16 @@ def nz(t):
 
 
 def to_pdf(doc):
-    out = os.path.join(PDFDIR, os.path.splitext(os.path.basename(doc))[0] + '.pdf')
+    # اسم PDF من المسار النسبي كاملًا (أسماء الملفات تتكرر بين السنوات والأجزاء)
+    key = re.sub(r'[\\/]+', '__', os.path.splitext(os.path.relpath(doc, SRC))[0])
+    out = os.path.join(PDFDIR, key + '.pdf')
     if not os.path.exists(out):
-        subprocess.run(['soffice', '-env:UserInstallation=file:///tmp/lo_pages', '--headless', '--convert-to', 'pdf', '--outdir', PDFDIR, doc], capture_output=True, timeout=600)
+        tmpd = tempfile.mkdtemp(dir=PDFDIR)
+        prof = 'file:///tmp/lo_pages_' + str(os.getpid())
+        subprocess.run(['soffice', '-env:UserInstallation=' + prof, '--headless', '--convert-to', 'pdf', '--outdir', tmpd, doc], capture_output=True, timeout=600)
+        got = os.path.join(tmpd, os.path.splitext(os.path.basename(doc))[0] + '.pdf')
+        if os.path.exists(got): os.replace(got, out)
+        if not os.listdir(tmpd): os.rmdir(tmpd)
     return out
 
 
@@ -132,7 +139,7 @@ def locate(items, rulings, FL):
             else:
                 nxt = tails[i + 1] if i + 1 < len(tails) and tails[i + 1] else None
                 if nxt is None:
-                    nxt = find_from(FL, t + 1, lambda e: e[2]['t'].strip().startswith('محكمة التمييز') or e[2]['t'].strip().strip('() ').isdigit() or re.fullmatch(r'المحكمـ*ة\s*[:.]?', e[2]['t'].strip()) is not None, 400)
+                    nxt = find_from(FL, t + 1, lambda e: e[2]['t'].strip().startswith('محكمة التمييز') or e[2]['t'].strip().strip('() ').isdigit() or re.fullmatch(r'["“”]?\s*المحكمـ*ة\s*["“”]?\s*[:.]?', e[2]['t'].strip()) is not None, 400)
                 end = (nxt - 1) if nxt else t
             res[it['id']] = (h, (heads[i + 1] - 1) if i + 1 < len(heads) and heads[i + 1] else h, t, end)
     return res
@@ -175,7 +182,7 @@ def main():
             pages = pdf_lines(pdf)
             FL = flat(pages)
             its = [it for it in items if it['src']['file'] == f]
-            ruls = [r for r in rulings if r['file'] == f]
+            ruls = sorted([r for r in rulings if r['file'] == f], key=lambda r: r['line'])   # بترتيب ورودها في الملف (الأقسام قد تتداخل في الملف الواحد)
             loc = locate_msa(its, FL) if code.startswith('MS') else locate(its, ruls, FL)
             first = gpage + 1
             for pi, p in enumerate(pages, 1):
