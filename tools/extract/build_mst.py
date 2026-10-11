@@ -36,7 +36,7 @@ G = collections.OrderedDict()
 for d in A:
     for x in d['rules']:
         key = ' '.join(nz(x['t']))
-        G.setdefault(key, {'t': x['t'], 'cits': []})['cits'].append(d)
+        G.setdefault(key, {'t': x['t'], 'cits': []})['cits'].append({**d, '_app': x.get('app')})
 KL = {'مشورة': 'قرار غرفة المشورة', 'فحص': 'قرار لجنة فحص الطعون'}
 def cite(d):
     ap = d['appeal']; dd = datetime.date.fromisoformat(d['date'])
@@ -47,6 +47,7 @@ def cite(d):
     o = {'raw': raw, 'chamber': d['circuit'], 'appeals': [{'number': n, 'year': y} for n, y in ap], 'session': d['date'],
          'ruling_key': '+'.join(f'{n}/{y}' for n, y in ap) + '@' + d['date'], 'decision': d['kind']}
     if d.get('panel'): o['panel'] = d['panel']
+    if d.get('_app'): o['application'] = d['_app']   # «التطبيق في الحكم» لهذا الحكم
     return o
 items = []; nov = 0; seq = 0
 for key, g in G.items():

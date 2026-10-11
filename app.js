@@ -799,7 +799,7 @@ function card(p,re,o={}){
     ${p.ttl?`<div class="ttl">${hl(p.ttl,re)}</div>`:''}<div class="text">${h.join('')}</div>
     ${p.rule===undefined&&p.rx!==undefined?`<details class="rule" data-rx="${p.id}"${o.open?' open':''}><summary>القاعدة — نص الحكم</summary><div class="text">جارٍ التحميل…</div></details>`:''}
     ${p.rule?`<details class="rule"${o.open||(re&&(re.lastIndex=0,re.test(p.rule)))?' open':''}><summary>القاعدة — نص الحكم</summary><div class="text">${hl(p.rule,re)}</div></details>`:''}
-    ${p.mst&&p.c[0]&&p.c[0].panel?`<div class="fn">الهيئة: ${esc(p.c[0].panel.president)}${p.c[0].panel.members.length?' — '+esc(p.c[0].panel.members.join('، ')):''}</div>`:''}${p.mst&&p.mst.same?`<div class="fn">المبدأ نفسه في المكتبة: <button class="linkbtn" data-go="#/p/${esc(p.mst.same)}">${esc(p.mst.same)}</button></div>`:''}
+    ${p.mst&&p.c[0]&&p.c[0].panel?`<div class="fn">الهيئة: ${esc(p.c[0].panel.president)}${p.c[0].panel.members.length?' — '+esc(p.c[0].panel.members.join('، ')):''}</div>`:''}${p.mst&&p.c.some(c=>c.app)?`<details class="rule mstapp"><summary>التطبيق في الحكم${p.c.filter(c=>c.app).length>1?' ('+p.c.filter(c=>c.app).length+')':''}</summary>${p.c.filter(c=>c.app).map(c=>`<div class="text">${hl(c.app,re)}<div class="fn">${esc(c.raw)}</div></div>`).join('')}</details>`:''}${p.mst&&p.mst.same?`<div class="fn">المبدأ نفسه في المكتبة: <button class="linkbtn" data-go="#/p/${esc(p.mst.same)}">${esc(p.mst.same)}</button></div>`:''}
     ${p.fn.length?`<div class="fn">${p.fn.map(esc).join('<br>')}</div>`:''}${p.sa.length?`<div class="sa">${p.sa.map(esc).join('<br>')}</div>`:''}
     ${also}<div class="meta">${meta}</div>
     <div class="acts no-print">
@@ -1095,7 +1095,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202610081749';
+const APP_BUILD='202610111140';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
@@ -1363,7 +1363,7 @@ async function mstOpen(buf,pass,remember){const b=new Uint8Array(buf);if(String.
 function mstIngest(pk){const add=[];for(const it of pk.items){if(BYID[it.id]||WD.has(it.id))continue;const col=it.source;
     if(!COLS[col]){const y='20'+col.slice(-2);COLS[col]={name:'المستخلص '+y,title:'مستخلص مبادئ التمييز '+y+' — غير رسمي',n:0,unpub:true,extract:true};ORDER.push(col);}
     COLS[col].n++;
-    add.push({id:it.id,col,n:it.number,np:it.number,sec:[it.branches.join('، ')],p:it.paragraphs,c:it.citations.map(c=>({raw:c.raw,ch:c.chamber,k:c.ruling_key,panel:c.panel})),
+    add.push({id:it.id,col,n:it.number,np:it.number,sec:[it.branches.join('، ')],p:it.paragraphs,c:it.citations.map(c=>({raw:c.raw,ch:c.chamber,k:c.ruling_key,panel:c.panel,app:c.application})),
       cp:[],sa:[],fn:[],pg:[],rg:[],rv:[],rel:it.same_as?[it.same_as]:[],tp:[],lw:[],src:{},mst:{novel:it.novel,same:it.same_as||null},_ix:(it.index||[]).map(x=>x.key)});}
   if(!add.length)return 0;ingestBase(add);countIn(add);artIn(add);
   const ixAdd=()=>{if(!IX)return;add.forEach(p=>{const ns=p._ix.map(k=>IX.ki[k]).filter(i=>i!==undefined);if(ns.length){IX.a[p.id]=ns;ns.forEach(i=>IX.by[i].push(p.id));}});};

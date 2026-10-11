@@ -102,7 +102,7 @@ async function decrypt(buf,pass){const b=new Uint8Array(buf);if(String.fromCharC
 const hex=async b=>[...new Uint8Array(await crypto.subtle.digest('SHA-256',b))].map(x=>x.toString(16).padStart(2,'0')).join('');
 $('go').onclick=async()=>{$('go').disabled=true;$('log').textContent='';$('out').innerHTML='';
   log('الفحص: محرك الخصوصية على نص كل مبدأ…');const bad=[];
-  for(const it of PLAIN.items)for(const t of it.paragraphs){const f=scan(t).filter(x=>x.level==='block');if(f.length)bad.push(it.id+' · '+f.map(x=>x.kind).join('، '));}
+  for(const it of PLAIN.items)for(const t of [...it.paragraphs,...(it.citations||[]).map(c=>c.application||'').filter(Boolean)]){const f=scan(t).filter(x=>x.level==='block');if(f.length)bad.push(it.id+' · '+f.map(x=>x.kind).join('، '));}
   if(bad.length){log('توقف التشفير: '+bad.length+' مبدأ فيه علامة بيان شخصي:\n'+bad.join('\n'));log('أرسل هذه المعرّفات إلى المكتبة، ولا تنشر شيئًا.');return;}
   log('الفحص: لا علامات. ✓');
   const groups={};for(const it of PLAIN.items)for(const b of it.branches)(groups[BR[b]||'other']=groups[BR[b]||'other']||[]).push(it);

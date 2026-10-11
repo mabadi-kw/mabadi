@@ -151,6 +151,28 @@ def parse_one(t,circ_dir,fname):
 START=re.compile(r'(?:^|[\s،,؛;:(\-–])((?:و?من\s+)?(?:ال)?مقرر(?![ةًاىهـ])(?=\s*(?:[،,\-–—]|في\s+قضاء|أن|ان|إن|طبقا|طبقاً|وفقا|وفقاً|قانونا|قانوناً|بنص|بمقتضى|بحكم|على\s+ما)))')
 APPL=re.compile(r'\s(?:لما\s+كان\s+ذلك|ولما\s+كان\s+ذلك|لما\s+كان\s+الثابت|ولما\s+كان\s+الثابت|وكان\s+الثابت|وكان\s+الحكم|لما\s+كان\s+الحكم|ولما\s+كان\s+الحكم|وكان\s+البين|وكان\s+الواقع|وكان\s+المطعون|وكان\s+الطاعن|وكان\s+ذلك|وكان\s+النزاع|ولما\s+كان\s+النزاع|وبما\s+أن|وإذ\s+|وحيث\s+إن\s+الحكم|وحيث\s+إنه\s+لما)')
 def open_quote(x): return x.count('"')%2==1 or x.count('“')>x.count('”')
+NEXTG=re.compile(r'^\s*(?:و?حيث\s+إن|و?حيث\s+ان|وعن\s+الدفع|وعن\s+السبب|و?بالنسبة|فلهذه\s+الأسباب)')
+def rules_app(main):
+    """مثل rules() ومعها «التطبيق في الحكم»: بقية الفقرة بعد موضع القطع، أو الفقرة التالية إن بدأت بتطبيق، حتى بدء سبب جديد."""
+    paras=[p.strip() for p in main.split('\n') if p.strip()]
+    out=[];i=0
+    while i<len(paras):
+        p=paras[i]; m=START.search(p)
+        if not m or len(p)<60: i+=1; continue
+        sub=p[m.start(1):]; j=i
+        while (sub.rstrip().endswith(':') or open_quote(sub)) and j+1<len(paras) and j-i<4:
+            j+=1; sub=sub+'\n'+paras[j]
+        a=APPL.search(sub,40); app=''
+        if a: rule=sub[:a.start()].strip(); whole=False; app=sub[a.start():].strip()
+        else:
+            rule=sub.strip(); whole=True
+            if j+1<len(paras) and APPL.match(' '+paras[j+1]) and not START.search(paras[j+1][:40]): app=paras[j+1].strip(); j+=1
+        k=j
+        while app and k+1<len(paras) and not NEXTG.match(paras[k+1]) and not START.search(paras[k+1][:60]) and len(app)<2500 and not app.rstrip().endswith(('أساس.','أساس','غير مقبول.','قبوله.','رفضه.')):
+            k+=1; app=app+'\n'+paras[k]
+        if len(rule)>=50: out.append((rule,whole,len(p),app if 40<=len(app)<=3000 else ''))
+        i=max(j,k if app else j)+1
+    return out
 def rules(main):
     paras=[p.strip() for p in main.split('\n') if p.strip()]
     out=[];i=0

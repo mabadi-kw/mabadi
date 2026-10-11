@@ -39,6 +39,7 @@ kept = json.load(open(os.path.join(work, 'kept.json'), encoding='utf-8'))
 exc = json.load(open(os.path.join(work, 'excluded.json'), encoding='utf-8'))
 names = json.load(open(os.path.join(work, 'names.json'), encoding='utf-8'))
 # 3) الخصوصية
+GOV = re.compile(r'وزار[ةه]|وزير|هيئ[ةه]\s+عام|الهيئ[ةه]\s+العام|بلدي[ةه]\s+الكويت|المؤسس[ةه]\s+العام|مؤسس[ةه]\s+عام|ديوان|الإدار[ةه]\s+العام|الادار[ةه]\s+العام|الدول[ةه]|مجلس\s+الوزراء|الجهاز\s+المركزي|بنك\s+الكويت\s+المركزي|النياب[ةه]|جامع[ةه]\s+الكويت|الهيئ[ةه]\s+العام[ةه]|الحكوم[ةه]|محافظ[ةه]|الجيش|الشرط[ةه]|الحرس\s+الوطني|المجلس\s+البلدي|سوق\s+الكويت|هيئ[ةه]\s+أسواق|المؤسس[ةه]\s+العام[ةه]\s+للتأمينات|التأمينات\s+الاجتماعي[ةه]')
 ORG = re.compile(r'شرك[ةه]|وزار[ةه]|بنك|مؤسس[ةه]|هيئ[ةه]|بلدي[ةه]|جامع[ةه]|نادي|مكتب|مصرف|جمعي[ةه]|ديوان|إدار[ةه]|ادار[ةه]|مجلس|الكويت|الدول[ةه]|مركز|مستشفى|اتحاد|صندوق|معهد|مدرس[ةه]|كلي[ةه]|ورث[ةه]|بصفت')
 # كلمة تتكرر في نصوص مبادئ ثلاثة أحكام مختلفة فأكثر مصطلح لا اسم؛ فلا تدخل المعجم المحلي
 DF = collections.Counter()
@@ -69,7 +70,7 @@ def panel(t):
 out = []; why = collections.Counter(); kinds = collections.Counter(); rev = []; fpc = collections.Counter()
 for r in kept:
     if CIRC and r.get('circuit') != CIRC: why['دائرة أخرى'] += 1; continue
-    pn = names.get(r['id'], [])
+    pn = [n for n in names.get(r['id'], []) if not GOV.search(n)]   # الجهات الحكومية تبقى بأسمائها (قرار المستخدم 11/10)
     rules = []
     for x in r['rules']:
         f = PV.scan(x['t'], pn)
@@ -80,7 +81,12 @@ for r in kept:
                     kinds[y['kind']] += 1
                     if y['kind'] == 'name' and all(DF[w] >= 3 for w in y['match'].split()): fpc[y['match']] += 1   # زوج من كلمات شائعة: غالبًا ليس اسمًا
             continue
-        rules.append({'t': x['t'], **({'review': [y['kind'] for y in f]} if f else {})})
+        app = x.get('app') or ''
+        if app:
+            fa = PV.scan(app, pn)
+            if PV.verdict(fa) == 'block': why['حُذف التطبيق لبيان شخصي (بقي المبدأ)'] += 1; app = ''
+            elif fa: f = f + fa
+        rules.append({'t': x['t'], **({'app': app} if app else {}), **({'review': [y['kind'] for y in f]} if f else {})})
     if not rules: continue
     t = open(os.path.join(tx2, r['id'] + '.txt'), encoding='utf-8').read()
     out.append({'appeal': r['appeal']['pairs'], 'circuit': r.get('circuit'), 'cno': r.get('cno'), 'date': r['date'], 'kind': r['kind'],
@@ -96,12 +102,12 @@ for k, (i, j) in enumerate(sorted(samp), 1):
     pnl = d['panel']; ptxt = (pnl['president'] + (' — ' + '، '.join(pnl['members']) if pnl['members'] else '')) if pnl else 'لم تُستخرج'
     cards.append(f'<article><header><b>{k}</b> الطعن {html.escape(ap)} {html.escape(d["circuit"] or "")} — جلسة {html.escape(d["date"] or "")}'
                  f'{" — " + html.escape(d["kind"]) if d["kind"] != "حكم" else ""}{" <mark>مراجعة: " + html.escape("، ".join(x["review"])) + "</mark>" if x.get("review") else ""}</header>'
-                 f'<p>{html.escape(x["t"])}</p><footer>الهيئة: {html.escape(ptxt)}</footer>'
+                 f'<p>{html.escape(x["t"])}</p>' + (f'<p style="background:#f8f6f0;border-right:3px solid #b8923a;padding:6px 10px;font-size:.95rem"><b>التطبيق في الحكم:</b> {html.escape(x["app"])}</p>' if x.get("app") else '') + f'<footer>الهيئة: {html.escape(ptxt)}</footer>'
                  f'<label><input type="checkbox"> فيه اسم أو بيان شخصي</label> <label><input type="checkbox"> القطع غير صحيح</label></article>')
 open(os.path.join(outd, 'review.html'), 'w', encoding='utf-8').write('<!doctype html><html lang="ar" dir="rtl"><meta charset="utf-8"><title>مراجعة المستخلص</title><style>body{font-family:Tahoma,Arial;max-width:900px;margin:20px auto;padding:0 16px;line-height:1.9;background:#f4f1ea}article{background:#fff;border:1px solid #ddd;border-radius:10px;padding:12px 16px;margin:12px 0}header{color:#12325e;font-size:.9rem}footer{color:#666;font-size:.85rem}mark{background:#ffe58a}label{font-size:.85rem;margin-inline-end:12px}</style>'
-    f'<h1>مراجعة المستخلص — عيّنة {len(samp)} من {len(allr)} مبدأ</h1><p>اقرأ كل مبدأ؛ علّم ما فيه اسم أو بيان شخصي، أو ما قُطع في غير موضعه. هذا الملف على جهازك وحده.</p>' + ''.join(cards) + '</html>')
+    f'<h1>مراجعة المستخلص — عيّنة {len(samp)} من {len(allr)} مبدأ</h1><p>اقرأ كل مبدأ وتطبيقه؛ علّم ما فيه اسم شخص (غير القضاة والجهات الحكومية)، أو واقعة تدل على شخص بعينه، أو مبدأ قُطع في غير موضعه. هذا الملف على جهازك وحده.</p>' + ''.join(cards) + '</html>')
 ex = collections.Counter(e['why'] for e in exc)
-log = [f'ملفات: {len(docs)} · حُوّل إلى نص: {nconv}', f'أحكام وقرارات صالحة بعد الاختيار: {len(kept)}', f'أحكام لها مبادئ مجازة: {len(out)} · مبادئ مجازة: {len(allr)}',
+log = [f'ملفات: {len(docs)} · حُوّل إلى نص: {nconv}', f'أحكام وقرارات صالحة بعد الاختيار: {len(kept)}', f'أحكام لها مبادئ مجازة: {len(out)} · مبادئ مجازة: {len(allr)} · معها «التطبيق في الحكم»: {sum(1 for d in out for x in d["rules"] if x.get("app"))}',
        f'هيئة المحكمة مستخرجة في: {sum(1 for d in out if d["panel"])} من {len(out)}', 'الاستبعاد على مستوى الحكم:'] + [f'  {k}: {v}' for k, v in ex.most_common()] + \
       ['الاستبعاد على مستوى المبدأ:'] + [f'  {k}: {v}' for k, v in why.most_common()] + ['أنواع العلامات المانعة:'] + [f'  {k}: {v}' for k, v in kinds.most_common()] + ['أزواج شائعة عُدّت أسماء (للتحقق من الإنذار الكاذب):'] + [f'  {k}: {v}' for k, v in fpc.most_common(25)] + \
       ['', 'parse26: ' + r1.stdout.strip().replace('\n', ' | '), 'select26: ' + r2.stdout.strip().replace('\n', ' | ')] + ([('stderr: ' + r1.stderr[-500:])] if r1.returncode else [])

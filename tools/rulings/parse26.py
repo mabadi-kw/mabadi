@@ -142,7 +142,7 @@ def parse(t,relpath):
                 r['flags'].append('اعتُمد رقم المنطوق لمطابقته اسم الملف')
             r['suspect']=True
     vars_={v for v in vars_ if 'الكويت' not in v and 'الخطوط' not in v}
-    rs=P.rules(main); R=[];nred=0
+    rs=P.rules_app(main); R=[];nred=0
     def _deceased(x):
         n=0
         def f(m):
@@ -157,9 +157,12 @@ def parse(t,relpath):
         x=re.sub(r'((?:لل|ل)?(?:ال)?(?:مرحوم[ةه]?)\s*/?\s*)((?:[ء-ي]+|\[…\])(?:\s+(?:[ء-ي]+|\[…\])){0,5})',f,x)
         x=re.sub(r'\[…\](?:\s*\[…\])+','[…]',x)
         return x,n
-    for rule,whole,plen in rs:
+    for rule,whole,plen,app in rs:
         x,c=P.redact(rule,vars_); x,c2=_deceased(x); c+=c2; nred+=c
-        R.append({'t':x,'whole':whole,**({'redacted':c} if c else {})})
+        if app:   # التطبيق: الاستبعاد لا الحجب — إن احتاج إلى حجب اسم طرف لا يُؤخذ
+            y,c3=P.redact(app,vars_); y,c4=_deceased(y)
+            app=app if not (c3 or c4) else ''
+        R.append({'t':x,'whole':whole,**({'redacted':c} if c else {}),**({'app':app} if app else {})})
     PB=set()
     for n in names:
         tk=[w for w in re.findall(r'[ء-ي]+',n)]
