@@ -31,6 +31,8 @@ for c in META['order']:
         for x in p['c']:
             if x.get('k'): RK[x['k']].add(p['id'])
 
+sys.path.insert(0, os.path.join(HERE, '..', 'mustahdath'))
+from run_ms import BOOKS as MSB
 report = json.load(open(os.path.join(ROOT, 'data', 'reports.json'), encoding='utf-8'))
 report = [r for r in report if r['col'] not in CODES]
 touched = collections.defaultdict(set)   # col -> ids whose rel changed
@@ -70,12 +72,14 @@ for code in CODES:
     vol = rc['vol']; year = rc['year']
     if code == 'MSA':
         nm, tt = 'المستحدث الإداري', 'المستحدث في المواد الإدارية — أهم وأحدث المبادئ من 1/4/2016 حتى 31/12/2022'
+    elif code in MSB:
+        nm, tt = MSB[code][0], MSB[code][1]
     else:
         nm, tt = f'المجلة س{vol}', f'مجلة القضاء والقانون — السنة {vol} ({year})'
     META['cols'][code] = {'name': nm, 'title': tt, 'off': 0, 'n': len(items), 'bytes': len(s.encode()),
                           'pw': pg['pw'], 'ph': pg['ph'], 'crop': pg['crop'], 'cell': pg['cell'], 'gp': 20, 'src': 'journal', 'issues': rc['issues'], 'docs': pg['docs']}
     if code not in META['order']:
-        after = 'S' if code == 'MSA' else max([c for c in META['order'] if c.startswith('MQ')] or ['S'])
+        after = 'S' if code == 'MSA' else (META['order'][max(META['order'].index(c) for c in META['order'] if c.startswith('MS') or c == 'S')] if code in MSB else None) or max([c for c in META['order'] if c.startswith('MQ')] or ['S'])
         META['order'].insert(META['order'].index(after) + 1, code)
     # الصفحات ونصوصها
     for sub in ('pages', 'pagetext'):
@@ -86,9 +90,12 @@ for code in CODES:
     # التقرير
     rvc = collections.Counter(r for it in items for r in it['rv'])
     report.append({'col': code, 'title': META['cols'][code]['title'],
-                   'stats': [[len(items), 'مبدأ (عنوان + موجز + قاعدة)'], [rc['rulings'], 'حكمًا'], [len(rc['issues']), 'أجزاء' if code != 'MSA' else 'إصدار'], [pg['pages'], 'صفحة'], [nlink, 'مبدأ مرتبط بحكمه في مجموعة أخرى'], [rc['review'], 'يحتاج مراجعة']],
+                   'stats': [[len(items), 'مبدأ (عنوان + موجز + قاعدة)'], [rc['rulings'], 'حكمًا'], [len(rc['issues']), 'أجزاء' if not code.startswith('MS') else 'إصدار'], [pg['pages'], 'صفحة'], [nlink, 'مبدأ مرتبط بحكمه في مجموعة أخرى'], [rc['review'], 'يحتاج مراجعة']],
                    'method': (['المصدر ملف Word للمستحدث في المواد الإدارية (الإصدارات 13–18، 2024): موضوعات مرتبة هجائيًا، ولكل مبدأ «الموجز» ثم «القاعدة» ثم سطر الإسناد (الطعن وتاريخ الجلسة)، وفي أوله حكم الهيئة العامة بصيغة المجلة.',
                                'الموجز والقاعدة منقولان حرفيًا من الملف، وعنوان المبدأ هو اسم الموضوع الذي ورد تحته.'] if code == 'MSA' else
+                              [f'المصدر ملف Word لكتاب المكتب الفني «{MSB[code][1]}»: موضوعات مرتبة هجائيًا، ولكل مبدأ «الموجز» ثم «القاعدة» ثم سطر الإسناد (الطعن وتاريخ الجلسة)' + ('، وفي أوله حكم الهيئة العامة بصيغة المجلة (نص الحكم الكامل مُجهَّز ولم يُنشر).' if code == 'MS16' else '.'),
+                               'الموجز والقاعدة منقولان حرفيًا من الملف، وعنوان المبدأ هو اسم الموضوع الذي ورد تحته.',
+                               'أخطاء الترقيم والعناوين في الملف (رقم قاعدة يخالف رقم موجزها، أو «القاعدة» مكان «الموجز» والعكس) طوبقت بالموضع: كل موجز تليه قاعدته ثم إسنادها، وفُحصت كلها.'] if code in MSB else
                               ['المصدر ملفات Word لأجزاء السنة الثلاثة (لا قراءة ضوئية)، في كل جزء: أحكام الهيئة العامة، ثم المواد الإدارية، ثم التجارية والمدنية والعمالية والأحوال الشخصية، ثم الجزائية. لكل حكم هيئة المحكمة وتاريخ الجلسة ورقم الحكم وسطر الإسناد، ثم عناوين المبادئ وموجزاتها، ثم نصوص القواعد بالترتيب نفسه، ثم نص الحكم كاملًا.',
                                'العنوان والموجز والقاعدة منقولة حرفيًا من الملف. نص الحكم الكامل مُجهَّز ولم يُنشر.',
                                'حيث غاب رقم الحكم وسطر الإسناد من ملف Word (34 حكمًا في الجزأين الثاني والثالث من 2016)، أُخذت الأرقام من ملف PDF المطبوع بعد مطابقة الأحكام بتاريخ الجلسة وترتيبها (تطابقت كلها)، وعُلِّمت.',

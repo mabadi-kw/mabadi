@@ -91,7 +91,7 @@ def by_name(label, part):
         if ks and len(ks) == 1: return next(iter(ks))
     return None
 for col in meta['order']:
-    if col in ('QK5', 'QJ5') or col.startswith('MQ') or col in ('MSA', 'S'): continue
+    if col in ('QK5', 'QJ5') or col.startswith('MQ') or col.startswith('MS') or col == 'S': continue
     for x in COL[col]:
         if any(v[0] == 'direct' for v in A.get(x['id'], {}).values()): continue
         p = part_of(x)
@@ -104,7 +104,7 @@ for col in meta['order']:
 if os.environ.get('EVAL'):
     tot = ok_top = ok_full = 0; bad = collections.Counter()
     for col in meta['order']:
-        if col in ('QK5', 'QJ5') or col.startswith('MQ') or col in ('MSA', 'S'): continue
+        if col in ('QK5', 'QJ5') or col.startswith('MQ') or col.startswith('MS') or col == 'S': continue
         for x in COL[col]:
             known = {k for k, v in A.get(x['id'], {}).items() if v[0] == 'direct' and v[2] in ('same_text', 'title', 'self')}
             if not known: continue
@@ -129,7 +129,7 @@ def hkey(x):
     return (x['col'],) + tuple(s[:2]) if s else None
 H = collections.defaultdict(list)
 for col in meta['order']:
-    if col in ('QK5', 'QJ5', 'S') or col.startswith('MQ') or col == 'MSA': continue
+    if col in ('QK5', 'QJ5', 'S') or col.startswith('MQ') or col.startswith('MS'): continue
     for x in COL[col]:
         h = hkey(x)
         if h: H[h].append(x['id'])

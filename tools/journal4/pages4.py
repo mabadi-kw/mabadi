@@ -176,7 +176,7 @@ def main():
             FL = flat(pages)
             its = [it for it in items if it['src']['file'] == f]
             ruls = [r for r in rulings if r['file'] == f]
-            loc = locate_msa(its, FL) if code == 'MSA' else locate(its, ruls, FL)
+            loc = locate_msa(its, FL) if code.startswith('MS') else locate(its, ruls, FL)
             first = gpage + 1
             for pi, p in enumerate(pages, 1):
                 gpage += 1
