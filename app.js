@@ -134,6 +134,8 @@ const ORDER=META.order,COLS=META.cols,TL=META.toplab,LL=META.lawlab;
 // صور الصفحات ونصها في مستودع تخزين مستقل على الأصل نفسه (meta.store)؛ وفي غير الموقع المنشور تُقرأ من المجلد المحلي
 try{if('caches' in window)caches.open('mabadi-data').then(c=>c.keys().then(ks=>ks.filter(r=>/\/data\/UN\d\d\.json/.test(r.url)).forEach(r=>c.delete(r))));}catch(_){}
 const STORE=(META.store&&/github\.io$/.test(location.hostname))?META.store:'',PG=u=>STORE+u;
+// صور الصفحات في مستودع مستقل (mabadi-pages) على النطاق نفسه؛ محليًا تُطلب من المسار النسبي
+const IMGB=(META.img&&/github\.io$/.test(location.hostname))?META.img:'',PI=u=>IMGB+u;
 // التحميل على مرحلتين: المجموعات الأساسية تُجهَّز أولًا فتظهر الواجهة، والأحكام غير المنشورة تُنزَّل معها وتُضاف بعد ظهورها
 const LATE=ORDER.filter(c=>COLS[c].unpub),CORE=ORDER.filter(c=>!COLS[c].unpub),COLARR={};
 let LATEDONE=!LATE.length,lateRes;const LATEP=new Promise(r=>lateRes=r);if(LATEDONE)lateRes();
@@ -281,7 +283,7 @@ function amendBanner(L){const ix=LAWBYKEY[L.key]||{},ev=(AMEND.laws||{})[L.key]|
 const artEv=(L,a)=>a.issue||a.bis?[]:((AMEND.arts||{})[L.id+'#'+a.n]||[]);
 function lawPageHTML(col,M,g,reg){const gp=M.gp||20,gc=gp/10,b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
   const box=reg?`<div class="hlbox" style="left:${(reg.bbox[0]-6)/M.pw*100}%;top:${(reg.bbox[1]-4)/M.ph*100}%;width:${(reg.bbox[2]-reg.bbox[0]+12)/M.pw*100}%;height:${(reg.bbox[3]-reg.bbox[1]+8)/M.ph*100}%"></div>`:'';
-  const src=PG(`pages/${col}/g${String(b).padStart(3,'0')}.webp`);return `<figure class="pg"><div class="pgimg" role="img" data-src="${src}" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="${pgCaption(M,g)}" style="aspect-ratio:${M.cell[0]}/${M.cell[1]};background-image:url(pages/${col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>${pgCaption(M,g)}</figcaption></figure>`;}
+  const src=PI(`pages/${col}/g${String(b).padStart(3,'0')}.webp`);return `<figure class="pg"><div class="pgimg" role="img" data-src="${src}" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="${pgCaption(M,g)}" style="aspect-ratio:${M.cell[0]}/${M.cell[1]};background-image:url(${PI('pages/'+col+'/')}g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>${pgCaption(M,g)}</figcaption></figure>`;}
 function lawPagesHTML(a){const L=a.law;return a.pages.map(g=>lawPageHTML(L.pages_col,L.page_meta,g,(a.rg||[]).find(r=>r.page===g))).join('');}
 const LOADMSG='<div class="empty">جارٍ تحميل النص…</div>';
 function viewLaws(){const el=$('v-laws');document.title='التشريعات — مبادئ التمييز';
@@ -1073,7 +1075,7 @@ function pageFig(p,g){if(WDP[p.col]&&WDP[p.col].has(g))return `<figure class="pg
   const reg=p.rg.find(r=>r.page===g);
   const box=reg?`<div class="hlbox" style="left:${((reg.bbox[0]-6)/PW-cr[0])/cw*100}%;top:${((reg.bbox[1]-4)/PH-cr[1])/chh*100}%;width:${(reg.bbox[2]-reg.bbox[0]+12)/PW/cw*100}%;height:${(reg.bbox[3]-reg.bbox[1]+8)/PH/chh*100}%"></div>`:'';
   const gp=C.gp||20,gc=gp/10,b=Math.floor((g-1)/gp),k=(g-1)%gp,cx=k%gc,ry=Math.floor(k/gc);
-  return `<figure class="pg" data-g="${g}"><div class="pgimg" role="img" data-src="${PG(`pages/${p.col}/g${String(b).padStart(3,'0')}.webp`)}" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="صورة الصفحة ${pageNo(p.col,g)}" style="aspect-ratio:${cell[0]}/${cell[1]};background-image:url(pages/${p.col}/g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>${pageCap(p.col,g)}</figcaption></figure><details class="pgtxt" data-id="${p.id}" data-g="${g}"><summary>نص الصفحة المستخرج</summary><div class="ptx">…</div></details>`;}
+  return `<figure class="pg" data-g="${g}"><div class="pgimg" role="img" data-src="${PI(`pages/${p.col}/g${String(b).padStart(3,'0')}.webp`)}" data-gc="${gc}" data-cx="${cx}" data-ry="${ry}" aria-label="صورة الصفحة ${pageNo(p.col,g)}" style="aspect-ratio:${cell[0]}/${cell[1]};background-image:url(${PI('pages/'+p.col+'/')}g${String(b).padStart(3,'0')}.webp);background-size:${gc*100}% 1000%;background-position:${cx*100/(gc-1)}% ${ry*100/9}%">${box}</div><figcaption>${pageCap(p.col,g)}</figcaption></figure><details class="pgtxt" data-id="${p.id}" data-g="${g}"><summary>نص الصفحة المستخرج</summary><div class="ptx">…</div></details>`;}
 // صفحات المبدأ متصلة من أولها إلى آخرها، وزرّان لعرض الصفحة السابقة والتالية (داخل حدود المجموعة أو الملف)
 function pagesHTML(p){if(COLS[p.col].noimg){if(COLS[p.col].unpub)return '<p class="muted pgnote">حكم غير منشور: نص القاعدة كما ورد في الحكم، وحُجبت أسماء الأطراف من الأشخاص والشركات وبقيت الجهات الحكومية والصفات.</p>';const ns=printed(p);return `<p class="muted pgnote">${ns.length?`الصفحة ${ns.join('–')} من الكتاب. `:''}المصدر ملف Word نُقل نصه كما هو، فلا صورة صفحة لهذه المجموعة.</p>`;}
   if(!p.pg.length)return '';const g0=p.pg[0],g1=p.pg[p.pg.length-1],C=COLS[p.col],d=pageDoc(p.col,g0),lo=d?d.first:1,hi=d?d.last:(C.last||1e9);
@@ -1753,7 +1755,7 @@ function offlineDlg(){dlg(`${svg('download')} العمل دون اتصال`,`<di
   <button class="btn primary" id="dl">تنزيل المكتبة كاملة</button><div class="bar-p"><i id="dlbar"></i></div><div class="hint" id="dlst"></div></div>`);
   $('dl').onclick=async()=>{if(!('caches' in window)){$('dlst').textContent='هذا المتصفح لا يدعم التخزين دون اتصال.';return;}$('dl').disabled=true;
    try{const Fs=await fetch('files.json',{cache:'no-store'}).then(r=>r.json());const cF=await caches.open('mabadi-files'),cD=await caches.open('mabadi-data');const tot=Fs.files.length;let n=0,by=0;const q=[...Fs.files];
-    const work=async()=>{while(q.length){const f=q.shift(),c=f.p.startsWith('pages/')?cF:cD;try{const u=/^(pages|pagetext)\//.test(f.p)?PG(f.p):f.p;if(!(await c.match(u))){const r=await fetch(u);if(r.ok)await c.put(u,r);}}catch(_){}n++;by+=f.s;if($('dlbar')){$('dlbar').style.width=(n/tot*100)+'%';$('dlst').textContent=`${n} من ${tot} ملف · ${(by/1048576).toFixed(0)} ميغابايت`;}}};
+    const work=async()=>{while(q.length){const f=q.shift(),c=f.p.startsWith('pages/')?cF:cD;try{const u=/^pages\//.test(f.p)?PI(f.p):/^pagetext\//.test(f.p)?PG(f.p):f.p;if(!(await c.match(u))){const r=await fetch(u);if(r.ok)await c.put(u,r);}}catch(_){}n++;by+=f.s;if($('dlbar')){$('dlbar').style.width=(n/tot*100)+'%';$('dlst').textContent=`${n} من ${tot} ملف · ${(by/1048576).toFixed(0)} ميغابايت`;}}};
     await Promise.all([work(),work(),work(),work()]);if($('dlst'))$('dlst').textContent='اكتمل: المكتبة كلها محفوظة في هذا الجهاز.';}catch(_){if($('dlst'))$('dlst').textContent='تعذّر التنزيل الآن. حاول مرة أخرى.';}
    if($('dl'))$('dl').disabled=false;};}
 let deferredInstall=null;window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredInstall=e;});

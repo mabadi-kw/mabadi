@@ -6,6 +6,7 @@ cd "$(dirname "$0")/.."
 python3 tools/privacy/test_privacy.py >/dev/null || { echo "✘ اختبار محرك الخصوصية فشل — أوقف النشر"; exit 1; }
 python3 tools/privacy/guard.py --selftest >/dev/null || { echo "✘ اختبار الحارس فشل — أوقف النشر"; exit 1; }
 python3 tools/privacy/guard.py || { echo "✘ حارس الخصوصية منع النشر"; exit 1; }
+python3 tools/files_json.py || exit 1
 V=$(TZ=Asia/Kuwait date +%Y%m%d%H%M)
 sed -i "s/const APP_BUILD='[0-9]*'/const APP_BUILD='$V'/" app.js
 sed -i "s/const VERSION='[0-9]*'/const VERSION='$V'/" sw.js
