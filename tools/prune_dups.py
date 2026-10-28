@@ -11,7 +11,7 @@ import os, json, collections
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 M = json.load(open(os.path.join(ROOT, 'data', 'meta.json'), encoding='utf-8'))
 ORDER = M['order']
-KEEP = lambda c: c.startswith('MQ') or c in ('QK5', 'QJ5')
+KEEP = lambda c: c.startswith('MQ') or c in ('QK5', 'QJ5', 'QM78')
 D = {c: json.load(open(os.path.join(ROOT, 'data', c + '.json'), encoding='utf-8')) for c in ORDER}
 BY = {x['id']: x for c in ORDER for x in D[c]}
 ap = os.path.join(ROOT, 'data', 'alias.json')
