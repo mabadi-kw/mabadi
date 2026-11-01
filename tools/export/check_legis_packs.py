@@ -17,8 +17,9 @@ def chk(where, paras):
     for p in paras or []:
         if p in src: ok += 1
         else: bad += 1; print('✘ نص غير موجود في المصدر:', where, p[:80])
-I = json.load(open(glob.glob(os.path.join(O, 'mabadi-legis-index_v*.json'))[0]))
-for f in sorted(glob.glob(os.path.join(O, 'mabadi-legis_*.json'))):
+IX = sorted(glob.glob(os.path.join(O, 'mabadi-legis-index_v*.json')), key=lambda f: tuple(int(v) for v in f.rsplit('_v', 1)[1][:-5].split('.')))
+I = json.load(open(IX[-1]))
+for f in [os.path.join(O, p['file']) for p in I['packs']]:
     P = json.load(open(f))
     for X in P['legislations']:
         assert X['id'] not in ids, X['id']; ids.add(X['id'])

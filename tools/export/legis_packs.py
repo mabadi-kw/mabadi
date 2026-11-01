@@ -2,8 +2,8 @@
 """حزم التشريعات لتطبيق «عمّالي» (mabadi-legis-pack 1.0).
 
 يقرأ data/laws/ (index.json ونصوص التشريعات وamend.json) ويكتب:
-  packs/legis/mabadi-legis_<slug>_v1.0.json   — حزمة لكل مجموعة
-  packs/legis/mabadi-legis-index_v1.0.json    — الملف التعريفي
+  packs/legis/mabadi-legis_<slug>_v<إصدارها>.json — حزمة لكل مجموعة (PACK_VER)
+  packs/legis/mabadi-legis-index_v<INDEX_VER>.json — الملف التعريفي
 
 قواعد النزاهة:
 - لا يُكتب نص لم يرد حرفيًا في مصدر: لا دمج آلي لفقرة أو بند أو عبارة في نص مادة.
@@ -17,7 +17,10 @@ import json, os, re, hashlib, datetime, collections
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 LAWS = os.path.join(ROOT, 'data', 'laws')
 OUT = os.path.join(ROOT, 'packs', 'legis')
-VER = '1.0'
+VER = '1.0'          # إصدار العقد (schema_version)
+# إصدار كل حزمة (في اسم الملف). الحزمة التي لم يتغير إصدارها لا يُعاد توليدها: يبقى ملفها المنشور كما هو، ويُقرأ منه سطر الفهرس.
+PACK_VER = {'criminal': '1.1'}
+INDEX_VER = '1.1'
 TODAY = datetime.date.today().isoformat()
 
 SLUG = {'الجزائي': 'criminal', 'الجهاز الإداري للدولة': 'state-administration', 'القضاء والوظيفة والعمل والتأمينات': 'labour-civil-service-insurance',
@@ -33,6 +36,21 @@ KNOWN = {
     'LAW-94-2026-A0001': 'المبلغ ظاهر «-1,000,000/» والمطبوع «1,000,000/-» (ترتيب الرموز).',
     'LAW-38-1980-A0128': 'نص الاستبدال (المرسوم بقانون 6/2025) فيه سطران مطبوعان في الجريدة على غير ترتيبهما، ونُقلا كما طُبعا؛ يُرجع إلى صورة الصفحة قبل الاعتماد.',
     'LAW-6-2025-A0001': 'في المادة (128) المستبدلة سطران مطبوعان في الجريدة على غير ترتيبهما، ونُقلا كما طُبعا؛ يُرجع إلى صورة الصفحة.',
+}
+# تعديلات صدرت ولم يتوفر نصها الرسمي في المكتبة بعد: تُعلَّم المواد المعنية «تحتاج مراجعة» ولا يُكتب لها نص.
+# المصدر هنا خبر صحفي لا نص رسمي؛ يُذكر كما هو، والنص المعروض للمادة هو النص السابق على التعديل.
+PENDING_AMEND = {
+    'LAW-17-1960': {'by': 'المرسوم بالقانون رقم 157 لسنة 2025', 'when': 'يعمل به من تاريخ نشره في الجريدة الرسمية (بحسب الخبر: 16/11/2025)',
+                    'src': 'خبر صحيفة «الجريدة» الكويتية (aljarida.com/article/114884)',
+                    'arts': {'148': 'استبدال نص المادة', '149': 'استبدال نص المادة'},
+                    'added': 'إضافة مادة جديدة برقم (95 مكرراً) في إتلاف الأشياء المضبوطة'},
+    'LAW-67-1976': {'by': 'المرسوم بالقانون رقم 5 لسنة 2025', 'when': 'يعمل به من 22/4/2025 (بحسب المصدر)',
+                    'src': 'مقال مكتب محاماة منشور على الإنترنت (stalawfirm.com)، والقائمة فيه أمثلة لا حصر',
+                    'arts': {'6': 'تعديل', '8': 'تعديل', '14': 'تعديل', '22': 'تعديل', '24': 'تعديل', '33': 'تعديل', '38': 'تعديل'},
+                    'added': 'مواد أخرى عدّلها أو أضافها المرسوم بقانون ولم تُحصر'},
+    'LAW-111-2015': {'by': 'المرسوم بالقانون رقم 70 لسنة 2026', 'when': 'لم يتوفر تاريخ النشر والنفاذ',
+                     'src': 'خبر صحيفة «الراي» الكويتية (alraimedia.com/article/1771685، 5/7/2026)',
+                     'arts': {'33': 'استبدال الفقرة الأولى', '49': 'استبدال الفقرة الثانية'}, 'added': None},
 }
 DOC_KNOWN = {
     'LAW-73-2025': 'الملف المتاح ينتهي عند المادة الثانية؛ المادة الختامية والتوقيع غير متاحين في المصدر.',
@@ -122,14 +140,19 @@ def main():
         d = DOCS[x['id']]
         src = d.get('source') or {}
         is_gz = x.get('src') == 'gazette'
-        kind = 'gazette' if is_gz else ('amali_contrib' if x.get('src') == 'amali' else ('moj_edition' if 'وزارة العدل' in (src.get('kind') or '') else 'pdf_file'))
+        kind = 'gazette' if is_gz else ('amali_contrib' if x.get('src') == 'amali' else ('moj_site' if x.get('src') == 'moj_site' else
+                                        ('moj_edition' if 'وزارة العدل' in (src.get('kind') or '') else 'pdf_file')))
         source = {'kind': kind, 'label': src.get('kind'),
                   'gazette': {'name': 'الكويت اليوم', 'issue': src.get('issue'), 'supplement': src.get('supplement'), 'date': src.get('date')} if is_gz else None,
                   'edition': src.get('edition'), 'volume': src.get('volume'), 'file': src.get('file'), 'pdf_pages': src.get('pdf_pages'),
                   'extraction': src.get('note')}
-        text_as_of = src.get('date') if is_gz else ('2011-02' if kind == 'moj_edition' else (x.get('issued') if kind == 'amali_contrib' else None))
+        text_as_of = src.get('date') if is_gz else ('2011-02' if kind == 'moj_edition' else (x.get('issued') if kind in ('amali_contrib', 'moj_site') else None))
         lev = AM['laws'].get(x['key'], [])
         rep = next((e for e in lev if e['what'] == 'إلغاء' and not e.get('pending')), None)   # الإلغاء المؤجَّل لا يُعدّ إلغاءً قبل نفاذه
+        rep_basis = None
+        if rep:
+            rep_basis = {'moj_site': f"نص الإلغاء في ملف موقع وزارة العدل للتشريع {rep['by']} (لم يُطابَق مع الجريدة الرسمية)",
+                         'amali': f"مساهمة «عمّالي» (لم تُطابَق مع الجريدة الرسمية)"}.get(rep.get('src'), 'الجريدة الرسمية')
         amended_by = [{'key': e['by'], 'id': e['by_id'], 'date': e.get('date') or gdate(e['by_id'])} for e in lev if e['what'] != 'إلغاء']
         applied_until = max([a['date'] for a in amended_by if a['date']], default=None)
         arts = []
@@ -156,6 +179,8 @@ def main():
                 basis = 'نص مساهمة «عمّالي» (منقول بصريًا، لم يُطابَق مع الجريدة)'
             elif kind == 'moj_edition':
                 basis = 'نص طبعة وزارة العدل 2011 (شاملًا ما ورد فيها من تعديلات حتى تاريخها)'
+            elif kind == 'moj_site':
+                basis = 'نص ملف موقع وزارة العدل (النص الأصلي كما صدر، لم يُطابَق مع الجريدة الرسمية)'
             else:
                 basis = 'نص الملف المصدر'
             rec = {'id': a['id'], 'order': order, 'number': a.get('n'), 'suffix': a.get('bis'), 'label': a.get('label'),
@@ -186,7 +211,7 @@ def main():
                                                  'النص النافذ يحتاج دمجًا يدويًا للنص الأصلي مع نص التعديل المنشور، ولم يُدمج آليًا.')
             if rep:   # إلغاء التشريع كله
                 rec.update(status='ملغاة', repealed=True, original_text=rec['original_text'] or rec['text_in_force'], text_in_force=None, text_in_force_basis=None)
-                rec['repealed_by'] = {'key': rep['by'], 'id': rep['by_id'], 'article': rep.get('by_art'), 'date': rep.get('date'), 'basis': 'الجريدة الرسمية', 'scope': 'إلغاء التشريع كله'}
+                rec['repealed_by'] = {'key': rep['by'], 'id': rep['by_id'], 'article': rep.get('by_art'), 'date': rep.get('date'), 'basis': rep_basis, 'scope': 'إلغاء التشريع كله'}
             if empty_note:
                 rec.update(status='بلا نص', text_in_force=None, text_in_force_basis=None, needs_review=True)
                 rec['review_reasons'].append(empty_note)
@@ -196,6 +221,11 @@ def main():
             if a['id'] in KNOWN:
                 rec['needs_review'] = True
                 rec['review_reasons'].append(KNOWN[a['id']])
+            pa = PENDING_AMEND.get(x['id'])
+            if pa and not a.get('issue') and not a.get('bis') and str(a.get('n')) in pa['arts']:
+                rec['needs_review'] = True
+                rec['review_reasons'].append(f"تعديل صدر ولم يُدرج: {pa['arts'][str(a['n'])]} بـ{pa['by']}؛ {pa['when']}. المصدر: {pa['src']}. "
+                                             'لم يتوفر النص الرسمي للتعديل في المكتبة، فالنص المعروض هو النص السابق على التعديل.')
             counts[rec['status']] += 1
             counts['needs_review'] += rec['needs_review']
             arts.append(rec)
@@ -223,7 +253,7 @@ def main():
         L = {'id': x['id'], 'key': x['key'], 'category': x['cat'], 'type': x['type'], 'number': x.get('number'), 'year': x.get('year'),
              'title': d.get('title') or x['title'], 'short_title': x.get('short'), 'group': x.get('group'),
              'status': 'ملغى' if rep else ('معدّل' if amended_by else 'نافذ'),
-             'repealed_by': {'key': rep['by'], 'id': rep['by_id'], 'article': rep.get('by_art'), 'date': rep.get('date')} if rep else None,
+             'repealed_by': {'key': rep['by'], 'id': rep['by_id'], 'article': rep.get('by_art'), 'date': rep.get('date'), 'basis': rep_basis} if rep else None,
              'issued': {'gregorian': x.get('issued'), 'hijri': d.get('issued_hijri')},
              'source': source, 'text_as_of': text_as_of, 'text_version_note': d.get('text_version'),
              'amendments_applied_until': applied_until, 'amended_by': amended_by,
@@ -231,9 +261,13 @@ def main():
              'verified_against_gazette': verified,
              'verification_note': 'استُخرج النص من ملف الجريدة الرسمية نفسه وطوبق مع صور صفحاته.' if verified else
              ('لم يُراجع على الجريدة الرسمية: النص من طبعة وزارة العدل «مجموعة التشريعات الكويتية» (فبراير 2011)، وقد تكون صدرت بعدها تعديلات لم تُضف.'
-              if kind == 'moj_edition' else ('لم يُراجع على الجريدة الرسمية: ' + (src.get('note') or 'مساهمة «عمّالي»'))
+              if kind == 'moj_edition' else ('لم يُراجع على الجريدة الرسمية: ' + (src.get('note') or '')) if kind == 'moj_site' else ('لم يُراجع على الجريدة الرسمية: ' + (src.get('note') or 'مساهمة «عمّالي»'))
               if kind == 'amali_contrib' else 'لم يُراجع على الجريدة الرسمية: النص من ملف PDF مصدَّر من Word، وهو النص الأصلي كما صدر.'),
-             'known_issues': [DOC_KNOWN[x['id']]] if x['id'] in DOC_KNOWN else [],
+             'known_issues': ([DOC_KNOWN[x['id']]] if x['id'] in DOC_KNOWN else []) + (
+                 [f"عدّله {PENDING_AMEND[x['id']]['by']} — {PENDING_AMEND[x['id']]['when']} — ولم يتوفر نصه الرسمي في المكتبة؛ المواد المعروفة معلَّمة «تحتاج مراجعة»"
+                  + (f"، ومن التعديل أيضًا: {PENDING_AMEND[x['id']]['added']}" if PENDING_AMEND[x['id']]['added'] else '') + f". المصدر: {PENDING_AMEND[x['id']]['src']}."]
+                 if x['id'] in PENDING_AMEND else []),
+             'effective': x.get('effective') or d.get('effective'),
              'preamble': d.get('preamble') or [], 'signature': d.get('signature') or [],
              'structure': [{'level': t.get('level'), 'title': t.get('title'), 'from_article': t.get('frm'), 'to_article': t.get('to')} for t in d.get('toc') or []],
              'has_explanatory_memo': os.path.exists(os.path.join(LAWS, x['id'] + '-M.json')),
@@ -244,13 +278,29 @@ def main():
             L['preamble'] = [L['preamble']]
         packs[x.get('group') or 'أخرى'].append(L)
     os.makedirs(OUT, exist_ok=True)
-    for f in os.listdir(OUT):
-        if f.endswith('.json'):
-            os.remove(os.path.join(OUT, f))
     files = []
     for g, Ls in sorted(packs.items(), key=lambda kv: SLUG.get(kv[0], kv[0])):
+        slug = SLUG.get(g, 'other')
+        pv = PACK_VER.get(slug, '1.0')
+        name = f"mabadi-legis_{slug}_v{pv}.json"
+        if slug not in PACK_VER and os.path.exists(os.path.join(OUT, name)):
+            # حزمة لم يتغير إصدارها: الملف المنشور يبقى كما هو، وسطور الفهرس منه
+            raw = open(os.path.join(OUT, name), 'rb').read()
+            P = json.loads(raw)
+            files.append({'file': name, 'pack': g, 'pack_version': pv, 'legislations': len(P['legislations']), 'articles': P['counts']['articles'],
+                          'bytes': len(raw), 'sha256': hashlib.sha256(raw).hexdigest()})
+            Ls = P['legislations']
+            for L in Ls:
+                one = json.dumps(L, ensure_ascii=False, separators=(',', ':')).encode()
+                index_rows.append({'id': L['id'], 'key': L['key'], 'category': L['category'], 'type': L['type'], 'number': L['number'], 'year': L['year'],
+                                   'title': L['title'], 'short_title': L['short_title'], 'group': L['group'], 'pack_file': name, 'status': L['status'],
+                                   'articles': L['counts']['articles'], 'articles_in_force': L['counts']['in_force'] + L['counts']['amended'] + L['counts']['added'],
+                                   'articles_needs_review': L['counts']['needs_review'],
+                                   'text_chars': sum(len(p) for a in L['articles'] for p in (a['text_in_force'] or [])), 'bytes': len(one),
+                                   'source_kind': L['source']['kind'], 'text_as_of': L['text_as_of'], 'verified_against_gazette': L['verified_against_gazette']})
+            continue
         Ls.sort(key=lambda L: (L['category'], -(L['year'] or 0), L['number'] or 0))
-        P = {'format': 'mabadi-legis-pack', 'schema_version': VER, 'pack': g, 'pack_slug': SLUG.get(g, 'other'), 'generated': TODAY,
+        P = {'format': 'mabadi-legis-pack', 'schema_version': VER, 'pack_version': pv, 'pack': g, 'pack_slug': slug, 'generated': TODAY,
              'producer': 'مكتبة مبادئ التمييز',
              'conventions': {
                  'id': 'معرّف التشريع والمادة ثابت ما دام المصدر نفسه (LAW-رقم-سنة للقوانين، REG-… للمراسيم واللوائح والقرارات).',
@@ -260,16 +310,17 @@ def main():
                  'edition_note_refs': 'التشريعات المذكورة في الحاشية، مستخرجة آليًا من نصها للتيسير؛ المرجع نص الحاشية نفسه.',
                  'status': 'نافذة | معدّلة | مضافة | ملغاة | بلا نص (مادة فارغة في المصدر دون سبب مذكور)',
                  'verified_against_gazette': 'true فقط لما استُخرج من ملف الجريدة الرسمية نفسه وطوبق مع صوره.',
+                 'source.kind': 'gazette | moj_edition (طبعة الوزارة 2011) | moj_site (ملف من موقع وزارة العدل، النص الأصلي كما صدر) | amali_contrib | pdf_file',
+                 'effective': 'قاعدة النفاذ كما نُصّ عليها في التشريع (نصًا لا تاريخًا محسوبًا)، أو null.',
                  'needs_review': 'المادة تحتاج مراجعة بشرية، والسبب في review_reasons.'},
              'counts': {'legislations': len(Ls), 'articles': sum(L['counts']['articles'] for L in Ls),
                         'needs_review': sum(L['counts']['needs_review'] for L in Ls),
                         'not_verified_against_gazette': sum(1 for L in Ls if not L['verified_against_gazette'])},
              'legislations': Ls}
-        name = f"mabadi-legis_{P['pack_slug']}_v{VER}.json"
         raw = json.dumps(P, ensure_ascii=False, separators=(',', ':')).encode()
         with open(os.path.join(OUT, name), 'wb') as f:
             f.write(raw)
-        files.append({'file': name, 'pack': g, 'legislations': len(Ls), 'articles': P['counts']['articles'], 'bytes': len(raw),
+        files.append({'file': name, 'pack': g, 'pack_version': pv, 'legislations': len(Ls), 'articles': P['counts']['articles'], 'bytes': len(raw),
                       'sha256': hashlib.sha256(raw).hexdigest()})
         for L in Ls:
             one = json.dumps(L, ensure_ascii=False, separators=(',', ':')).encode()
@@ -279,12 +330,12 @@ def main():
                                'articles_needs_review': L['counts']['needs_review'],
                                'text_chars': sum(len(p) for a in L['articles'] for p in (a['text_in_force'] or [])), 'bytes': len(one),
                                'source_kind': L['source']['kind'], 'text_as_of': L['text_as_of'], 'verified_against_gazette': L['verified_against_gazette']})
-    I = {'format': 'mabadi-legis-index', 'schema_version': VER, 'generated': TODAY, 'producer': 'مكتبة مبادئ التمييز',
+    I = {'format': 'mabadi-legis-index', 'schema_version': VER, 'index_version': INDEX_VER, 'generated': TODAY, 'producer': 'مكتبة مبادئ التمييز',
          'counts': {'legislations': len(index_rows), 'laws': sum(r['category'] == 'law' for r in index_rows), 'regulations': sum(r['category'] == 'reg' for r in index_rows),
                     'articles': sum(r['articles'] for r in index_rows), 'needs_review': sum(r['articles_needs_review'] for r in index_rows),
                     'verified_against_gazette': sum(r['verified_against_gazette'] for r in index_rows)},
          'packs': files, 'legislations': sorted(index_rows, key=lambda r: (r['category'], r['group'] or '', -(r['year'] or 0)))}
-    with open(os.path.join(OUT, f'mabadi-legis-index_v{VER}.json'), 'w', encoding='utf-8') as f:
+    with open(os.path.join(OUT, f'mabadi-legis-index_v{INDEX_VER}.json'), 'w', encoding='utf-8') as f:
         json.dump(I, f, ensure_ascii=False, indent=1)
     print(json.dumps(I['counts'], ensure_ascii=False))
     for p in files:
