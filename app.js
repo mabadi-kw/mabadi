@@ -318,15 +318,20 @@ function viewLaw(id){const el=$('v-item');el.innerHTML=LOADMSG;
    <div class="card rhead"><div class="kv"><span><b>النوع</b>${esc(L.type)}</span>${L.issued?`<span><b>صدر</b>${esc(L.issued.split('-').reverse().join('/'))}${L.issued_hijri?' ('+esc(L.issued_hijri)+')':''}</span>`:''}<span><b>المواد</b>${nf(A.filter(a=>!a.issue).length)}</span>${ix.memo?`<span><b>المذكرة</b><button class="linkbtn" data-go="#/m/${L.id}">افتحها</button></span>`:''}</div></div>
    ${amendBanner(L)}<div class="verban">${svg('info')}<span><b>${esc(L.text_version)}.</b> المصدر: ${esc(L.source.kind)}${L.source.edition?'، '+esc(L.source.edition):''}. ${esc(L.source.note||'')}</span></div>
    ${L.notes&&L.notes.length?`<div class="card lnotes"><b>${L.contrib?'ملاحظات على المصدر':L.source&&/الجريدة/.test(L.source.kind)?'ملاحظات النشر':'حواشي الطبعة'}</b>${L.notes.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}
-   <input class="flt" id="lq" type="search" placeholder="ابحث في مواد هذا القانون أو اكتب رقم مادة…"><div id="lres"></div>
+   <input class="flt" id="lq" type="search" placeholder="ابحث في مواد هذا القانون أو اكتب رقم مادة…"><div id="lqres"></div>
    <div id="ltoc">${L.preamble&&L.preamble.length?`<details class="lsec"><summary>${iss.length?'مرسوم الإصدار ومواده':'الديباجة'}</summary><div class="ltxt">${(L.title_lines||[]).map(x=>`<p class="tl">${esc(x)}</p>`).join('')}${L.preamble.map(x=>`<p>${esc(x)}</p>`).join('')}</div>${iss.length?`<div class="rows">${iss.map(row).join('')}</div>`:''}${L.signature&&L.signature.length?`<div class="ltxt sig">${L.signature.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}</details>`:''}
    ${body}
    ${L.annex&&L.annex.length?`<details class="lsec"><summary>الجداول والملاحق<small>نص مستخرج؛ للتنسيق انظر صورة الصفحة</small></summary><div class="ltxt annex">${L.annex.map(x=>`<p>${esc(x.t)} <button class="pgref" data-lpg="${x.pg}">${esc((L.page_meta.printed&&L.page_meta.printed[x.pg-1])||x.pg)}</button></p>`).join('')}</div></details>`:''}
    ${!iss.length&&L.signature&&L.signature.length?`<div class="card ltxt sig">${L.signature.map(x=>`<p>${esc(x)}</p>`).join('')}</div>`:''}</div>`;
   el.onclick=e=>{const b=e.target.closest('[data-lpg]');if(!b)return;const g=+b.dataset.lpg;side(pgCaption(L.page_meta,g),lawPageHTML(L.pages_col,L.page_meta,g,null));};
-  $('lq').oninput=()=>{const v=west($('lq').value).trim();$('ltoc').hidden=!!v;if(!v){$('lres').innerHTML='';return;}
+  $('lq').oninput=()=>{const v=west($('lq').value).trim();$('ltoc').hidden=!!v;if(!v){$('lqres').innerHTML='';$('lqres').style.minHeight='';return;}
     let hits;if(/^\d+$/.test(v))hits=A.filter(a=>!a.issue&&String(a.n).startsWith(v));else{const ts=terms(v);hits=A.filter(a=>ts.every(t=>a.ns.includes(t)));}
-    $('lres').innerHTML=hits.length?`<p class="muted">${hits.length} مادة</p><div class="rows">${hits.slice(0,80).map(row).join('')}</div>`:'<div class="empty">لا نتائج.</div>';};
+    $('lqres').innerHTML=hits.length?`<p class="muted">${hits.length} مادة</p><div class="rows">${hits.slice(0,80).map(row).join('')}</div>`:'<div class="empty">لا نتائج.</div>';
+    // النتائج تظهر تحت الحقل: يُرفع الحقل إلى أعلى الشاشة لئلا تختفي النتائج خلف لوحة المفاتيح
+    const q=$('lq'),top=8;$('lqres').style.minHeight=innerHeight+'px';
+    if(q.getBoundingClientRect().top>top+40)window.scrollTo({top:scrollY+q.getBoundingClientRect().top-top,behavior:'smooth'});};
+  $('lq').onkeydown=e=>{if(e.key!=='Enter')return;const v=west($('lq').value).trim();if(!/^\d+$/.test(v))return;
+    const a=A.find(x=>!x.issue&&String(x.n)===v&&!x.bis)||A.find(x=>!x.issue&&String(x.n)===v);if(a){e.preventDefault();$('lq').blur();go('#/a/'+a.id);}};
   }).catch(()=>{el.innerHTML='<div class="empty">تعذّر تحميل القانون.</div>';});}
 // نص المادة المعنية داخل مادة معدِّلة: الفقرات بعد سطر «مادة (n)…» حتى سطر «مادة» التالي (مثل أداة الحزم)
 const RLAB=/^\(?\s*(?:ال)?مادة(?:\s|\(|$)/,ORDN={'الأولى':1,'الثانية':2,'الثالثة':3,'الرابعة':4,'الخامسة':5,'السادسة':6,'السابعة':7,'الثامنة':8,'التاسعة':9,'العاشرة':10};
@@ -1099,7 +1104,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202611011854';
+const APP_BUILD='202611021605';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
