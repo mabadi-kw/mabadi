@@ -289,7 +289,7 @@ const LOADMSG='<div class="empty">جارٍ تحميل النص…</div>';
 function viewLaws(){const el=$('v-laws');document.title='التشريعات — مبادئ التمييز';
   const L=[...LAWIX].sort((a,b)=>(lcount[b.key]||0)-(lcount[a.key]||0)||((b.src==='gazette')-(a.src==='gazette'))||(b.year||0)-(a.year||0));
   el.innerHTML=`<div class="vh"><h2>التشريعات</h2><span class="muted">${nf(LAWIX.length)} وثيقة</span></div><p class="muted">نصوص القوانين مادةً مادة، وكل مادة موصولة بمبادئ التمييز التي تذكرها وبصورة صفحتها في المصدر. يُذكر مع كل قانون مصدر نصه وتاريخ النسخة.</p>
-   <div class="ltabs" id="lwt"></div><input class="flt" id="lwf" type="search" placeholder="ابحث بالاسم أو الرقم…"><div class="quick" id="lwc"></div><div class="grid g3" id="lwg"></div>
+   <div class="ltabs" id="lwt"></div><input class="flt" id="lwf" type="search" placeholder="اسم التشريع أو رقمه، أو مادة مثل «134 مرافعات»…"><div id="lwj"></div><div class="quick" id="lwc"></div><div class="grid g3" id="lwg"></div>
    <div class="card note"><b>عن النسخ</b><p class="muted" style="margin:.3em 0 0">أغلب النصوص من «مجموعة التشريعات الكويتية» الصادرة عن وزارة العدل (الطبعة الأولى، فبراير 2011)، وتشمل التعديلات حتى تاريخها كما تذكرها حواشي الطبعة. وما صدر بعدها مما أُضيف من الجريدة الرسمية («صدر حديثًا») يظهر وثيقةً مستقلة، ويُعلَّم على القانون الأصلي ومواده («معدّل» أو «ملغى») مع نص التعديل، دون دمجه في النص الأصلي. التعديلات التي لم تُضف بعد لا تظهر، فارجع إلى الجريدة الرسمية قبل الاعتماد.</p></div>`;
   const tile=lawTile;
   let cat='law',g='';const G=()=>[...new Set(L.filter(x=>(x.cat||'law')===cat).map(x=>x.group).filter(Boolean))];
@@ -297,7 +297,15 @@ function viewLaws(){const el=$('v-laws');document.title='التشريعات — 
   $('lwt').innerHTML=`<button class="tab" data-lc="law">القوانين والمراسيم بقوانين <b>${nf(nL)}</b></button><button class="tab" data-lc="reg">المراسيم واللوائح والقرارات <b>${nf(nR)}</b></button>`;
   const tabs=()=>$('lwt').querySelectorAll('[data-lc]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.lc===cat));tabs();
   $('lwt').onclick=e=>{const b=e.target.closest('[data-lc]');if(!b)return;cat=b.dataset.lc;g='';tabs();chips();draw(norm(west($('lwf').value).trim()));};
-  const draw=q=>$('lwg').innerHTML=L.filter(x=>(x.cat||'law')===cat&&(!g||(g==='__new'?x.src==='gazette':x.group===g))&&(!q||norm(x.short+' '+x.title+' '+x.key).includes(q)||west(x.key).includes(q))).map(tile).join('')||'<div class="empty">لا نتائج.</div>';
+  // «المادة 134 مرافعات» أو «134 مرافعات» أو «م 41 من 6/2010»: انتقال مباشر إلى المادة؛ والرقم وحده يُشرح أنه رقم تشريع لا مادة
+  const jumps=raw=>{const r=west(raw||'').trim();if(!r)return [];let js=smartJump(r);
+    const m=r.match(/^(\d{1,4})\s+(\D.*)$/)||r.match(/^(\D.*?)\s+(\d{1,4})$/);
+    if(!js.length&&m){const n=/^\d/.test(m[1])?m[1]:m[2],t=/^\d/.test(m[1])?m[2]:m[1];js=smartJump('المادة '+n+' '+t);}
+    return js.filter(j=>j.go.startsWith('#/a/')||j.go.startsWith('#/law/'));};
+  const draw=q=>{const raw=$('lwf').value,js=jumps(raw);
+    const hits=L.filter(x=>(x.cat||'law')===cat&&(!g||(g==='__new'?x.src==='gazette':x.group===g))&&(!q||norm(x.short+' '+x.title+' '+x.key).includes(q)||west(x.key).includes(q)));
+    const none=/^\d{1,4}$/.test(q)?`<div class="empty">لا يوجد تشريع رقمه ${esc(q)}${g?' في هذا التصنيف':''}. هذه الخانة تبحث في أسماء التشريعات وأرقامها؛ وللوصول إلى مادة اكتب رقمها مع اسم القانون، مثل «${esc(q)} مرافعات» أو «المادة ${esc(q)} من 6/2010»، أو افتح القانون واكتب رقم المادة في خانة البحث داخله.</div>`:'<div class="empty">لا نتائج.</div>';
+    const num=!hits.length&&!js.length&&/^\d{1,4}$/.test(q);$('lwj').innerHTML=jumpHTML(js)+(num?none:'');if(js.length||num){const f=$('lwf'),t=f.getBoundingClientRect().top;if(t>120)window.scrollTo({top:scrollY+t-8,behavior:'smooth'});}$('lwg').innerHTML=hits.map(tile).join('')||(js.length||num?'':none);};
   const chips=()=>$('lwc').innerHTML=[['','الكل'],...(L.some(x=>x.src==='gazette'&&(x.cat||'law')===cat)?[['__new','صدر حديثًا (2025–2026)']]:[]),...G().map(x=>[x,x])].map(([k,t])=>`<button class="chip${g===k?' on':''}" data-lg="${esc(k)}">${esc(t)}</button>`).join('');
   chips();draw('');$('lwf').oninput=()=>draw(norm(west($('lwf').value).trim()));
   $('lwc').onclick=e=>{const b=e.target.closest('[data-lg]');if(!b)return;g=b.dataset.lg;chips();draw(norm(west($('lwf').value).trim()));};}
@@ -1104,7 +1112,7 @@ function arrangeDlg(kind){const base=kind==='fams'?FAMS:ORDER,name=k=>kind==='fa
 // صفحة «عن المكتبة» تعرض رقم الإصدار في آخرها
 function aboutVer(){const e=$('v-about');if(e&&!e.querySelector('.verline'))e.insertAdjacentHTML('beforeend',`<p class="verline">الإصدار ${buildLabel()}</p>`);}
 // ---------- رقم الإصدار (يطابق VERSION في sw.js — يحدّثهما tools/bump-version.sh معًا)
-const APP_BUILD='202611021605';
+const APP_BUILD='202611021609';
 const buildLabel=()=>{const b=APP_BUILD;return `${b.slice(0,4)}.${b.slice(4,6)}.${b.slice(6,8)} — ${b.slice(8,10)}:${b.slice(10,12)}`;};
 // ---------- الجولة التعريفية لأول تشغيل: شرائح قصيرة، «تخطٍّ»، وتثبيت التطبيق على الشاشة الرئيسية
 const IS_STANDALONE_APP=()=>navigator.standalone===true||matchMedia('(display-mode: standalone)').matches;
